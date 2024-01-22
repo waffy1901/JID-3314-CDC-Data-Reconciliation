@@ -5,14 +5,21 @@ import asyncio
 import csv
 import os
 import uuid
+import pyodbc
+import json
 
 app = FastAPI()
+
+conn = None
+config = None
 
 origins = [
     "http://localhost:5173"
 ]
 
-app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=origins,
+                   allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
 
 @app.post("/manual_report")
 async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None)):
@@ -22,7 +29,7 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
 
     id = str(uuid.uuid4())
     os.makedirs(f"{folder_name}/{id}")
-    
+
     cdc_content = await cdc_file.read()
     cdc_save_to = f"./{folder_name}/{id}/{cdc_file.filename}"
     with open(cdc_save_to, "wb") as f:
@@ -54,7 +61,32 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
 
     return res
 
+
+def run_query(year: int):
+    query = None
+    query_file_path = os.path.join(os.path.dirname(__file__), "query.sql")
+    with open(query_file_path, 'r') as f:
+        query = f.read()
+
+    cursor = conn.cursor()
+    cursor.execute(query, year)
+
+    return cursor.fetchall()
+
+
 if __name__ == "__main__":
+    # Load config.json
+    config_file_path = os.path.join(os.path.dirname(__file__), "config.json")
+    with open(config_file_path, "r") as f:
+        config = json.load(f)
+
+    # Connect to the SQL Server
+    connection_string = 'DRIVER={' + config["driver"] + \
+        '}' + \
+        f';SERVER={config["server"]};DATABASE={config["database"]};UID={config["username"]};PWD={config["password"]}'
+
+    conn = pyodbc.connect(connection_string)
+
     # Run the API with uvicorn
     uvicorn.run("server:app", host="localhost", port=8000)
 

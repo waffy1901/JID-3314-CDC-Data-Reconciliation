@@ -1,0 +1,7 @@
+{
+  "driver": "ODBC Driver 17 for SQL Server",
+  "server": "localhost",
+  "database": "NBS_ODSE",
+  "username": "sa",
+  "password": "Test123!"
+}
