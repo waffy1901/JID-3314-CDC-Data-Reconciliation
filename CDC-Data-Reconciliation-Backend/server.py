@@ -76,10 +76,10 @@ def run_query(year: int):
 
 
 if __name__ == "__main__":
-    print("List of ODBC Drivers:")
-dlist = pyodbc.drivers()
-for drvr in dlist:
-    print('LIST OF DRIVERS:' + drvr)
+    # print("List of ODBC Drivers:")
+    # dlist = pyodbc.drivers()
+    # for drvr in dlist:
+    #     print('LIST OF DRIVERS:' + drvr)
     # Load config.json
     config_file_path = os.path.join(os.path.dirname(__file__), "config.json")
     with open(config_file_path, "r") as f:
