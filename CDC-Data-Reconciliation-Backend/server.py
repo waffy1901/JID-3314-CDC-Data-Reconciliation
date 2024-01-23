@@ -7,6 +7,7 @@ import os
 import uuid
 import pyodbc
 import json
+import sqlite3
 
 app = FastAPI()
 
@@ -75,6 +76,10 @@ def run_query(year: int):
 
 
 if __name__ == "__main__":
+    print("List of ODBC Drivers:")
+dlist = pyodbc.drivers()
+for drvr in dlist:
+    print('LIST OF DRIVERS:' + drvr)
     # Load config.json
     config_file_path = os.path.join(os.path.dirname(__file__), "config.json")
     with open(config_file_path, "r") as f:
@@ -86,6 +91,33 @@ if __name__ == "__main__":
         f';SERVER={config["server"]};DATABASE={config["database"]};UID={config["username"]};PWD={config["password"]}'
 
     conn = pyodbc.connect(connection_string)
+
+    #SQLite reports and cases tables setup
+    database_file_path = os.path.join(os.path.dirname(__file__), "database.db")
+    liteConn = sqlite3.connect(database_file_path) 
+    cur = liteConn.cursor()
+    #Reports table
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS Reports(
+            ID INTEGER PRIMARY KEY NOT NULL, 
+            createdAtDate TEXT,
+            timeOfCreation TEXT, 
+            numberOfDiscrepancies INTEGER    
+    )''')
+    #Cases table
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS Cases(
+            ID INTEGER PRIMARY KEY NOT NULL,
+            reportID INTEGER NOT NULL,
+            caseID INTEGER, 
+            eventCode TEXT,
+            MMWRYear INTEGER, 
+            MMWRWeek INTEGER,
+            reason TEXT, 
+            reasonID INTEGER,
+            FOREIGN KEY (reportID) REFERENCES Reports(ID)
+    )''')
+    liteConn.commit()
 
     # Run the API with uvicorn
     uvicorn.run("server:app", host="localhost", port=8000)
