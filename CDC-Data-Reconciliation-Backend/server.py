@@ -92,30 +92,30 @@ if __name__ == "__main__":
 
     conn = pyodbc.connect(connection_string)
 
-    #SQLite reports and cases tables setup
+    # SQLite reports and cases tables setup
     database_file_path = os.path.join(os.path.dirname(__file__), "database.db")
-    liteConn = sqlite3.connect(database_file_path) 
+    liteConn = sqlite3.connect(database_file_path)
     cur = liteConn.cursor()
-    #Reports table
+    # Reports table
     cur.execute('''
         CREATE TABLE IF NOT EXISTS Reports(
             ID INTEGER PRIMARY KEY NOT NULL, 
-            createdAtDate TEXT,
-            timeOfCreation TEXT, 
-            numberOfDiscrepancies INTEGER    
+            CreatedAtDate TEXT,
+            TimeOfCreation TEXT, 
+            NumberOfDiscrepancies INTEGER    
     )''')
-    #Cases table
+    # Cases table
     cur.execute('''
         CREATE TABLE IF NOT EXISTS Cases(
             ID INTEGER PRIMARY KEY NOT NULL,
-            reportID INTEGER NOT NULL,
-            caseID INTEGER, 
-            eventCode TEXT,
+            ReportID INTEGER NOT NULL,
+            CaseID INTEGER, 
+            EventCode TEXT,
             MMWRYear INTEGER, 
             MMWRWeek INTEGER,
-            reason TEXT, 
-            reasonID INTEGER,
-            FOREIGN KEY (reportID) REFERENCES Reports(ID)
+            Reason TEXT, 
+            ReasonID INTEGER,
+            FOREIGN KEY (ReportID) REFERENCES Reports(ID)
     )''')
     liteConn.commit()
 
