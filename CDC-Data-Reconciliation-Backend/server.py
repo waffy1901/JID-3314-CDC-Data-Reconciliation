@@ -12,6 +12,7 @@ import sqlite3
 app = FastAPI()
 
 conn = None
+liteConn = None
 config = None
 
 origins = [
@@ -82,7 +83,6 @@ def fetch_report_from_db(report_id: int):
         cur = liteConn.cursor()
         cur.execute("SELECT * FROM Cases WHERE ReportID = ?", (report_id,))
         report = cur.fetchone()
-        liteConn.close()
         return report
     except sqlite3.Error as e:
         print(f"Database error: {e}")
