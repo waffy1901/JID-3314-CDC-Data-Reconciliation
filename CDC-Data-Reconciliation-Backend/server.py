@@ -62,6 +62,19 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
 
     return res
 
+# Runs the query on the state NBS ODSE database and outputs the results to a CSV file
+def automatic_report(year: int):
+    state_results = run_query(year)
+
+    folder_name = "temp"
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+    result_save_to = f"./{folder_name}/state_results.csv"
+    with open(result_save_to, "w", newline='') as f:
+        csv_out = csv.writer(f)
+        #csv_out.writerow(["column", "titles", "needed?"])
+        for row in state_results:
+            csv_out.writerow(row)
 
 def run_query(year: int):
     query = None
@@ -91,6 +104,8 @@ if __name__ == "__main__":
         f';SERVER={config["server"]};DATABASE={config["database"]};UID={config["username"]};PWD={config["password"]}'
 
     conn = pyodbc.connect(connection_string)
+
+    automatic_report(2023)
 
     # SQLite reports and cases tables setup
     database_file_path = os.path.join(os.path.dirname(__file__), "database.db")
