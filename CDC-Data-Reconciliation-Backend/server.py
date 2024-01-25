@@ -62,19 +62,58 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
 
     return res
 
-# Runs the query on the state NBS ODSE database and outputs the results to a CSV file
-def automatic_report(year: int):
-    state_results = run_query(year)
+@app.post("/automatic_report")
+async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
+    # Run query to retrieve data from NBS ODSE database
+    state_content = run_query(year)
+    if len(state_content) > 0:
+        column_names = state_content[0].keys()
+    else:
+        raise Exception("Query resulted in no data")
 
+    # Create temp file structure
     folder_name = "temp"
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
-    result_save_to = f"./{folder_name}/state_results.csv"
-    with open(result_save_to, "w", newline='') as f:
-        csv_out = csv.writer(f)
-        #csv_out.writerow(["column", "titles", "needed?"])
-        for row in state_results:
-            csv_out.writerow(row)
+    id = str(uuid.uuid4())
+    os.makedirs(f"{folder_name}/{id}")
+
+    # Write queried state data to csv
+    state_save_to = f"./{folder_name}/{id}/state.csv"
+    with open(state_save_to, "w", newline='') as f:
+        writer = csv.DictWriter(f, column_names)
+        writer.writeheader()
+        writer.writerows(state_content)
+
+    # Write user-uploaded CDC data to local csv
+    cdc_content = await cdc_file.read()
+    cdc_save_to = f"./{folder_name}/{id}/{cdc_file.filename}"
+    with open(cdc_save_to, "wb") as f:
+        f.write(cdc_content)
+
+    # Do comparison
+    res_file = f'./{folder_name}/{id}/results.csv'
+    process = await asyncio.create_subprocess_exec('python', './compare.py', '-c', cdc_save_to, '-s', state_save_to, '-o', res_file)
+    await process.wait()
+
+    # Write comparison to csv
+    res = []
+    with open(res_file, newline='') as csvfile:
+        # Create a CSV reader object
+        reader = csv.DictReader(csvfile)
+        # Loop through each row in the CSV file
+        for row in reader:
+            # Add the row as a dictionary to the list
+            res.append(row)
+
+    # remove temp files / folder
+    os.remove(cdc_save_to)
+    os.remove(state_save_to)
+    os.remove(res_file)
+    os.rmdir(f"{folder_name}/{id}")
+
+    return res
+    
 
 def run_query(year: int):
     query = None
@@ -85,7 +124,14 @@ def run_query(year: int):
     cursor = conn.cursor()
     cursor.execute(query, year)
 
-    return cursor.fetchall()
+    # Return the queried data as a list of dicts
+    column_names = [col[0] for col in cursor.description]
+    row_data = cursor.fetchall()
+    # (List comprehension might be too slow for large datasets; 
+    #  may need to consider pandas or numpy in the future)
+    data = [dict(zip(column_names, row)) for row in row_data]
+
+    return data
 
 
 if __name__ == "__main__":
@@ -104,8 +150,6 @@ if __name__ == "__main__":
         f';SERVER={config["server"]};DATABASE={config["database"]};UID={config["username"]};PWD={config["password"]}'
 
     conn = pyodbc.connect(connection_string)
-
-    automatic_report(2023)
 
     # SQLite reports and cases tables setup
     database_file_path = os.path.join(os.path.dirname(__file__), "database.db")
