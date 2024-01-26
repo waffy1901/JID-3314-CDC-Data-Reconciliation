@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import csv
@@ -159,6 +159,31 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
     return res
+
+
+@app.get("/reports/{report_id}")
+async def get_report_summary(report_id: int):
+    """
+    Endpoint to fetch a report by its ID.
+    """
+    report = fetch_report_from_db(report_id)
+    if report is None:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return report
+
+
+def fetch_report_from_db(report_id: int):
+    """
+    Function to fetch a report from the SQLite database.
+    """
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute("SELECT * FROM Cases WHERE ReportID = ?", report_id)
+        report = cur.fetchone()
+        return report
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
 
 
 def run_query(year: int):
