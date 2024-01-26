@@ -124,18 +124,18 @@ export default function ManualReport() {
             <table className='w-full text-center'>
               <tr className='border-b-2 border-slate-900'>
                 <th>CaseID</th>
-                <th>Disease</th>
-                <th>State</th>
-                <th>Date</th>
+                <th>EventCode</th>
+                <th>MMWRYear</th>
+                <th>MMWRWeek</th>
                 <th>Reason</th>
               </tr>
               {results.map((result) => {
                 return (
                   <tr key={result.CaseID}>
                     <td>{result.CaseID}</td>
-                    <td>{result.EventName}</td>
-                    <td>{result.State}</td>
-                    <td>{result.EventDate}</td>
+                    <td>{result.EventCode}</td>
+                    <td>{result.MMWRYear}</td>
+                    <td>{result.MMWRWeek}</td>
                     <td>{result.Reason}</td>
                   </tr>
                 )
