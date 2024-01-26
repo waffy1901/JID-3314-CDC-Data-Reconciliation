@@ -5,8 +5,7 @@ export default function ManualReport() {
   const [stateFile, setStateFile] = useState(null)
   const [cdcFile, setCDCFile] = useState(null)
   const [results, setResults] = useState(null)
-  const [isAutomatic, setIsAutomatic] = useState(false);
-
+  const [isAutomatic, setIsAutomatic] = useState(false)
 
   const handleCheckboxChange = (e) => {
     setIsAutomatic(e.target.checked)
@@ -29,19 +28,17 @@ export default function ManualReport() {
 
     // Checking whether the checkbox for automatic upload is ticked or not
     if (isAutomatic) {
-
       if (cdcFile === null) {
         console.error("Files not uploaded!")
         return
       }
       // Setting form data to year and cdcFile
       const formdata = new FormData()
-      formdata.append("year", 2023)
       formdata.append("cdc_file", cdcFile)
 
       // Run the automatic report fetching
       try {
-        const response = await fetch(config.API_URL + "/automatic_report", {
+        const response = await fetch(config.API_URL + "/automatic_report?year=2023", {
           method: "POST",
           body: formdata,
         })
@@ -56,10 +53,9 @@ export default function ManualReport() {
       } catch (e) {
         console.error("Error fetching automatic report - " + e)
       }
-    
-    // ran if the automatic report checkbox is not ticked
-    } else {
 
+      // ran if the automatic report checkbox is not ticked
+    } else {
       if (stateFile === null || cdcFile === null) {
         console.error("Files not uploaded!")
         return
@@ -93,25 +89,21 @@ export default function ManualReport() {
       <div className='bg-slate-300 w-[400px] min-h-[300px] rounded-xl mx-auto mt-20'>
         <form onSubmit={handleSubmit} className='h-full'>
           <div className='flex flex-col gap-6 items-center justify-center h-full'>
-          <label>
-              <input 
-                type="checkbox" 
-                checked={isAutomatic} 
-                onChange={handleCheckboxChange} 
-              />
+            <label>
+              <input type='checkbox' checked={isAutomatic} onChange={handleCheckboxChange} />
               Use Automatic Report
             </label>
             <label htmlFor='cdc_file'>Upload CDC .csv File</label>
             <input type='file' id='cdc_file' onChange={handleCDCFileChange} />
-              
-            { 
-            // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
+
+            {
+              // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
             }
-            
+
             {!isAutomatic && (
               <>
-              <label htmlFor='state_file'>Upload State .csv File</label>
-              <input type='file' id='state_file' onChange={handleStateFileChange} />
+                <label htmlFor='state_file'>Upload State .csv File</label>
+                <input type='file' id='state_file' onChange={handleStateFileChange} />
               </>
             )}
 
