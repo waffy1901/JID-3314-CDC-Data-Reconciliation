@@ -171,19 +171,21 @@ async def get_report_summary(report_id: int):
         raise HTTPException(status_code=404, detail="Report not found")
     return report
 
+
 def fetch_report_from_db(report_id: int):
     """
     Function to fetch a report from the SQLite database.
     """
     try:
-        cur = liteConn.cursor()
-        cur.execute("SELECT * FROM Cases WHERE ReportID = ?", (report_id,))
+        cur = app.liteConn.cursor()
+        cur.execute("SELECT * FROM Cases WHERE ReportID = ?", report_id)
         report = cur.fetchone()
         return report
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return None
-    
+
+
 def run_query(year: int):
     query = None
     query_file_path = os.path.join(app.dir, "query.sql")
