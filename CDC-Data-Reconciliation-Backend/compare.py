@@ -83,8 +83,17 @@ def comp(state_dict, cdc_dict):
                     i += 1
                     continue
 
+                state_attribute = state_row[attribute]
+                cdc_attribute = cdc_dict[state_case_id][attribute]
+
+                if state_attribute == "":
+                    state_attribute = "NULL"
+
+                if cdc_attribute == "":
+                    cdc_attribute = "NULL"
+
                 # If a case has different attributes between state and CDC DBs, mark it as such
-                if state_row[attribute] != cdc_dict[state_case_id][attribute]:
+                if state_attribute != cdc_attribute:
                     results.append(CaseResult(state_case_id, state_row['EventCode'], state_row[
                                    'MMWRYear'], state_row['MMWRWeek'], "Case has different attributes between State and CDC CSV Files", "3"))
                     break

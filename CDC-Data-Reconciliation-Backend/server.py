@@ -162,24 +162,24 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
 
 
 @app.get("/reports/{report_id}")
-async def get_report_summary(report_id: int):
+async def get_report_cases(report_id: int):
     """
-    Endpoint to fetch a report by its ID.
+    Endpoint to fetch cases for a report by its ID.
     """
-    report = fetch_report_from_db(report_id)
+    report = fetch_reports_from_db(report_id)
     if report is None:
         raise HTTPException(status_code=404, detail="Report not found")
     return report
 
 
-def fetch_report_from_db(report_id: int):
+def fetch_reports_from_db(report_id: int):
     """
     Function to fetch a report from the SQLite database.
     """
     try:
         cur = app.liteConn.cursor()
         cur.execute("SELECT * FROM Cases WHERE ReportID = ?", report_id)
-        report = cur.fetchone()
+        report = cur.fetchall()
         return report
     except sqlite3.Error as e:
         print(f"Database error: {e}")
