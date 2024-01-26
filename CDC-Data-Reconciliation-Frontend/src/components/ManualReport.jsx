@@ -30,7 +30,7 @@ export default function ManualReport() {
     // Checking whether the checkbox for automatic upload is ticked or not
     if (isAutomatic) {
 
-      if (stateFile === null) {
+      if (cdcFile === null) {
         console.error("Files not uploaded!")
         return
       }
