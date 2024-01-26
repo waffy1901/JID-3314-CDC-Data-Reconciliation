@@ -101,17 +101,17 @@ export default function ManualReport() {
               />
               Use Automatic Report
             </label>
-            <label htmlFor='state_file'>Upload State .csv File</label>
-            <input type='file' id='state_file' onChange={handleStateFileChange} />
-
+            <label htmlFor='cdc_file'>Upload CDC .csv File</label>
+            <input type='file' id='cdc_file' onChange={handleCDCFileChange} />
+              
             { 
-            // checking if the automatic report checkbox has been ticked, and disabling the CDC .csv file upload if it is
+            // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
             }
             
             {!isAutomatic && (
               <>
-                <label htmlFor='cdc_file'>Upload CDC .csv File</label>
-                <input type='file' id='cdc_file' onChange={handleCDCFileChange} />
+              <label htmlFor='state_file'>Upload State .csv File</label>
+              <input type='file' id='state_file' onChange={handleStateFileChange} />
               </>
             )}
 
