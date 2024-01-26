@@ -79,7 +79,6 @@ def fetch_report_from_db(report_id: int):
     Function to fetch a report from the SQLite database.
     """
     try:
-        liteConn = sqlite3.connect("database.db") 
         cur = liteConn.cursor()
         cur.execute("SELECT * FROM Cases WHERE ReportID = ?", (report_id,))
         report = cur.fetchone()
