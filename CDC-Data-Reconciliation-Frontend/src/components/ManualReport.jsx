@@ -82,6 +82,24 @@ export default function ManualReport() {
         console.error("Error Creating Report - " + e)
       }
     }
+
+  }
+
+  const handleDownload = (e) => {
+
+    const csvData = 'CaseID,EventCode,MMWRYear,MMWRWeek,Reason,ReasonID\n' +
+    results.map((result) => `${result.CaseID},${result.EventCode},${result.MMWRYear},${result.MMWRWeek},${result.Reason},${result.ReasonID}`).join('\n')
+    const blob = new Blob([csvData], {type: 'text/csv;charset=utf-8,'})
+    const linkURL = URL.createObjectURL(blob)
+    const linking = document.createElement('a')
+    linking.setAttribute('href', linkURL)
+    linking.setAttribute('download', 'Results.csv')
+    linking.textContent = 'Download'
+
+    document.body.appendChild(linking)
+    linking.click()
+    document.body.removeChild(linking)
+
   }
 
   return (
@@ -113,12 +131,20 @@ export default function ManualReport() {
           </div>
         </form>
       </div>
+
       <div className='mt-5 py-5 w-5/6 max-w-6xl flex flex-col items-center'>
         {results && (
           <>
             <div className='flex flex-col items-center mb-5'>
               <h2 className='text-2xl font-bold'>Results</h2>
               <h3>Number of Cases Different: {results.length}</h3>
+            </div>
+
+
+            <div className='flex flex-col items-center mb-4'>
+            <button type='button' className='bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600' onClick={handleDownload}>
+              Download CSV
+              </button>
             </div>
 
             <table className='w-full text-center'>
@@ -128,6 +154,7 @@ export default function ManualReport() {
                 <th>MMWRYear</th>
                 <th>MMWRWeek</th>
                 <th>Reason</th>
+                <th>ReasonID</th>
               </tr>
               {results.map((result) => {
                 return (
@@ -137,6 +164,7 @@ export default function ManualReport() {
                     <td>{result.MMWRYear}</td>
                     <td>{result.MMWRWeek}</td>
                     <td>{result.Reason}</td>
+                    <td>{result.ReasonID}</td>
                   </tr>
                 )
               })}
