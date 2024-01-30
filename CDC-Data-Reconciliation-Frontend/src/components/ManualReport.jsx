@@ -99,7 +99,6 @@ export default function ManualReport() {
     document.body.appendChild(linking)
     linking.click()
     document.body.removeChild(linking)
-
   }
 
   return (
@@ -124,7 +123,6 @@ export default function ManualReport() {
                 <input type='file' id='state_file' onChange={handleStateFileChange} />
               </>
             )}
-
             <button type='submit' className='bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600'>
               Submit
             </button>
@@ -139,7 +137,6 @@ export default function ManualReport() {
               <h2 className='text-2xl font-bold'>Results</h2>
               <h3>Number of Cases Different: {results.length}</h3>
             </div>
-
 
             <div className='flex flex-col items-center mb-4'>
             <button type='button' className='bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600' onClick={handleDownload}>
