@@ -1,13 +1,10 @@
-# CDC-Data-Reconciliation
-
-## Technologies used:
-
-*Python, FastAPI, React*
-
-For our backend selection, we have chosen to use a Python framework called FastAPI useful for integrating RESTful APIs. We chose this backend because it is easy to use, creates automatic documentation, and will be able to run on basically any hardware that the state would like to use. Next, we chose to use React to create our user interface as it makes it easy to create a stateful UI and the component style makes it easy to reuse existing code. Notably, the client for this project requested that we use Python and RESTful APIs for our backend logic. The reasons for this are that these technologies are proven as well as familiar with existing employees.
-
-## Rationale for coded portion:
-
-*Coded portion: As a data scientist, I want to generate reports detailing differences between state and CDC case data so that I can remedy the discrepancies.*
-
-We chose to implement this section of the program because it is the single most important and basic part of the application. Users need to be able to generate reports indicating the differences between two csv files in order for any other part of the program to be useful.
+# CDC Data Reconciliation Tool
+Our tool compares data between the CDC database and databases from the 50 U.S. state health departments. The data from the states is regarded as “the source of truth”. If any data in the CDC database errs from the state databases in any way, it will be regarded as a discrepancy which may be remedied. 
+# Release Notes
+## Version 0.1.0 
+### New Features
+- Pull data automatically from state database
+- Toggle between manual uploading of state data and automatic pulling
+- Download .csv report of the discrepancies between the state and CDC data
+### Bug Fixes
+- N/A
