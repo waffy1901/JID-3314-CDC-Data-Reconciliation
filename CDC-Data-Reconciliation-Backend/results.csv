@@ -1,0 +1,8 @@
+CaseID,EventCode,MMWRYear,MMWRWeek,Reason,ReasonID
+CAS10001025GA01,10245,2023,08,Duplicate Case ID found in CDC CSV File,1
+CAS10001000GA01,11065,2023,06,Duplicate Case ID found in CDC CSV File,1
+CAS10013007GA01,11120,2023,40,Duplicate Case ID found in CDC CSV File,1
+CAS10001023GA01,11065,2023,08,Case has different attributes between State and CDC CSV Files,3
+CAS10003002GA01,102201,2023,11,Case has different attributes between State and CDC CSV Files,3
+CAS10005000GA01,102201,2023,16,Case ID not found in CDC CSV File,2
+CAS14501004GA01,11065,2023,06,Case ID not found in State CSV File,4
