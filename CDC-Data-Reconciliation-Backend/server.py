@@ -163,10 +163,11 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
 
 @app.get("/reports")
 async def get_report_summaries():
-    # Fetch all reports from the SQLite database
+    # Fetch all reports from the SQLite database, ordered by date and time (newest reports at the top)
     try:
         cur = app.liteConn.cursor()
-        cur.execute("SELECT * FROM Reports")
+        cur.execute(
+            "SELECT * FROM Reports ORDER BY CreatedAtDate DESC, TimeOfCreation DESC;")
 
         return [dict(zip([column[0] for column in cur.description], row)) for row in cur.fetchall()]
 
