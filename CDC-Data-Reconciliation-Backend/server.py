@@ -57,7 +57,7 @@ cur.execute('''
     CREATE TABLE IF NOT EXISTS Cases(
         ID INTEGER PRIMARY KEY NOT NULL,
         ReportID INTEGER NOT NULL,
-        CaseID INTEGER, 
+        CaseID TEXT, 
         EventCode TEXT,
         MMWRYear INTEGER, 
         MMWRWeek INTEGER,
@@ -161,6 +161,21 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
     return res
 
 
+@app.get("/reports")
+async def get_report_summaries():
+    # Fetch all reports from the SQLite database, ordered by date and time (newest reports at the top)
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute(
+            "SELECT * FROM Reports ORDER BY CreatedAtDate DESC, TimeOfCreation DESC;")
+
+        return [dict(zip([column[0] for column in cur.description], row)) for row in cur.fetchall()]
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+
+
 @app.get("/reports/{report_id}")
 async def get_report_cases(report_id: int):
     """
@@ -178,9 +193,8 @@ def fetch_reports_from_db(report_id: int):
     """
     try:
         cur = app.liteConn.cursor()
-        cur.execute("SELECT * FROM Cases WHERE ReportID = ?", report_id)
-        report = cur.fetchall()
-        return report
+        cur.execute("SELECT * FROM Cases WHERE ReportID = ?", (report_id,))
+        return [dict(zip([column[0] for column in cur.description], row)) for row in cur.fetchall()]
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return None
