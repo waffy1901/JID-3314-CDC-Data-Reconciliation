@@ -20,12 +20,13 @@ app.add_middleware(CORSMiddleware, allow_origins=origins,
                    allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 
+# Method to test if you have the correct ODBC Driver
 # print("List of ODBC Drivers:")
 # dlist = pyodbc.drivers()
 # for drvr in dlist:
 #     print('LIST OF DRIVERS:' + drvr)
-# Load config.json
 
+# Load config.json
 app.dir = os.path.dirname(__file__)
 
 
@@ -64,6 +65,18 @@ cur.execute('''
         Reason TEXT, 
         ReasonID INTEGER,
         FOREIGN KEY (ReportID) REFERENCES Reports(ID)
+)''')
+# Statistics table
+cur.execute('''
+    CREATE TABLE IF NOT EXISTS Statistics(
+    ID INTEGER PRIMARY KEY NOT NULL,
+    ReportID INTEGER NOT NULL,
+    EventCode TEXT NOT NULL,
+    TotalCases INTEGER,
+    TotalDuplicates INTEGER,
+    TotalMissing INTEGER,
+    TotalWrongAttributes INTEGER,
+    FOREIGN KEY (ReportID) REFERENCES Reports(ID)
 )''')
 app.liteConn.commit()
 
