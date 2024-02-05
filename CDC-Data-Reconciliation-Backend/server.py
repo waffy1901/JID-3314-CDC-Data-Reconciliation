@@ -45,6 +45,7 @@ app.conn = pyodbc.connect(connection_string)
 database_file_path = os.path.join(app.dir, "database.db")
 app.liteConn = sqlite3.connect(database_file_path)
 cur = app.liteConn.cursor()
+
 # Reports table
 cur.execute('''
     CREATE TABLE IF NOT EXISTS Reports(
@@ -53,6 +54,7 @@ cur.execute('''
         TimeOfCreation TEXT, 
         NumberOfDiscrepancies INTEGER    
 )''')
+
 # Cases table
 cur.execute('''
     CREATE TABLE IF NOT EXISTS Cases(
@@ -66,6 +68,7 @@ cur.execute('''
         ReasonID INTEGER,
         FOREIGN KEY (ReportID) REFERENCES Reports(ID)
 )''')
+
 # Statistics table
 cur.execute('''
     CREATE TABLE IF NOT EXISTS Statistics(
@@ -74,7 +77,8 @@ cur.execute('''
     EventCode TEXT NOT NULL,
     TotalCases INTEGER,
     TotalDuplicates INTEGER,
-    TotalMissing INTEGER,
+    TotalMissingFromCDC INTEGER,
+    TotalMissingFromState INTEGER,
     TotalWrongAttributes INTEGER,
     FOREIGN KEY (ReportID) REFERENCES Reports(ID)
 )''')
