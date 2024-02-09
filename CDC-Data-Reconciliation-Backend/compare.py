@@ -141,7 +141,7 @@ def comp(state_dict, cdc_dict):
             stats[cdc_row['EventCode']]['caseIDs'].append(cdc_row['CaseID'])
         
         else:
-            stats[cdc_row['EventCode']] = {'totalCases': 1, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 0, 'totalWrongAttributes': 0, 'caseIDs': [cdc_row['CaseID']]}
+            stats[cdc_row['EventCode']] = {'totalCases': 1, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 1, 'totalWrongAttributes': 0, 'caseIDs': [cdc_row['CaseID']]}
 
 
 def main():
