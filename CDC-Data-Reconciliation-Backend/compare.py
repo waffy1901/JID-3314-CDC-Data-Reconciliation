@@ -67,14 +67,12 @@ def get_cdc_dict(cdc_file):
                                row['MMWRYear'], row['MMWRWeek'], "Duplicate Case ID found in CDC CSV File", "1"))
                 
                 # adding duplicates to duplicate count if needed
-                if row['CaseID'] not in stats[row['EventCode']]['CaseIDs']:
-                    stats[row['EventCode']]['totalCases'] += 1
-                else:
-                    stats[row['EventCode']]['totalDuplicates'] += 1
+                stats[row['EventCode']]['totalDuplicates'] += 1
                 
             else:
                 cdc_dict[row['CaseID']] = row
-                stats[row['EventCode']] = {'totalCases': 1, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 0, 'totalWrongAttributes': 0, 'caseIDs': [row['CaseID']]}
+                if row['EventCode'] not in stats:
+                    stats[row['EventCode']] = {'totalCases': 0, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 0, 'totalWrongAttributes': 0, 'caseIDs': [row['CaseID']]}
 
     return cdc_dict
 
