@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 import asyncio
 import csv
 import os
@@ -123,6 +124,51 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
     os.remove(res_file)
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
+    currTime = datetime.now()
+    createdAtDate = currTime.strftime("%Y-%m-%d")
+    timeOfCreation = currTime.strftime("%H:%M:%S")
+
+    numDiscrepancies = len(res)
+    reportId = insert_report(createdAtDate, timeOfCreation, numDiscrepancies)
+    
+    statistics_summary = {}
+      
+    for case in res:
+        eventCode = case["EventCode"]
+        reasonID = case["ReasonID"]
+        
+        # Initialize the event code entry if not present
+        if eventCode not in statistics_summary:
+            statistics_summary[eventCode] = {
+                "TotalCases": 0,
+                "TotalDuplicates": 0,
+                "TotalMissingFromCDC": 0,
+                "TotalMissingFromState": 0,
+                "TotalWrongAttributes": 0,
+            }
+        
+        statistics_summary[eventCode]["TotalCases"] += 1
+
+        if reasonID == 1:  
+            statistics_summary[eventCode]["TotalDuplicates"] += 1
+        elif reasonID == 2: 
+            statistics_summary[eventCode]["TotalMissingFromCDC"] += 1
+        elif reasonID == 3: 
+            statistics_summary[eventCode]["TotalWrongAttributes"] += 1
+        elif reasonID == 4: 
+            statistics_summary[eventCode]["TotalMissingFromState"] += 1
+
+    for event_code, stats in statistics_summary.items():
+        insert_statistics(
+            reportId,
+            event_code,
+            stats["TotalCases"],
+            stats["TotalDuplicates"],
+            stats["TotalMissingFromCDC"],
+            stats["TotalMissingFromState"],
+            stats["TotalWrongAttributes"],
+        )
+
     return res
 
 
@@ -175,6 +221,51 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
     os.remove(res_file)
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
+    currTime = datetime.now()
+    createdAtDate = currTime.strftime("%Y-%m-%d")
+    timeOfCreation = currTime.strftime("%H:%M:%S")
+
+    numDiscrepancies = len(res)
+    reportId = insert_report(createdAtDate, timeOfCreation, numDiscrepancies)
+
+    statistics_summary = {}
+
+    
+    for case in res:
+        eventCode = case["EventCode"]
+        reasonID = case["ReasonID"]
+        
+        # Initialize the event code entry if not present
+        if eventCode not in statistics_summary:
+            statistics_summary[eventCode] = {
+                "TotalCases": 0,
+                "TotalDuplicates": 0,
+                "TotalMissingFromCDC": 0,
+                "TotalMissingFromState": 0,
+                "TotalWrongAttributes": 0,
+            }
+        
+        statistics_summary[eventCode]["TotalCases"] += 1
+
+        if reasonID == 1:  
+            statistics_summary[eventCode]["TotalDuplicates"] += 1
+        elif reasonID == 2: 
+            statistics_summary[eventCode]["TotalMissingFromCDC"] += 1
+        elif reasonID == 3: 
+            statistics_summary[eventCode]["TotalWrongAttributes"] += 1
+        elif reasonID == 4: 
+            statistics_summary[eventCode]["TotalMissingFromState"] += 1
+
+    for event_code, stats in statistics_summary.items():
+        insert_statistics(
+            reportId,
+            event_code,
+            stats["TotalCases"],
+            stats["TotalDuplicates"],
+            stats["TotalMissingFromCDC"],
+            stats["TotalMissingFromState"],
+            stats["TotalWrongAttributes"],
+        )
     return res
 
 
@@ -215,6 +306,17 @@ def fetch_reports_from_db(report_id: int):
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return None
+
+def insert_report(createdDate, creationTime, noOfDiscrepancies):
+    cur.execute("INSERT INTO Reports (CreatedAtDate, TimeOfCreation, NumberOfDiscrepancies) VALUES (?, ?, ?)", (createdDate, creationTime, noOfDiscrepancies))
+    report_id = cur.lastrowid
+    app.liteConn.commit()
+    return report_id
+
+def insert_statistics(reportId, eventCode, totalCases, totalDuplicates, totalMissingFromCDC, totalMissingFromState, totalWrongAttributes):
+    cur.execute("INSERT INTO Statistics (ReportID, EventCode, TotalCases, TotalMissingFromCDC, TotalMissingFromState, TotalWrongAttributes) VALUES (?, ?, ?, ?, ?, ?)", (reportId, eventCode, totalCases, totalDuplicates, totalMissingFromCDC, totalMissingFromState, totalWrongAttributes))
+    report_id = cur.lastrowid
+    app.liteConn.commit()
 
 
 def run_query(year: int):
