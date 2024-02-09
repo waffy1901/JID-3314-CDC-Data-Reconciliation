@@ -72,7 +72,7 @@ def get_cdc_dict(cdc_file):
             else:
                 cdc_dict[row['CaseID']] = row
                 if row['EventCode'] not in stats:
-                    stats[row['EventCode']] = {'totalCases': 0, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 0, 'totalWrongAttributes': 0, 'caseIDs': [row['CaseID']]}
+                    stats[row['EventCode']] = {'totalCases': 0, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 0, 'totalWrongAttributes': 0}
 
     return cdc_dict
 
@@ -83,12 +83,9 @@ def comp(state_dict, cdc_dict):
         
         # checking if a given event code already exists in the stats dictionary
         if state_row['EventCode'] in stats:
-            if state_row['CaseID'] not in stats[state_row['EventCode']]['caseIDs']:
-                stats[state_row['EventCode']]['totalCases'] += 1
-                stats[state_row['EventCode']]['caseIDs'].append(state_row['CaseID'])
-            
+            stats[state_row['EventCode']]['totalCases'] += 1
         else:
-            stats[state_row['EventCode']] = {'totalCases': 1, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 0, 'totalWrongAttributes': 0, 'caseIDs': [state_row['CaseID']]}
+            stats[state_row['EventCode']] = {'totalCases': 1, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 0, 'totalWrongAttributes': 0}
 
         # If a case ID is in the state DB but not the CDC DB, mark it as a missing case
         if state_case_id not in cdc_dict:
@@ -138,10 +135,8 @@ def comp(state_dict, cdc_dict):
         if cdc_row['EventCode'] in stats:
             stats[cdc_row['EventCode']]['totalMissingState'] += 1
             stats[cdc_row['EventCode']]['totalCases'] += 1
-            stats[cdc_row['EventCode']]['caseIDs'].append(cdc_row['CaseID'])
-        
         else:
-            stats[cdc_row['EventCode']] = {'totalCases': 1, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 1, 'totalWrongAttributes': 0, 'caseIDs': [cdc_row['CaseID']]}
+            stats[cdc_row['EventCode']] = {'totalCases': 1, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 1, 'totalWrongAttributes': 0}
 
 
 def main():
