@@ -141,26 +141,8 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
     reportId = insert_report(createdAtDate, timeOfCreation, numDiscrepancies)
 
 
-    for stat in stats_list:
-        insert_statistics(
-            reportId,
-            stat["EventCode"],
-            stat["TotalCases"],
-            stat["TotalDuplicates"],
-            stat["TotalMissingFromCDC"],
-            stat["TotalMissingFromState"],
-            stat["TotalWrongAttributes"],
-        )
-    
-    for case in res:
-        insert_cases(
-            case["CaseID"],
-            case["EventCode"],
-            case["MMWRYear"], 
-            case["MMWRWeek"], 
-            case["Reason"],
-            case["ReasonID"] 
-        )
+    insert_statistics(reportId, stats_list)
+    insert_cases(res)
 
     return res
 
@@ -230,26 +212,8 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
     numDiscrepancies = len(res)
     reportId = insert_report(createdAtDate, timeOfCreation, numDiscrepancies)
 
-    for stat in stats_list:
-        insert_statistics(
-            reportId,
-            stat["EventCode"],
-            stat["TotalCases"],
-            stat["TotalDuplicates"],
-            stat["TotalMissingFromCDC"],
-            stat["TotalMissingFromState"],
-            stat["TotalWrongAttributes"],
-        )
-    
-    for case in res:
-        insert_cases(
-            case["CaseID"],
-            case["EventCode"],
-            case["MMWRYear"], 
-            case["MMWRWeek"], 
-            case["Reason"],
-            case["ReasonID"] 
-        )
+    insert_statistics(reportId, stats_list)
+    insert_cases(res)
     return res
 
 
@@ -292,18 +256,33 @@ def fetch_reports_from_db(report_id: int):
         return None
 
 def insert_report(createdDate, creationTime, noOfDiscrepancies):
-    cur.execute("INSERT INTO Reports (CreatedAtDate, TimeOfCreation, NumberOfDiscrepancies) VALUES (?, ?, ?)", (createdDate, creationTime, noOfDiscrepancies))
-    report_id = cur.lastrowid
-    app.liteConn.commit()
-    return report_id
+    try:
+        cur.execute("INSERT INTO Reports (CreatedAtDate, TimeOfCreation, NumberOfDiscrepancies) VALUES (?, ?, ?)", (createdDate, creationTime, noOfDiscrepancies))
+        report_id = cur.lastrowid
+        app.liteConn.commit()
+        return report_id
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
+    
 
-def insert_statistics(reportId, eventCode, totalCases, totalDuplicates, totalMissingFromCDC, totalMissingFromState, totalWrongAttributes):
-    cur.execute("INSERT INTO Statistics (ReportID, EventCode, TotalCases, TotalMissingFromCDC, TotalMissingFromState, TotalWrongAttributes) VALUES (?, ?, ?, ?, ?, ?)", (reportId, eventCode, totalCases, totalDuplicates, totalMissingFromCDC, totalMissingFromState, totalWrongAttributes))
-    app.liteConn.commit()
+def insert_statistics(reportId, stats):
+    try:
+        for stat in stats:
+            cur.execute("INSERT INTO Statistics (ReportID, EventCode, TotalCases, TotalMissingFromCDC, TotalMissingFromState, TotalWrongAttributes) VALUES (?, ?, ?, ?, ?, ?)", (reportId, stat["EventCode"], stat["TotalCases"], stat["TotalDuplicates"], stat["TotalMissingFromCDC"], stat["TotalMissingFromState"], stat["TotalWrongAttributes"]))
+        app.liteConn.commit()
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
 
-def insert_cases(CaseID, EventCode, MMWRYear, MMWRWeek, Reason, ReasonID):
-    cur.execute("INSERT INTO Cases (CaseID, EventCode, MMWRYear, MMWRWeek, Reason, ReasonID) VALUES (?, ?, ?, ?, ?, ?)", (CaseID, EventCode, MMWRYear, MMWRWeek, Reason, ReasonID))
-    app.liteConn.commit()
+def insert_cases(res):
+    try:
+        for case in res: 
+            cur.execute("INSERT INTO Cases (CaseID, EventCode, MMWRYear, MMWRWeek, Reason, ReasonID) VALUES (?, ?, ?, ?, ?, ?)", (case["CaseID"], case["EventCode"], case["MMWRYear"], case["MMWRWeek"], case["Reason"], case["ReasonID"]))
+        app.liteConn.commit()
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
 
 
 def run_query(year: int):
