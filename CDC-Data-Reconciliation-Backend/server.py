@@ -133,12 +133,8 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
     os.remove(res_file)
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
-    currTime = datetime.now()
-    createdAtDate = currTime.strftime("%Y-%m-%d")
-    timeOfCreation = currTime.strftime("%H:%M:%S")
-
     numDiscrepancies = len(res)
-    reportId = insert_report(createdAtDate, timeOfCreation, numDiscrepancies)
+    reportId = insert_report(numDiscrepancies)
 
 
     insert_statistics(reportId, stats_list)
@@ -205,12 +201,9 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
     os.remove(res_file)
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
-    currTime = datetime.now()
-    createdAtDate = currTime.strftime("%Y-%m-%d")
-    timeOfCreation = currTime.strftime("%H:%M:%S")
 
     numDiscrepancies = len(res)
-    reportId = insert_report(createdAtDate, timeOfCreation, numDiscrepancies)
+    reportId = insert_report(numDiscrepancies)
 
     insert_statistics(reportId, stats_list)
     insert_cases(res)
@@ -255,9 +248,9 @@ def fetch_reports_from_db(report_id: int):
         print(f"Database error: {e}")
         return None
 
-def insert_report(createdDate, creationTime, noOfDiscrepancies):
+def insert_report(noOfDiscrepancies):
     try:
-        cur.execute("INSERT INTO Reports (CreatedAtDate, TimeOfCreation, NumberOfDiscrepancies) VALUES (?, ?, ?)", (createdDate, creationTime, noOfDiscrepancies))
+        cur.execute("INSERT INTO Reports (CreatedAtDate, TimeOfCreation, NumberOfDiscrepancies)  VALUES (DATE('now'), TIME('now'), ?)", (noOfDiscrepancies,))
         report_id = cur.lastrowid
         app.liteConn.commit()
         return report_id
