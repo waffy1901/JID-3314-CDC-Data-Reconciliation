@@ -73,15 +73,15 @@ cur.execute('''
 # Statistics table
 cur.execute('''
     CREATE TABLE IF NOT EXISTS Statistics(
-    ID INTEGER PRIMARY KEY NOT NULL,
-    ReportID INTEGER NOT NULL,
-    EventCode TEXT NOT NULL,
-    TotalCases INTEGER,
-    TotalDuplicates INTEGER,
-    TotalMissingFromCDC INTEGER,
-    TotalMissingFromState INTEGER,
-    TotalWrongAttributes INTEGER,
-    FOREIGN KEY (ReportID) REFERENCES Reports(ID)
+        ID INTEGER PRIMARY KEY NOT NULL,
+        ReportID INTEGER NOT NULL,
+        EventCode TEXT NOT NULL,
+        TotalCases INTEGER,
+        TotalDuplicates INTEGER,
+        TotalMissingFromCDC INTEGER,
+        TotalMissingFromState INTEGER,
+        TotalWrongAttributes INTEGER,
+        FOREIGN KEY (ReportID) REFERENCES Reports(ID)
 )''')
 app.liteConn.commit()
 
@@ -243,6 +243,20 @@ async def get_report_cases(report_id: int):
         raise HTTPException(status_code=404, detail="Report not found")
     return report
 
+@app.get("/report_statistics/{report_id}")
+async def get_report_statistics(report_id: int):
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute(
+            "SELECT * FROM Statistics WHERE ReportID = ?", (report_id,))
+        results = cur.fetchall()
+        if not results:
+            raise HTTPException(status_code = 404, detail = "Report Not Found")
+        return [dict(zip([column[0] for column in cur.description], row)) for row in results]
+    
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        raise HTTPException(status_code = 500, detail = "Internal Server Error")
 
 def fetch_reports_from_db(report_id: int):
     """
