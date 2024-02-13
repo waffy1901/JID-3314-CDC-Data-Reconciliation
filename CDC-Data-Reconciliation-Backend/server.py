@@ -118,6 +118,15 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
             # Add the row as a dictionary to the list
             res.append(row)
 
+    stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
+    stats_list = []
+
+    with open(stats_file, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            stats_list.append(row)
+
+
     # remove temp files / folder
     os.remove(cdc_save_to)
     os.remove(state_save_to)
@@ -130,43 +139,27 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
 
     numDiscrepancies = len(res)
     reportId = insert_report(createdAtDate, timeOfCreation, numDiscrepancies)
-    
-    statistics_summary = {}
-      
-    for case in res:
-        eventCode = case["EventCode"]
-        reasonID = case["ReasonID"]
-        
-        # Initialize the event code entry if not present
-        if eventCode not in statistics_summary:
-            statistics_summary[eventCode] = {
-                "TotalCases": 0,
-                "TotalDuplicates": 0,
-                "TotalMissingFromCDC": 0,
-                "TotalMissingFromState": 0,
-                "TotalWrongAttributes": 0,
-            }
-        
-        statistics_summary[eventCode]["TotalCases"] += 1
 
-        if reasonID == 1:  
-            statistics_summary[eventCode]["TotalDuplicates"] += 1
-        elif reasonID == 2: 
-            statistics_summary[eventCode]["TotalMissingFromCDC"] += 1
-        elif reasonID == 3: 
-            statistics_summary[eventCode]["TotalWrongAttributes"] += 1
-        elif reasonID == 4: 
-            statistics_summary[eventCode]["TotalMissingFromState"] += 1
 
-    for event_code, stats in statistics_summary.items():
+    for stat in stats_list:
         insert_statistics(
             reportId,
-            event_code,
-            stats["TotalCases"],
-            stats["TotalDuplicates"],
-            stats["TotalMissingFromCDC"],
-            stats["TotalMissingFromState"],
-            stats["TotalWrongAttributes"],
+            stat["EventCode"],
+            stat["TotalCases"],
+            stat["TotalDuplicates"],
+            stat["TotalMissingFromCDC"],
+            stat["TotalMissingFromState"],
+            stat["TotalWrongAttributes"],
+        )
+    
+    for case in res:
+        insert_cases(
+            case["CaseID"],
+            case["EventCode"],
+            case["MMWRYear"], 
+            case["MMWRWeek"], 
+            case["Reason"],
+            case["ReasonID"] 
         )
 
     return res
@@ -215,6 +208,15 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
             # Add the row as a dictionary to the list
             res.append(row)
 
+    stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
+    stats_list = []
+
+    with open(stats_file, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            stats_list.append(row)
+
+
     # remove temp files / folder
     os.remove(cdc_save_to)
     os.remove(state_save_to)
@@ -228,43 +230,25 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
     numDiscrepancies = len(res)
     reportId = insert_report(createdAtDate, timeOfCreation, numDiscrepancies)
 
-    statistics_summary = {}
-
-    
-    for case in res:
-        eventCode = case["EventCode"]
-        reasonID = case["ReasonID"]
-        
-        # Initialize the event code entry if not present
-        if eventCode not in statistics_summary:
-            statistics_summary[eventCode] = {
-                "TotalCases": 0,
-                "TotalDuplicates": 0,
-                "TotalMissingFromCDC": 0,
-                "TotalMissingFromState": 0,
-                "TotalWrongAttributes": 0,
-            }
-        
-        statistics_summary[eventCode]["TotalCases"] += 1
-
-        if reasonID == 1:  
-            statistics_summary[eventCode]["TotalDuplicates"] += 1
-        elif reasonID == 2: 
-            statistics_summary[eventCode]["TotalMissingFromCDC"] += 1
-        elif reasonID == 3: 
-            statistics_summary[eventCode]["TotalWrongAttributes"] += 1
-        elif reasonID == 4: 
-            statistics_summary[eventCode]["TotalMissingFromState"] += 1
-
-    for event_code, stats in statistics_summary.items():
+    for stat in stats_list:
         insert_statistics(
             reportId,
-            event_code,
-            stats["TotalCases"],
-            stats["TotalDuplicates"],
-            stats["TotalMissingFromCDC"],
-            stats["TotalMissingFromState"],
-            stats["TotalWrongAttributes"],
+            stat["EventCode"],
+            stat["TotalCases"],
+            stat["TotalDuplicates"],
+            stat["TotalMissingFromCDC"],
+            stat["TotalMissingFromState"],
+            stat["TotalWrongAttributes"],
+        )
+    
+    for case in res:
+        insert_cases(
+            case["CaseID"],
+            case["EventCode"],
+            case["MMWRYear"], 
+            case["MMWRWeek"], 
+            case["Reason"],
+            case["ReasonID"] 
         )
     return res
 
@@ -315,7 +299,10 @@ def insert_report(createdDate, creationTime, noOfDiscrepancies):
 
 def insert_statistics(reportId, eventCode, totalCases, totalDuplicates, totalMissingFromCDC, totalMissingFromState, totalWrongAttributes):
     cur.execute("INSERT INTO Statistics (ReportID, EventCode, TotalCases, TotalMissingFromCDC, TotalMissingFromState, TotalWrongAttributes) VALUES (?, ?, ?, ?, ?, ?)", (reportId, eventCode, totalCases, totalDuplicates, totalMissingFromCDC, totalMissingFromState, totalWrongAttributes))
-    report_id = cur.lastrowid
+    app.liteConn.commit()
+
+def insert_cases(CaseID, EventCode, MMWRYear, MMWRWeek, Reason, ReasonID):
+    cur.execute("INSERT INTO Cases (CaseID, EventCode, MMWRYear, MMWRWeek, Reason, ReasonID) VALUES (?, ?, ?, ?, ?, ?)", (CaseID, EventCode, MMWRYear, MMWRWeek, Reason, ReasonID))
     app.liteConn.commit()
 
 
