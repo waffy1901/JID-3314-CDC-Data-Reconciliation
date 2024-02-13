@@ -1,6 +1,7 @@
 import uvicorn
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, Response, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 import asyncio
 import csv
 import os
@@ -115,15 +116,35 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
         # Loop through each row in the CSV file
         for row in reader:
             # Add the row as a dictionary to the list
-            res.append(row)
+            res.append(tuple(row.values()))
+
+
+    numDiscrepancies = len(res)
+    reportId = insert_report(numDiscrepancies)
+
+    stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
+    stats_list = []
+
+    with open(stats_file, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            tup = (reportId,) + tuple(row.values())
+            stats_list.append(tup)
+
+    # Add reportId to each row
+    new_res = [(reportId,) + row for row in res]
+
+    insert_cases(new_res)
+    insert_statistics(stats_list)
 
     # remove temp files / folder
     os.remove(cdc_save_to)
     os.remove(state_save_to)
     os.remove(res_file)
+    os.remove(stats_file)
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
-    return res
+    return Response(status_code=200)
 
 
 @app.post("/automatic_report")
@@ -167,15 +188,34 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
         # Loop through each row in the CSV file
         for row in reader:
             # Add the row as a dictionary to the list
-            res.append(row)
+            res.append(tuple(row.values()))
 
+    numDiscrepancies = len(res)
+    reportId = insert_report(numDiscrepancies)
+
+    stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
+    stats_list = []
+
+    with open(stats_file, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            tup = (reportId,) + tuple(row.values())
+            stats_list.append(tup)
+
+    # Add reportId to each row
+    new_res = [(reportId,) + row for row in res]
+
+    insert_cases(new_res)
+    insert_statistics(stats_list)
+    
     # remove temp files / folder
     os.remove(cdc_save_to)
     os.remove(state_save_to)
     os.remove(res_file)
+    os.remove(stats_file)
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
-    return res
+    return Response(status_code=200)
 
 
 @app.get("/reports")
@@ -215,6 +255,36 @@ def fetch_reports_from_db(report_id: int):
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return None
+
+def insert_report(noOfDiscrepancies):
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute("INSERT INTO Reports (CreatedAtDate, TimeOfCreation, NumberOfDiscrepancies)  VALUES (DATE('now'), TIME('now'), ?)", (noOfDiscrepancies,))
+        report_id = cur.lastrowid
+        app.liteConn.commit()
+        return report_id
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
+    
+
+def insert_statistics(stats):
+    try:
+        cur = app.liteConn.cursor()
+        cur.executemany("INSERT INTO Statistics (ReportID, EventCode, TotalCases, TotalDuplicates, TotalMissingFromCDC, TotalMissingFromState, TotalWrongAttributes) VALUES (?, ?, ?, ?, ?, ?, ?)", stats)
+        app.liteConn.commit()
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
+
+def insert_cases(res):
+    try:
+        cur = app.liteConn.cursor()
+        cur.executemany("INSERT INTO Cases (ReportID, CaseID, EventCode, MMWRYear, MMWRWeek, Reason, ReasonID) VALUES (?, ?, ?, ?, ?, ?, ?)", res)
+        app.liteConn.commit()
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
 
 
 def run_query(year: int):
