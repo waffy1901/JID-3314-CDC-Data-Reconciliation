@@ -44,7 +44,7 @@ export default function Home() {
       </Modal>
 
       <div className='flex flex-row items-center h-full w-full'>
-        <div className='w-[600px] bg-slate-200 h-full flex flex-col items-center gap-4 p-8'>
+        <div className='w-[600px] bg-slate-200 h-full flex flex-col items-center gap-4 p-8 overflow-auto'>
           <button
             className='bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600'
             onClick={() => setIsModalOpen(true)}
@@ -57,7 +57,7 @@ export default function Home() {
                 key={summary.ID}
                 onClick={() => handleSummaryClick(summary.ID)}
                 className={`w-4/5 rounded-lg p-4 ${
-                  summary.ID === currReport ? "bg-indigo-600" : "bg-indigo-300 hover:bg-indigo-400"
+                  summary.ID === currReport ? "bg-indigo-600 text-slate-200" : "bg-indigo-300 hover:bg-indigo-400"
                 }`}
               >
                 <h2 className='text-xl font-semibold'>Report: {summary.ID}</h2>
@@ -70,7 +70,7 @@ export default function Home() {
               </div>
             ))}
         </div>
-        <div className='bg-slate-50 h-full w-full flex flex-col items-center'>
+        <div className='bg-slate-50 h-full w-full flex flex-col items-center overflow-auto'>
           <Report reportID={currReport} />
         </div>
       </div>
