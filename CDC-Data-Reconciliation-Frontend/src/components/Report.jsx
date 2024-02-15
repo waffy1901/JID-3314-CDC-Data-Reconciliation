@@ -1,11 +1,26 @@
 import { useState, useEffect } from "react"
+import config from "../config.json"
 
 export default function Report({ reportID }) {
   const [results, setResults] = useState(null)
 
   useEffect(() => {
-    // Here you will fetch the report data from the API based on the reportID
+    fetchReport(reportID)
   }, [reportID])
+
+  const fetchReport = async (reportID) => {
+    try {
+      const response = await fetch(config.API_URL + "/reports/" + reportID)
+      if (response.ok) {
+        const data = await response.json()
+        setResults(data)
+      } else {
+        console.error("Failed to fetch report!")
+      }
+    } catch (e) {
+      console.error("Error fetching report - " + e)
+    }
+  }
 
   const handleDownload = (e) => {
     const csvData =
