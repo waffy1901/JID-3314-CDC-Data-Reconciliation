@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import config from "../config.json"
 
 export default function Report({ reportID }) {
   const [results, setResults] = useState(null)
@@ -6,26 +7,21 @@ export default function Report({ reportID }) {
   const [showDiseaseStats, setShowDiseaseStats] = useState(false)
 
   useEffect(() => {
-    // Here you will fetch the report data from the API based on the reportID
-    const fetchReportStatistics = async () => {
-		try {
-			const response = await fetch(`http://localhost:8000/report_statistics/${reportID}`)
-			if (!response.ok) {
-				throw new Error(`Error: ${response.statusText}`)
-			}
-			const data = await response.json()
-			setStatistics(data)
-		} catch(error) {
-			console.error("Unable to fetch statistics", error)
-		}
-	}
-	if (reportID) {
-		fetchReportStatistics()
-	}
+    fetchReport(reportID)
   }, [reportID])
 
-  const toggleDiseaseStats = () => {
-	setShowDiseaseStats(!showDiseaseStats)
+  const fetchReport = async (reportID) => {
+    try {
+      const response = await fetch(config.API_URL + "/reports/" + reportID)
+      if (response.ok) {
+        const data = await response.json()
+        setResults(data)
+      } else {
+        console.error("Failed to fetch report!")
+      }
+    } catch (e) {
+      console.error("Error fetching report - " + e)
+    }
   }
 
   const handleDownload = (e) => {

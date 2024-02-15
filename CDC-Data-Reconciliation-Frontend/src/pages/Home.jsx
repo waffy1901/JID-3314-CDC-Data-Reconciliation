@@ -70,7 +70,7 @@ export default function Home() {
               </div>
             ))}
         </div>
-        <div className='bg-slate-50 h-full w-full'>
+        <div className='bg-slate-50 h-full w-full flex flex-col items-center'>
           <Report reportID={currReport} />
         </div>
       </div>
