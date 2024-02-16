@@ -7,9 +7,8 @@ export default function CreateReport({ onDone }) {
   const [isAutomatic, setIsAutomatic] = useState(true)
   const [inputValue, setInputValue] = useState('')
 
-  const currYear = new Date().getFullYear()
-  const start = currYear - 100
-  const yearList = Array.from({ length: 101}, (_, index) => start + index)
+  const currYear = 2023
+  const yearList = Array.from({ length: 101}, (_, index) => currYear + index)
 
   const handleCheckboxChange = (e) => {
     setIsAutomatic(e.target.checked)
@@ -101,6 +100,8 @@ export default function CreateReport({ onDone }) {
             </label>
             <label htmlFor='cdc_file'>Upload CDC .csv File</label>
             <input type='file' id='cdc_file' onChange={handleCDCFileChange} />
+            {isAutomatic && (
+            <>
             <label>Specify Year to Query From</label>
             <select
               value={inputValue}
@@ -117,6 +118,8 @@ export default function CreateReport({ onDone }) {
                 </option>
               ))}
             </select>
+            </>
+            )}
 
             {
               // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
