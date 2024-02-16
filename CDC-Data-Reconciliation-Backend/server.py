@@ -63,6 +63,7 @@ cur.execute('''
         ReportID INTEGER NOT NULL,
         CaseID TEXT, 
         EventCode TEXT,
+        EventName TEXT,
         MMWRYear INTEGER, 
         MMWRWeek INTEGER,
         Reason TEXT, 
@@ -76,6 +77,7 @@ cur.execute('''
         ID INTEGER PRIMARY KEY NOT NULL,
         ReportID INTEGER NOT NULL,
         EventCode TEXT NOT NULL,
+        EventName TEXT,
         TotalCases INTEGER,
         TotalDuplicates INTEGER,
         TotalMissingFromCDC INTEGER,
@@ -285,7 +287,7 @@ def insert_report(noOfDiscrepancies):
 def insert_statistics(stats):
     try:
         cur = app.liteConn.cursor()
-        cur.executemany("INSERT INTO Statistics (ReportID, EventCode, TotalCases, TotalDuplicates, TotalMissingFromCDC, TotalMissingFromState, TotalWrongAttributes) VALUES (?, ?, ?, ?, ?, ?, ?)", stats)
+        cur.executemany("INSERT INTO Statistics (ReportID, EventCode, EventName, TotalCases, TotalDuplicates, TotalMissingFromCDC, TotalMissingFromState, TotalWrongAttributes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", stats)
         app.liteConn.commit()
     except Exception as e:
         app.liteConn.rollback()
@@ -294,7 +296,7 @@ def insert_statistics(stats):
 def insert_cases(res):
     try:
         cur = app.liteConn.cursor()
-        cur.executemany("INSERT INTO Cases (ReportID, CaseID, EventCode, MMWRYear, MMWRWeek, Reason, ReasonID) VALUES (?, ?, ?, ?, ?, ?, ?)", res)
+        cur.executemany("INSERT INTO Cases (ReportID, CaseID, EventCode, EventName, MMWRYear, MMWRWeek, Reason, ReasonID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", res)
         app.liteConn.commit()
     except Exception as e:
         app.liteConn.rollback()
