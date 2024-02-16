@@ -28,15 +28,14 @@ export default function CreateReport({ onDone }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!inputValue) {
-      console.error("Year not selected!")
-      return
-    }
-
     // Checking whether the checkbox for automatic upload is ticked or not
     if (isAutomatic) {
       if (cdcFile === null) {
         console.error("Files not uploaded!")
+        return
+      }
+      if (!inputValue) {
+        console.error("Year not selected!")
         return
       }
       // Setting form data to year and cdcFile
