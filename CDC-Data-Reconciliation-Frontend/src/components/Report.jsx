@@ -11,7 +11,7 @@ export default function Report({ reportID }) {
       try {
         const statsResponse = await fetch(config.API_URL + "/report_statistics/" + reportID)
         if (!statsResponse.ok) {
-          throw new Error(`Error: ${response.statusText}`)
+          throw new Error(`Error: ${statsResponse.statusText}`)
         }
         const statsData = await statsResponse.json()
 
