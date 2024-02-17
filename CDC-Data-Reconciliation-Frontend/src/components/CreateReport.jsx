@@ -5,6 +5,10 @@ export default function CreateReport({ onDone }) {
   const [stateFile, setStateFile] = useState(null)
   const [cdcFile, setCDCFile] = useState(null)
   const [isAutomatic, setIsAutomatic] = useState(true)
+  const [inputValue, setInputValue] = useState('')
+
+  const currYear = 2023
+  const yearList = Array.from({ length: 101}, (_, index) => currYear + index)
 
   const handleCheckboxChange = (e) => {
     setIsAutomatic(e.target.checked)
@@ -17,6 +21,9 @@ export default function CreateReport({ onDone }) {
   const handleCDCFileChange = (e) => {
     setCDCFile(e.target.files[0])
   }
+  const handleInputChange = (e) => {
+    setInputValue(e.target.value)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -27,13 +34,17 @@ export default function CreateReport({ onDone }) {
         console.error("Files not uploaded!")
         return
       }
+      if (!inputValue) {
+        console.error("Year not selected!")
+        return
+      }
       // Setting form data to year and cdcFile
       const formdata = new FormData()
       formdata.append("cdc_file", cdcFile)
 
       // Run the automatic report fetching
       try {
-        const response = await fetch(config.API_URL + "/automatic_report?year=2023", {
+        const response = await fetch(config.API_URL + `/automatic_report?year=${inputValue}`, {
           method: "POST",
           body: formdata,
         })
@@ -88,6 +99,26 @@ export default function CreateReport({ onDone }) {
             </label>
             <label htmlFor='cdc_file'>Upload CDC .csv File</label>
             <input type='file' id='cdc_file' onChange={handleCDCFileChange} />
+            {isAutomatic && (
+            <>
+            <label>Specify Year to Query From</label>
+            <select
+              value={inputValue}
+              onChange={handleInputChange}
+              style={{ border: '1px solid black', borderRadius: '2px', backgroundColor: 'whitesmoke'}}
+            >
+              <option
+                value="">Select a Year
+              </option>
+              {yearList.map((year) => (
+                <option
+                  key={year}
+                  value={year}>{year}
+                </option>
+              ))}
+            </select>
+            </>
+            )}
 
             {
               // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
