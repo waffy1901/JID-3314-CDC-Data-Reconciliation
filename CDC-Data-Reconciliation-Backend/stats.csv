@@ -1,0 +1,19 @@
+EventCode,EventName,TotalCases,TotalDuplicates,TotalMissingFromCDC,TotalMissingFromState,TotalWrongAttributes
+10030,Varicella (Chickenpox),6,0,1,5,0
+11065,2019 Novel Coronavirus,7,0,7,0,0
+10245,African Tick Bite Fever,2,0,2,0,0
+50221,"Zika Virus Infection, Non-Congenital",1,0,1,0,0
+10100,"Hepatitis B, acute",2,0,2,0,0
+10660,Yellow Fever,1,0,1,0,0
+102201,Tuberculosis (2020 RVCT),7,0,7,0,0
+10190,Pertussis,1,0,1,0,0
+10530,"Botulism, foodborne",1,0,1,0,0
+50225,Acanthamoeba Disease (Excluding Keratitis),2,0,2,0,0
+10311,"Syphilis, primary",1,0,1,0,0
+10273,Chancroid,1,0,1,0,0
+10316,"Syphilis, congenital",1,0,1,0,0
+10104,"Hepatitis B Viral Infection, Perinatal",1,0,1,0,0
+10280,Gonorrhea,2,0,2,0,0
+502582,Latent Tuberculosis Infection (2020 TBLISS),4,0,4,0,0
+11120,Acute flaccid myelitis,1,0,1,0,0
+10220,Tuberculosis,1,0,1,0,0

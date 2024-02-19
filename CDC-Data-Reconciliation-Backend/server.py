@@ -1,6 +1,7 @@
 import uvicorn
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, Response, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 import asyncio
 import csv
 import os
@@ -20,12 +21,13 @@ app.add_middleware(CORSMiddleware, allow_origins=origins,
                    allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 
+# Method to test if you have the correct ODBC Driver
 # print("List of ODBC Drivers:")
 # dlist = pyodbc.drivers()
 # for drvr in dlist:
 #     print('LIST OF DRIVERS:' + drvr)
-# Load config.json
 
+# Load config.json
 app.dir = os.path.dirname(__file__)
 
 
@@ -44,6 +46,7 @@ app.conn = pyodbc.connect(connection_string)
 database_file_path = os.path.join(app.dir, "database.db")
 app.liteConn = sqlite3.connect(database_file_path)
 cur = app.liteConn.cursor()
+
 # Reports table
 cur.execute('''
     CREATE TABLE IF NOT EXISTS Reports(
@@ -52,17 +55,34 @@ cur.execute('''
         TimeOfCreation TEXT, 
         NumberOfDiscrepancies INTEGER    
 )''')
+
 # Cases table
 cur.execute('''
     CREATE TABLE IF NOT EXISTS Cases(
         ID INTEGER PRIMARY KEY NOT NULL,
         ReportID INTEGER NOT NULL,
-        CaseID INTEGER, 
+        CaseID TEXT, 
         EventCode TEXT,
+        EventName TEXT,
         MMWRYear INTEGER, 
         MMWRWeek INTEGER,
         Reason TEXT, 
         ReasonID INTEGER,
+        FOREIGN KEY (ReportID) REFERENCES Reports(ID)
+)''')
+
+# Statistics table
+cur.execute('''
+    CREATE TABLE IF NOT EXISTS Statistics(
+        ID INTEGER PRIMARY KEY NOT NULL,
+        ReportID INTEGER NOT NULL,
+        EventCode TEXT NOT NULL,
+        EventName TEXT,
+        TotalCases INTEGER,
+        TotalDuplicates INTEGER,
+        TotalMissingFromCDC INTEGER,
+        TotalMissingFromState INTEGER,
+        TotalWrongAttributes INTEGER,
         FOREIGN KEY (ReportID) REFERENCES Reports(ID)
 )''')
 app.liteConn.commit()
@@ -98,15 +118,35 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
         # Loop through each row in the CSV file
         for row in reader:
             # Add the row as a dictionary to the list
-            res.append(row)
+            res.append(tuple(row.values()))
+
+
+    numDiscrepancies = len(res)
+    reportId = insert_report(numDiscrepancies)
+
+    stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
+    stats_list = []
+
+    with open(stats_file, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            tup = (reportId,) + tuple(row.values())
+            stats_list.append(tup)
+
+    # Add reportId to each row
+    new_res = [(reportId,) + row for row in res]
+
+    insert_cases(new_res)
+    insert_statistics(stats_list)
 
     # remove temp files / folder
     os.remove(cdc_save_to)
     os.remove(state_save_to)
     os.remove(res_file)
+    os.remove(stats_file)
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
-    return res
+    return Response(status_code=200)
 
 
 @app.post("/automatic_report")
@@ -150,15 +190,49 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
         # Loop through each row in the CSV file
         for row in reader:
             # Add the row as a dictionary to the list
-            res.append(row)
+            res.append(tuple(row.values()))
 
+    numDiscrepancies = len(res)
+    reportId = insert_report(numDiscrepancies)
+
+    stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
+    stats_list = []
+
+    with open(stats_file, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            tup = (reportId,) + tuple(row.values())
+            stats_list.append(tup)
+
+    # Add reportId to each row
+    new_res = [(reportId,) + row for row in res]
+
+    insert_cases(new_res)
+    insert_statistics(stats_list)
+    
     # remove temp files / folder
     os.remove(cdc_save_to)
     os.remove(state_save_to)
     os.remove(res_file)
+    os.remove(stats_file)
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
-    return res
+    return Response(status_code=200)
+
+
+@app.get("/reports")
+async def get_report_summaries():
+    # Fetch all reports from the SQLite database, ordered by date and time (newest reports at the top)
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute(
+            "SELECT * FROM Reports ORDER BY CreatedAtDate DESC, TimeOfCreation DESC;")
+
+        return [dict(zip([column[0] for column in cur.description], row)) for row in cur.fetchall()]
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
 
 
 @app.get("/reports/{report_id}")
@@ -171,6 +245,20 @@ async def get_report_cases(report_id: int):
         raise HTTPException(status_code=404, detail="Report not found")
     return report
 
+@app.get("/report_statistics/{report_id}")
+async def get_report_statistics(report_id: int):
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute(
+            "SELECT * FROM Statistics WHERE ReportID = ?", (report_id,))
+        results = cur.fetchall()
+        if not results:
+            raise HTTPException(status_code = 404, detail = "Report Not Found")
+        return [dict(zip([column[0] for column in cur.description], row)) for row in results]
+    
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        raise HTTPException(status_code = 500, detail = "Internal Server Error")
 
 def fetch_reports_from_db(report_id: int):
     """
@@ -178,12 +266,41 @@ def fetch_reports_from_db(report_id: int):
     """
     try:
         cur = app.liteConn.cursor()
-        cur.execute("SELECT * FROM Cases WHERE ReportID = ?", report_id)
-        report = cur.fetchall()
-        return report
+        cur.execute("SELECT * FROM Cases WHERE ReportID = ?", (report_id,))
+        return [dict(zip([column[0] for column in cur.description], row)) for row in cur.fetchall()]
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return None
+
+def insert_report(noOfDiscrepancies):
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute("INSERT INTO Reports (CreatedAtDate, TimeOfCreation, NumberOfDiscrepancies)  VALUES (DATE('now'), TIME('now'), ?)", (noOfDiscrepancies,))
+        report_id = cur.lastrowid
+        app.liteConn.commit()
+        return report_id
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
+    
+
+def insert_statistics(stats):
+    try:
+        cur = app.liteConn.cursor()
+        cur.executemany("INSERT INTO Statistics (ReportID, EventCode, EventName, TotalCases, TotalDuplicates, TotalMissingFromCDC, TotalMissingFromState, TotalWrongAttributes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", stats)
+        app.liteConn.commit()
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
+
+def insert_cases(res):
+    try:
+        cur = app.liteConn.cursor()
+        cur.executemany("INSERT INTO Cases (ReportID, CaseID, EventCode, EventName, MMWRYear, MMWRWeek, Reason, ReasonID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", res)
+        app.liteConn.commit()
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
 
 
 def run_query(year: int):
