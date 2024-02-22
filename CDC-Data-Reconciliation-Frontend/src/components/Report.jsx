@@ -1,10 +1,98 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import DebouncedInput from "./DebouncedInput"
+import Filter from "./Filter"
 import config from "../config.json"
+import { FaSortDown, FaSortUp } from "react-icons/fa6"
+
+import {
+  MdKeyboardDoubleArrowLeft,
+  MdKeyboardArrowLeft,
+  MdKeyboardDoubleArrowRight,
+  MdKeyboardArrowRight,
+  MdFileDownload,
+} from "react-icons/md"
+
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getPaginationRowModel,
+  getSortedRowModel,
+  flexRender,
+} from "@tanstack/react-table"
 
 export default function Report({ reportID }) {
   const [results, setResults] = useState(null)
   const [statistics, setStatistics] = useState(null)
   const [showDiseaseStats, setShowDiseaseStats] = useState(false)
+
+  const [discColumnFilters, setDiscColumnFilters] = useState([])
+  const [discGlobalFilter, setDiscGlobalFilter] = useState("")
+
+  const discColumns = useMemo(() => [
+    {
+      header: "CaseID",
+      accessorKey: "CaseID",
+      footer: (props) => props.column.id,
+    },
+    {
+      header: "EventCode",
+      accessorKey: "EventCode",
+      footer: (props) => props.column.id,
+    },
+    {
+      header: "EventName",
+      accessorKey: "EventName",
+      footer: (props) => props.column.id,
+    },
+    {
+      header: "MMWRYear",
+      accessorFn: (row) => row.MMWRYear.toString(),
+      id: "MMWRYear",
+      footer: (props) => props.column.id,
+    },
+    {
+      header: "MMWRWeek",
+      accessorFn: (row) => row.MMWRWeek.toString(),
+      id: "MMWRWeek",
+      footer: (props) => props.column.id,
+    },
+    {
+      header: "Reason",
+      accessorKey: "Reason",
+      footer: (props) => props.column.id,
+    },
+    {
+      header: "ReasonID",
+      accessorFn: (row) => row.ReasonID.toString(),
+      id: "ReasonID",
+      footer: (props) => props.column.id,
+    },
+  ])
+
+  const discTable = useReactTable({
+    data: results,
+    columns: discColumns,
+    state: {
+      columnFilters: discColumnFilters,
+      globalFilter: discGlobalFilter,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 5,
+      },
+    },
+    onColumnFiltersChange: setDiscColumnFilters,
+    onGlobalFilterChange: setDiscGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
+  })
 
   useEffect(() => {
     const fetchReportStatistics = async () => {
@@ -90,14 +178,13 @@ export default function Report({ reportID }) {
   }
 
   return (
-    <div className='mt-5 py-5 w-5/6 max-w-6xl flex flex-col items-center'>
+    <div className='mt-5 py-5 w-5/6 flex flex-col items-center gap-6'>
       {results && (
         <>
           <div className='flex flex-col items-center mb-5'>
             <h2 className='text-2xl font-bold'>Results</h2>
             <h3>Number of Cases Different: {results.length}</h3>
           </div>
-
           {/* Toggle Button for Disease Specific Stats */}
           {statistics && (
             <>
@@ -148,7 +235,7 @@ export default function Report({ reportID }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {statistics.eventCodeStats.map(stats => (
+                    {statistics.eventCodeStats.map((stats) => (
                       <tr key={stats.EventCode}>
                         <td>{stats.EventCode}</td>
                         <td>{stats.EventName}</td>
@@ -165,45 +252,144 @@ export default function Report({ reportID }) {
             </>
           )}
 
-          <div className='flex flex-col items-center mb-4'>
-            <button
-              type='button'
-              className='bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600'
-              onClick={handleDownload}
-            >
-              Download CSV
-            </button>
+          <div>
+            <div className='w-full flex flex-row items-center justify-between'>
+              <DebouncedInput
+                value={discGlobalFilter ?? ""}
+                onChange={(value) => setDiscGlobalFilter(String(value))}
+                className='p-2 font-lg shadow border border-block'
+                placeholder='Search all columns...'
+              />
+              <button
+                type='button'
+                className='bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 flex flex-row items-center justify-around gap-2'
+                onClick={handleDownload}
+              >
+                Download CSV
+                <MdFileDownload size={23} />
+              </button>
+            </div>
+            <div className='border border-slate-400 rounded-xl my-3'>
+              <table className='table-auto'>
+                <thead>
+                  {discTable.getHeaderGroups().map((headerGroup) => (
+                    <tr key={headerGroup.id} className='border-b border-slate-400'>
+                      {headerGroup.headers.map((header) => {
+                        return (
+                          <th className='p-2' key={header.id} colSpan={header.colSpan}>
+                            {header.isPlaceholder ? null : (
+                              <>
+                                <div
+                                  {...{
+                                    className: header.column.getCanSort()
+                                      ? "cursor-pointer select-none flex flex-row items-center justify-start gap-2"
+                                      : "flex flex-row items-center justify-start gap-2",
+                                    onClick: header.column.getToggleSortingHandler(),
+                                  }}
+                                >
+                                  {flexRender(header.column.columnDef.header, header.getContext())}
+                                  {{
+                                    asc: <FaSortUp />,
+                                    desc: <FaSortDown />,
+                                  }[header.column.getIsSorted()] ?? null}
+                                </div>
+                                {header.column.getCanFilter() ? (
+                                  <div>
+                                    <Filter column={header.column} table={discTable} />
+                                  </div>
+                                ) : null}
+                              </>
+                            )}
+                          </th>
+                        )
+                      })}
+                    </tr>
+                  ))}
+                </thead>
+                <tbody>
+                  {discTable.getRowModel().rows.map((row, index) => {
+                    return (
+                      <tr
+                        {...{
+                          className: index < discTable.getRowModel().rows.length - 1 ? "border-b border-slate-400" : "",
+                        }}
+                        key={row.id}
+                      >
+                        {row.getVisibleCells().map((cell) => {
+                          return (
+                            <td className='p-1' key={cell.id}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className='flex items-center gap-2 justify-center'>
+              <button
+                className='border rounded p-1 border-slate-400'
+                onClick={() => discTable.setPageIndex(0)}
+                disabled={!discTable.getCanPreviousPage()}
+              >
+                <MdKeyboardDoubleArrowLeft className='text-xl' />
+              </button>
+              <button
+                className='border rounded p-1 border-slate-400'
+                onClick={() => discTable.previousPage()}
+                disabled={!discTable.getCanPreviousPage()}
+              >
+                <MdKeyboardArrowLeft className='text-xl' />
+              </button>
+              <button
+                className='border rounded p-1 border-slate-400'
+                onClick={() => discTable.nextPage()}
+                disabled={!discTable.getCanNextPage()}
+              >
+                <MdKeyboardArrowRight className='text-xl' />
+              </button>
+              <button
+                className='border rounded p-1 border-slate-400'
+                onClick={() => discTable.setPageIndex(discTable.getPageCount() - 1)}
+                disabled={!discTable.getCanNextPage()}
+              >
+                <MdKeyboardDoubleArrowRight className='text-xl' />
+              </button>
+              <span className='flex items-center gap-1'>
+                <div>Page</div>
+                <strong>
+                  {discTable.getState().pagination.pageIndex + 1} of {discTable.getPageCount()}
+                </strong>
+              </span>
+              <span className='flex items-center gap-1'>
+                | Go to page:
+                <input
+                  type='number'
+                  defaultValue={discTable.getState().pagination.pageIndex + 1}
+                  onChange={(e) => {
+                    const page = e.target.value ? Number(e.target.value) - 1 : 0
+                    discTable.setPageIndex(page)
+                  }}
+                  className='border p-1 rounded w-16 border-slate-400'
+                />
+              </span>
+              <select
+                className='border p-1 rounded border-slate-400'
+                value={discTable.getState().pagination.pageSize}
+                onChange={(e) => {
+                  discTable.setPageSize(Number(e.target.value))
+                }}
+              >
+                {[5, 10, 20, 30, 40, 50, 100].map((pageSize) => (
+                  <option key={pageSize} value={pageSize}>
+                    Show {pageSize}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-
-          <table className='w-full text-center'>
-            <thead>
-              <tr className='border-b-2 border-slate-900'>
-                <th>CaseID</th>
-                <th>EventCode</th>
-                <th>EventName</th>
-                <th>MMWRYear</th>
-                <th>MMWRWeek</th>
-                <th>Reason</th>
-                <th>ReasonID</th>
-              </tr>
-            </thead>
-            
-            <tbody>
-              {results.map((result) => {
-                return (
-                  <tr key={result.CaseID}>
-                    <td>{result.CaseID}</td>
-                    <td>{result.EventCode}</td>
-                    <td>{result.EventName}</td>
-                    <td>{result.MMWRYear}</td>
-                    <td>{result.MMWRWeek}</td>
-                    <td>{result.Reason}</td>
-                    <td>{result.ReasonID}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
         </>
       )}
     </div>
