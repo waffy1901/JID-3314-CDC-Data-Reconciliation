@@ -201,7 +201,7 @@ export default function Report({ reportID }) {
 
     if (reportID) {
       fetchReportStatistics()
-      fetchReport(reportID) // moved this line here to resolve a server error code of 422
+      fetchReport(reportID) 
     }
   }, [reportID])
 
@@ -223,7 +223,7 @@ export default function Report({ reportID }) {
     setShowDiseaseStats(!showDiseaseStats)
   }
 
-  const handleDownload = (e) => {
+  const handleResultsDownload = (e) => {
     const csvData =
       "CaseID,EventCode,EventName,MMWRYear,MMWRWeek,Reason,ReasonID\n" +
       results
@@ -245,7 +245,23 @@ export default function Report({ reportID }) {
   }
 
   const handleStatsDownload = (e) => {
-    // Waffy's Task
+    const csvStatsData = 
+      "EventCode,EventName,TotalCases,TotalDuplicates,TotalMissingFromCDC,TotalMissingFromState,TotalWrongAttributes\n" +
+      statistics.map(
+        (stat) => 
+          `${stat.EventCode},"${stat.EventName}",${stat.TotalCases},${stat.TotalDuplicates},${stat.TotalMissingFromCDC},${stat.TotalMissingFromState},${stat.TotalWrongAttributes}`
+      ).join("\n")
+
+    const blob = new Blob([csvStatsData], { type: "text/csv;charset=utf-8," })
+    const linkURL = URL.createObjectURL(blob)
+    const linking = document.createElement("a")
+    linking.setAttribute("href", linkURL)
+    linking.setAttribute("download", "Statistics.csv")
+    linking.textContent = "Download"
+
+    document.body.appendChild(linking)
+    linking.click()
+    document.body.removeChild(linking)
   }
 
   return (
@@ -446,7 +462,7 @@ export default function Report({ reportID }) {
               <button
                 type='button'
                 className='bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 flex flex-row items-center justify-around gap-2'
-                onClick={handleDownload}
+                onClick={handleResultsDownload}
               >
                 Download CSV
                 <MdFileDownload size={23} />
