@@ -95,12 +95,12 @@ export default function Report({ reportID }) {
     },
     {
       header: "Duplicates",
-      accessorFn: (row) => row.TotalDuplicates,
+      accessorFn: (row) => row.TotalDuplicates.toString(),
       cell: (info) => (
         <span
-          style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+          className='text-blue-500 cursor-pointer underline'
         >
-          {info.getValue().toString()}
+          {info.getValue()}
         </span>
       ),
       id: "TotalDuplicates",
@@ -108,12 +108,12 @@ export default function Report({ reportID }) {
     },
     {
       header: "Missing From CDC",
-      accessorFn: (row) => row.TotalMissingFromCDC,
+      accessorFn: (row) => row.TotalMissingFromCDC.toString(),
       cell: (info) => (
         <span
-          style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+          className='text-blue-500 cursor-pointer underline'
         >
-          {info.getValue().toString()}
+          {info.getValue()}
         </span>
       ),
       id: "TotalMissingFromCDC",
@@ -121,12 +121,12 @@ export default function Report({ reportID }) {
     },
     {
       header: "Missing From State",
-      accessorFn: (row) => row.TotalMissingFromState,
+      accessorFn: (row) => row.TotalMissingFromState.toString(),
       cell: (info) => (
         <span
-          style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+          className='text-blue-500 cursor-pointer underline'
         >
-          {info.getValue().toString()}
+          {info.getValue()}
         </span>
       ),
       id: "TotalMissingFromState",
@@ -134,12 +134,12 @@ export default function Report({ reportID }) {
     },
     {
       header: "Wrong Attributes",
-      accessorFn: (row) => row.TotalWrongAttributes,
+      accessorFn: (row) => row.TotalWrongAttributes.toString(),
       cell: (info) => (
         <span
-          style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+          className='text-blue-500 cursor-pointer underline'
         >
-          {info.getValue().toString()}
+          {info.getValue()}
         </span>
       ),
       id: "TotalWrongAttributes",
@@ -295,8 +295,6 @@ export default function Report({ reportID }) {
   }
 
   const handleStatClick = (col, row) => {
-    console.log(col.id, row)
-
     setDiscColumnFilters(null)
     switch (col.id) {
       case "TotalDuplicates":
@@ -364,8 +362,8 @@ export default function Report({ reportID }) {
   }
 
   const clearStatFilters = () => {
-    setDiscColumnFilters([])
-    setDiscGlobalFilter("")
+    setStatColumnFilters([])
+    setStatGlobalFilter("")
   }
 
   return (
