@@ -96,24 +96,52 @@ export default function Report({ reportID }) {
     {
       header: "Duplicates",
       accessorFn: (row) => row.TotalDuplicates.toString(),
+      cell: (info) => (
+        <span
+          className='text-blue-500 cursor-pointer underline'
+        >
+          {info.getValue()}
+        </span>
+      ),
       id: "TotalDuplicates",
       footer: (props) => props.column.id,
     },
     {
       header: "Missing From CDC",
       accessorFn: (row) => row.TotalMissingFromCDC.toString(),
+      cell: (info) => (
+        <span
+          className='text-blue-500 cursor-pointer underline'
+        >
+          {info.getValue()}
+        </span>
+      ),
       id: "TotalMissingFromCDC",
       footer: (props) => props.column.id,
     },
     {
       header: "Missing From State",
       accessorFn: (row) => row.TotalMissingFromState.toString(),
+      cell: (info) => (
+        <span
+          className='text-blue-500 cursor-pointer underline'
+        >
+          {info.getValue()}
+        </span>
+      ),
       id: "TotalMissingFromState",
       footer: (props) => props.column.id,
     },
     {
       header: "Wrong Attributes",
       accessorFn: (row) => row.TotalWrongAttributes.toString(),
+      cell: (info) => (
+        <span
+          className='text-blue-500 cursor-pointer underline'
+        >
+          {info.getValue()}
+        </span>
+      ),
       id: "TotalWrongAttributes",
       footer: (props) => props.column.id,
     },
@@ -247,10 +275,12 @@ export default function Report({ reportID }) {
   const handleStatsDownload = (e) => {
     const csvStatsData = 
       "EventCode,EventName,TotalCases,TotalDuplicates,TotalMissingFromCDC,TotalMissingFromState,TotalWrongAttributes\n" +
-      statistics.map(
-        (stat) => 
-          `${stat.EventCode},"${stat.EventName}",${stat.TotalCases},${stat.TotalDuplicates},${stat.TotalMissingFromCDC},${stat.TotalMissingFromState},${stat.TotalWrongAttributes}`
-      ).join("\n")
+      statistics
+        .map(
+          (stat) => 
+            `${stat.EventCode},"${stat.EventName}",${stat.TotalCases},${stat.TotalDuplicates},${stat.TotalMissingFromCDC},${stat.TotalMissingFromState},${stat.TotalWrongAttributes}`
+      )
+      .join("\n")
 
     const blob = new Blob([csvStatsData], { type: "text/csv;charset=utf-8," })
     const linkURL = URL.createObjectURL(blob)
@@ -262,6 +292,78 @@ export default function Report({ reportID }) {
     document.body.appendChild(linking)
     linking.click()
     document.body.removeChild(linking)
+  }
+
+  const handleStatClick = (col, row) => {
+    setDiscColumnFilters(null)
+    switch (col.id) {
+      case "TotalDuplicates":
+        if (row.TotalDuplicates === 0) return
+
+        setDiscColumnFilters([
+          {
+            id: "ReasonID",
+            value: "1",
+          },
+          {
+            id: "EventCode",
+            value: row.EventCode,
+          },
+        ])
+      case "TotalMissingFromCDC":
+        if (row.TotalMissingFromCDC === 0) return
+
+        setDiscColumnFilters([
+          {
+            id: "ReasonID",
+            value: "2",
+          },
+          {
+            id: "EventCode",
+            value: row.EventCode,
+          },
+        ])
+        break
+
+      case "TotalWrongAttributes":
+        if (row.TotalWrongAttributes === 0) return
+
+        setDiscColumnFilters([
+          {
+            id: "ReasonID",
+            value: "3",
+          },
+          {
+            id: "EventCode",
+            value: row.EventCode,
+          },
+        ])
+        break
+      case "TotalMissingFromState":
+        if (row.TotalMissingFromState === 0) return
+
+        setDiscColumnFilters([
+          {
+            id: "ReasonID",
+            value: "4",
+          },
+          {
+            id: "EventCode",
+            value: row.EventCode,
+          },
+        ])
+        break
+    }
+  }
+
+  const clearDiscFilters = () => {
+    setDiscColumnFilters([])
+    setDiscGlobalFilter("")
+  }
+
+  const clearStatFilters = () => {
+    setStatColumnFilters([])
+    setStatGlobalFilter("")
   }
 
   return (
@@ -316,6 +418,14 @@ export default function Report({ reportID }) {
                       className='p-2 font-lg shadow border border-block'
                       placeholder='Search all columns...'
                     />
+                    <button
+                      type="button"
+                      className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+                      onClick={clearStatFilters}
+                    >
+                      Clear Filters
+                    </button>
+
                     <button
                       type='button'
                       className='bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 flex flex-row items-center justify-around gap-2'
@@ -374,7 +484,11 @@ export default function Report({ reportID }) {
                             >
                               {row.getVisibleCells().map((cell) => {
                                 return (
-                                  <td className='p-1' key={cell.id}>
+                                  <td
+                                    onClick={() => handleStatClick(cell.column, cell.row.original)}
+                                    className='p-1'
+                                    key={cell.id}
+                                  >
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                   </td>
                                 )
@@ -459,6 +573,14 @@ export default function Report({ reportID }) {
                 className='p-2 font-lg shadow border border-block'
                 placeholder='Search all columns...'
               />
+              <button
+                type="button"
+                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+                onClick={clearDiscFilters}
+              >
+                Clear Filters
+              </button>
+
               <button
                 type='button'
                 className='bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 flex flex-row items-center justify-around gap-2'
