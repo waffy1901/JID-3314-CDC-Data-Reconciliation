@@ -76,6 +76,10 @@ export default function Report({ reportID }) {
     },
   ])
 
+  const handleStatsFilter = (columnName, value) => {
+    setDiscColumnFilters([{ id: columnName, value: value.toString() }])
+  }
+
   const statColumns = useMemo(() => [
     {
       header: "Event Code",
@@ -95,25 +99,57 @@ export default function Report({ reportID }) {
     },
     {
       header: "Duplicates",
-      accessorFn: (row) => row.TotalDuplicates.toString(),
+      accessorFn: (row) => row.TotalDuplicates,
+      cell: (info) => (
+        <span
+          style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+          onClick={() => handleStatsFilter("TotalDuplicates", info.getValue())}
+        >
+          {info.getValue().toString()}
+        </span>
+      ),
       id: "TotalDuplicates",
       footer: (props) => props.column.id,
     },
     {
       header: "Missing From CDC",
-      accessorFn: (row) => row.TotalMissingFromCDC.toString(),
+      accessorFn: (row) => row.TotalMissingFromCDC,
+      cell: (info) => (
+        <span
+          style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+          onClick={() => handleStatsFilter("TotalMissingFromCDC", info.getValue())}
+        >
+          {info.getValue().toString()}
+        </span>
+      ),
       id: "TotalMissingFromCDC",
       footer: (props) => props.column.id,
     },
     {
       header: "Missing From State",
-      accessorFn: (row) => row.TotalMissingFromState.toString(),
+      accessorFn: (row) => row.TotalMissingFromState,
+      cell: (info) => (
+        <span
+          style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+          onClick={() => handleStatsFilter("TotalMissingFromState", info.getValue())}
+        >
+          {info.getValue().toString()}
+        </span>
+      ),
       id: "TotalMissingFromState",
       footer: (props) => props.column.id,
     },
     {
       header: "Wrong Attributes",
-      accessorFn: (row) => row.TotalWrongAttributes.toString(),
+      accessorFn: (row) => row.TotalWrongAttributes,
+      cell: (info) => (
+        <span
+          style={{ color: "blue", textDecoration: "underline", cursor: "pointer" }}
+          onClick={() => handleStatsFilter("TotalWrongAttributes", info.getValue())}
+        >
+          {info.getValue().toString()}
+        </span>
+      ),
       id: "TotalWrongAttributes",
       footer: (props) => props.column.id,
     },
