@@ -85,6 +85,15 @@ cur.execute('''
         TotalWrongAttributes INTEGER,
         FOREIGN KEY (ReportID) REFERENCES Reports(ID)
 )''')
+
+# Statistics table
+cur.execute('''
+    CREATE TABLE IF NOT EXISTS Config(
+        ID INTEGER PRIMARY KEY NOT NULL,
+        FieldName TEXT NOT NULL,
+        FieldValue TEXT NOT NULL
+)''')
+
 app.liteConn.commit()
 
 
@@ -319,6 +328,37 @@ def run_query(year: int):
     # data = [dict(zip(column_names, row)) for row in row_data]
 
     return (column_names, data)
+
+@app.get("/config/{field_name}")
+async def get_config_setting(field_name: str):
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute("SELECT * FROM Config WHERE FieldName = ?", (field_name,))
+        value = cur.fetchall()
+        if len(value) > 0:
+            # value is [(idx, field_name, field_value)] so need to return value[0][2]
+            return value[0][2]
+        else: return []
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    
+@app.post("/config")
+async def set_config_setting(field_name: str, value: str):
+    current_setting = await get_config_setting(field_name)
+    # print(f"Setting config setting {field_name} to {value}. Previous value: {current_setting}")
+    try:
+        cur = app.liteConn.cursor()
+        # If the setting already exists, update it
+        if len(current_setting) > 0:
+            cur.execute("UPDATE Config SET FieldValue = ? WHERE FieldName = ?", (value, field_name))
+        else:
+            # Otherwise, create the entry
+            cur.execute("INSERT INTO Config (FieldName, FieldValue) VALUES (?, ?)", (field_name, value))
+        app.liteConn.commit()
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
 
 
 if __name__ == "__main__":
