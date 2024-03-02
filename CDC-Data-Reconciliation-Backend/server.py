@@ -344,7 +344,11 @@ async def get_config_setting(field_name: str):
         return None
     
 @app.post("/config")
-async def set_config_setting(field_name: str, value: str):
+async def set_config_setting(field_name: str, value: str, password: str):
+    # Do not allow changing config settings if password is wrong
+    if password != app.config["config_password"]:
+        raise HTTPException(status_code = 401, detail = "Unauthorized: password incorrect") 
+    
     current_setting = await get_config_setting(field_name)
     # print(f"Setting config setting {field_name} to {value}. Previous value: {current_setting}")
     try:
