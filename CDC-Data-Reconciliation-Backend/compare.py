@@ -24,7 +24,7 @@ stats = {}
 results: list[CaseResult] = []
 
 
-def get_state_dict(state_file, eventCodes):
+def get_state_dict(state_file, eventCodes=None):
     state_dict = {}
     # Open the state CSV file
     with open(state_file, newline='', encoding='utf-8') as csvfile:
@@ -59,15 +59,18 @@ def get_state_dict(state_file, eventCodes):
     return state_dict
 
 
-def get_cdc_dict(cdc_file, eventCodes):
+def get_cdc_dict(cdc_file, filterCDC = False, eventCodes=None):
     cdc_dict = {}
     # Open the cdc CSV file
+    cdcEventCodes = set() if filterCDC else None
     with open(cdc_file, newline='') as csvfile:
         # Create a CSV reader object
         reader = csv.DictReader(csvfile)
         # Loop through each row in the CSV file
         for row in reader:
             # Add the row as a dictionary to the list
+            if filterCDC:
+                cdcEventCodes.add(row['EventCode'])
             if eventCodes is not None and row['EventCode'] not in eventCodes:
                 continue
             if row['CaseID'] in cdc_dict:
@@ -82,7 +85,7 @@ def get_cdc_dict(cdc_file, eventCodes):
                 if row['EventCode'] not in stats:
                     stats[row['EventCode']] = {'eventName': row['EventName'], 'totalCases': 0, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 0, 'totalWrongAttributes': 0}
 
-    return cdc_dict
+    return cdc_dict, cdcEventCodes
 
 # place the stats stuff here
 def comp(state_dict, cdc_dict):
@@ -154,13 +157,15 @@ def main():
     parser.add_argument('-c', '--cdc', help='Local Path to CDC CSV file')
     parser.add_argument('-o', '--output', help='Local Path to Output CSV file')
     parser.add_argument('-e', '--events', help='Event code(s) to filter by, seperated by commas(optional)')
+    # if the parameter below is specified the value stored is true
+    parser.add_argument('-f', '--filter', action='store_true', help='Filter by CDC eventCodes')
     args = parser.parse_args()
 
     theEventCodes = args.events.split(',') if args.events else None
-
+    filterByCDC = args.filter
     
-    cdc_dict = get_cdc_dict(args.cdc, theEventCodes)
-    state_dict = get_state_dict(args.state, theEventCodes)
+    cdc_dict, cdcEventCodes = get_cdc_dict(args.cdc, filterByCDC, theEventCodes)
+    state_dict = get_state_dict(args.state, cdcEventCodes if filterByCDC else theEventCodes)
 
     comp(state_dict, cdc_dict)
 
