@@ -24,7 +24,7 @@ stats = {}
 results: list[CaseResult] = []
 
 
-def get_state_dict(state_file):
+def get_state_dict(state_file, eventCodes):
     state_dict = {}
     # Open the state CSV file
     with open(state_file, newline='', encoding='utf-8') as csvfile:
@@ -35,7 +35,9 @@ def get_state_dict(state_file):
             # If the EventCode is not a number, skip the row (Getting rid of values like MAPPING and ZT_PP_Condition3)
             if row['EventCode'].isnumeric() == False:
                 continue
-
+            # Here we are filtering out the rows of the database by the event code that they have
+            if eventCodes is not None and row['EventCode'] not in eventCodes:
+                continue
             if row['CaseID'] in state_dict:
                 # If the case ID already exists in the dictionary, check to see if the new row has a more recent add_time
 
@@ -57,7 +59,7 @@ def get_state_dict(state_file):
     return state_dict
 
 
-def get_cdc_dict(cdc_file):
+def get_cdc_dict(cdc_file, eventCodes):
     cdc_dict = {}
     # Open the cdc CSV file
     with open(cdc_file, newline='') as csvfile:
@@ -66,6 +68,8 @@ def get_cdc_dict(cdc_file):
         # Loop through each row in the CSV file
         for row in reader:
             # Add the row as a dictionary to the list
+            if eventCodes is not None and row['EventCode'] not in eventCodes:
+                continue
             if row['CaseID'] in cdc_dict:
                 results.append(CaseResult(row['CaseID'], row['EventCode'],
                                row['EventName'], row['MMWRYear'], row['MMWRWeek'], "Duplicate Case ID found in CDC CSV File", "1"))
@@ -149,11 +153,14 @@ def main():
     parser.add_argument('-s', '--state', help='Local Path to State CSV file')
     parser.add_argument('-c', '--cdc', help='Local Path to CDC CSV file')
     parser.add_argument('-o', '--output', help='Local Path to Output CSV file')
-
+    parser.add_argument('-e', '--events', help='Event code(s) to filter by, seperated by commas(optional)')
     args = parser.parse_args()
 
-    state_dict = get_state_dict(args.state)
-    cdc_dict = get_cdc_dict(args.cdc)
+    theEventCodes = args.events.split(',') if args.events else None
+
+    
+    cdc_dict = get_cdc_dict(args.cdc, theEventCodes)
+    state_dict = get_state_dict(args.state, theEventCodes)
 
     comp(state_dict, cdc_dict)
 
