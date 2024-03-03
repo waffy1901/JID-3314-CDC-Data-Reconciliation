@@ -71,7 +71,7 @@ def get_cdc_dict(cdc_file, filterCDC = False, eventCodes=None):
             # Add the row as a dictionary to the list
             if filterCDC:
                 cdcEventCodes.add(row['EventCode'])
-            if eventCodes is not None and row['EventCode'] not in eventCodes:
+            if not filterCDC and eventCodes is not None and row['EventCode'] not in eventCodes:
                 continue
             if row['CaseID'] in cdc_dict:
                 results.append(CaseResult(row['CaseID'], row['EventCode'],
