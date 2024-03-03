@@ -59,7 +59,7 @@ def get_state_dict(state_file, eventCodes=None):
     return state_dict
 
 
-def get_cdc_dict(cdc_file, filterCDC = False, eventCodes=None):
+def get_cdc_dict(cdc_file, filterCDC = False):
     cdc_dict = {}
     # Open the cdc CSV file
     cdcEventCodes = set() if filterCDC else None
@@ -71,8 +71,6 @@ def get_cdc_dict(cdc_file, filterCDC = False, eventCodes=None):
             # Add the row as a dictionary to the list
             if filterCDC:
                 cdcEventCodes.add(row['EventCode'])
-            if not filterCDC and eventCodes is not None and row['EventCode'] not in eventCodes:
-                continue
             if row['CaseID'] in cdc_dict:
                 results.append(CaseResult(row['CaseID'], row['EventCode'],
                                row['EventName'], row['MMWRYear'], row['MMWRWeek'], "Duplicate Case ID found in CDC CSV File", "1"))
@@ -156,16 +154,14 @@ def main():
     parser.add_argument('-s', '--state', help='Local Path to State CSV file')
     parser.add_argument('-c', '--cdc', help='Local Path to CDC CSV file')
     parser.add_argument('-o', '--output', help='Local Path to Output CSV file')
-    parser.add_argument('-e', '--events', help='Event code(s) to filter by, seperated by commas(optional)')
     # if the parameter below is specified the value stored is true
     parser.add_argument('-f', '--filter', action='store_true', help='Filter by CDC eventCodes')
     args = parser.parse_args()
 
-    theEventCodes = args.events.split(',') if args.events else None
     filterByCDC = args.filter
     
-    cdc_dict, cdcEventCodes = get_cdc_dict(args.cdc, filterByCDC, theEventCodes)
-    state_dict = get_state_dict(args.state, cdcEventCodes if filterByCDC else theEventCodes)
+    cdc_dict, cdcEventCodes = get_cdc_dict(args.cdc, filterByCDC)
+    state_dict = get_state_dict(args.state, cdcEventCodes)
 
     comp(state_dict, cdc_dict)
 
