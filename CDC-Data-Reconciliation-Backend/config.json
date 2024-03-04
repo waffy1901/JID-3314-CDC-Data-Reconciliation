@@ -2,7 +2,7 @@
   "driver": "ODBC Driver 17 for SQL Server",
   "server": "localhost",
   "database": "NBS_ODSE",
-  "username": "sa",
-  "password": "Gt24ye??",
+  "db_username": "sa",
+  "db_password": "Gt24ye??",
   "config_password": "password"
 }

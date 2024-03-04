@@ -10,6 +10,7 @@ import {
   MdKeyboardDoubleArrowRight,
   MdKeyboardArrowRight,
   MdFileDownload,
+  MdFilterAltOff, 
 } from "react-icons/md"
 
 import {
@@ -387,26 +388,27 @@ export default function Report({ reportID }) {
 
               {/* Overall Report Statistics */}
 
-              <table className='w-full text-center mb-4'>
-                <thead>
+              <table className='w-full text-center mb-4 shadow-md'>
+                <thead className='bg-slate-100'>
                   <tr className='border-b-2 border-slate-900'>
-                    <th>Total Cases</th>
-                    <th>Total Duplicates</th>
-                    <th>Total Missing From CDC</th>
-                    <th>Total Missing From States</th>
-                    <th>Total Wrong Attributes</th>
+                    <th className='px-4 py-2 font-semibold'>Total Cases</th>
+                    <th className='px-4 py-2 font-semibold'>Total Duplicates</th>
+                    <th className='px-4 py-2 font-semibold'>Total Missing From CDC</th>
+                    <th className='px-4 py-2 font-semibold'>Total Missing From States</th>
+                    <th className='px-4 py-2 font-semibold'>Total Wrong Attributes</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className='bg-white'>
                   <tr>
-                    <td>{totalStatistics.TotalCases}</td>
-                    <td>{totalStatistics.TotalDuplicates}</td>
-                    <td>{totalStatistics.TotalMissingFromCDC}</td>
-                    <td>{totalStatistics.TotalMissingFromState}</td>
-                    <td>{totalStatistics.TotalWrongAttributes}</td>
+                    <td className='px-4 py-2'>{totalStatistics.TotalCases}</td>
+                    <td className='px-4 py-2'>{totalStatistics.TotalDuplicates}</td>
+                    <td className='px-4 py-2'>{totalStatistics.TotalMissingFromCDC}</td>
+                    <td className='px-4 py-2'>{totalStatistics.TotalMissingFromState}</td>
+                    <td className='px-4 py-2'>{totalStatistics.TotalWrongAttributes}</td>
                   </tr>
                 </tbody>
               </table>
+
 
               {/* Disease Specific Statistics */}
               {showDiseaseStats && (
@@ -420,10 +422,11 @@ export default function Report({ reportID }) {
                     />
                     <button
                       type="button"
-                      className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+                      className="bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 flex flex-row items-center justify-around gap-2"
                       onClick={clearStatFilters}
                     >
                       Clear Filters
+                      <MdFilterAltOff size={23} />
                     </button>
 
                     <button
@@ -575,10 +578,11 @@ export default function Report({ reportID }) {
               />
               <button
                 type="button"
-                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+                className="bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 flex flex-row items-center justify-around gap-2"
                 onClick={clearDiscFilters}
               >
                 Clear Filters
+                <MdFilterAltOff size={23} />
               </button>
 
               <button

@@ -9,9 +9,6 @@ class CaseResult:
         self.caseID = caseID
         self.eventCode = eventCode
         self.eventName = eventName
-        # self.caseClassStatus = caseClassStatus
-        # self.state = state
-        # self.eventDate = eventDate   -- Shouldn't we have eventDate in the state CSV file? Query does not currently return it
         self.MMWRYear = MMWRYear
         self.MMWRWeek = MMWRWeek
         self.reason = reason
@@ -181,7 +178,6 @@ def main():
     if output_directory == '':
         output_directory = '.'
     
-    # i was not sure how to handle reportID in the csv, so i have left it out from this. If it needs to be added into the csv then do it here
     # writing stats data to the csv
     with open(os.path.join(output_directory, 'stats.csv'), 'w', newline='') as csvfile:
         fieldNames = ['EventCode', 'EventName', 'TotalCases', 'TotalDuplicates',

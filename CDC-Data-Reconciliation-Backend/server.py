@@ -38,7 +38,7 @@ with open(config_file_path, "r") as f:
 # Connect to the SQL Server
 connection_string = 'DRIVER={' + app.config["driver"] + \
     '}' + \
-    f';SERVER={app.config["server"]};DATABASE={app.config["database"]};UID={app.config["username"]};PWD={app.config["password"]}'
+    f';SERVER={app.config["server"]};DATABASE={app.config["database"]};UID={app.config["db_username"]};PWD={app.config["db_password"]}'
 
 app.conn = pyodbc.connect(connection_string)
 
