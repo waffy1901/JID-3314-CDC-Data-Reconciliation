@@ -127,11 +127,6 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
     process = await asyncio.create_subprocess_exec(sys.executable, os.path.join(app.dir, "compare.py"), '-c', cdc_save_to, '-s', state_save_to, '-o', res_file)
     await process.wait()
     
-    if not os.path.exists(archive_path):
-        os.makedirs(archive_path)
-    
-    # Writing the newly created results file to the archive folder too
-    shutil.copy2(res_file, archive_path)
 
     res = []
     with open(res_file, newline='') as csvfile:
@@ -154,6 +149,14 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
         for row in reader:
             tup = (reportId,) + tuple(row.values())
             stats_list.append(tup)
+
+    # Making a folder for the specific reportId
+    archive_save_to = os.path.join(archive_path, str(reportId))
+    os.makedirs(archive_save_to, exist_ok=True)
+
+    # writing the newly created results file to the archive folder too
+    shutil.copy2(res_file, archive_save_to)
+    shutil.copy2(stats_file, archive_save_to)
 
     # Add reportId to each row
     new_res = [(reportId,) + row for row in res]
@@ -211,11 +214,6 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
     process = await asyncio.create_subprocess_exec(sys.executable, os.path.join(app.dir, "compare.py"), '-c', cdc_save_to, '-s', state_save_to, '-o', res_file)
     await process.wait()
 
-    if not os.path.exists(archive_path):
-        os.makedirs(archive_path)
-
-    # writing the newly created results file to the archive folder too
-    shutil.copy2(res_file, archive_path)
 
     # Add results to the response
     res = []
@@ -238,6 +236,14 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
         for row in reader:
             tup = (reportId,) + tuple(row.values())
             stats_list.append(tup)
+            
+    # Making a folder for the specific reportId
+    archive_save_to = os.path.join(archive_path, str(reportId))
+    os.makedirs(archive_save_to, exist_ok=True)
+
+    # writing the newly created results file to the archive folder too
+    shutil.copy2(res_file, archive_save_to)
+    shutil.copy2(stats_file, archive_save_to)
 
     # Add reportId to each row
     new_res = [(reportId,) + row for row in res]
