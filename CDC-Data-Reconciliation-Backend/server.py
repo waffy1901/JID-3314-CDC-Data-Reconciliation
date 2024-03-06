@@ -10,6 +10,7 @@ import uuid
 import pyodbc
 import json
 import sqlite3
+import shutil
 
 app = FastAPI()
 
@@ -105,6 +106,12 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
 
     id = str(uuid.uuid4())
     os.makedirs(os.path.join(app.dir, folder_name, id))
+    
+    # Fetching the archive_path for saving the Report
+    archive_path = await get_config_setting("archive_path")
+    # Making sure the archive_path has been set, otherwise throwing an exception
+    if not archive_path:
+        raise HTTPException(status_code=500, detail="Archive path configuration is missing")
 
     cdc_content = await cdc_file.read()
     cdc_save_to = os.path.join(app.dir, folder_name, id, cdc_file.filename)
@@ -119,6 +126,7 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
     res_file = os.path.join(app.dir, folder_name, id, "results.csv")
     process = await asyncio.create_subprocess_exec(sys.executable, os.path.join(app.dir, "compare.py"), '-c', cdc_save_to, '-s', state_save_to, '-o', res_file)
     await process.wait()
+    
 
     res = []
     with open(res_file, newline='') as csvfile:
@@ -141,6 +149,14 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
         for row in reader:
             tup = (reportId,) + tuple(row.values())
             stats_list.append(tup)
+
+    # Making a folder for the specific reportId
+    archive_save_to = os.path.join(archive_path, str(reportId))
+    os.makedirs(archive_save_to, exist_ok=True)
+
+    # writing the newly created results file to the archive folder too
+    shutil.copy2(res_file, archive_save_to)
+    shutil.copy2(stats_file, archive_save_to)
 
     # Add reportId to each row
     new_res = [(reportId,) + row for row in res]
@@ -170,6 +186,13 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
     if not os.path.exists(os.path.join(app.dir, folder_name)):
         os.makedirs(os.path.join(app.dir, folder_name))
 
+    # Fetching the archive_path for saving the Report
+    archive_path = await get_config_setting("archive_path")
+    # Making sure the archive_path has been set, otherwise throwing an exception
+    if not archive_path:
+        raise HTTPException(status_code=500, detail="Archive path configuration is missing")
+    
+    
     id = str(uuid.uuid4())
     os.makedirs(os.path.join(app.dir, folder_name, id))
 
@@ -190,6 +213,7 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
     res_file = os.path.join(app.dir, folder_name, id, "results.csv")
     process = await asyncio.create_subprocess_exec(sys.executable, os.path.join(app.dir, "compare.py"), '-c', cdc_save_to, '-s', state_save_to, '-o', res_file)
     await process.wait()
+
 
     # Add results to the response
     res = []
@@ -212,6 +236,14 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
         for row in reader:
             tup = (reportId,) + tuple(row.values())
             stats_list.append(tup)
+            
+    # Making a folder for the specific reportId
+    archive_save_to = os.path.join(archive_path, str(reportId))
+    os.makedirs(archive_save_to, exist_ok=True)
+
+    # writing the newly created results file to the archive folder too
+    shutil.copy2(res_file, archive_save_to)
+    shutil.copy2(stats_file, archive_save_to)
 
     # Add reportId to each row
     new_res = [(reportId,) + row for row in res]
