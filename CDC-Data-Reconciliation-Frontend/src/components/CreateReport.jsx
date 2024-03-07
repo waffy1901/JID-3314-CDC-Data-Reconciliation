@@ -6,7 +6,7 @@ export default function CreateReport({ onDone }) {
   const [cdcFile, setCDCFile] = useState(null)
   const [isAutomatic, setIsAutomatic] = useState(true)
   const [inputValue, setInputValue] = useState('')
-  const [isCDCFilter, setIsCDCFilter] = useState(true)
+  const [isCDCFilter, setIsCDCFilter] = useState(false)
 
   const currYear = 2023
   const yearList = Array.from({ length: 101}, (_, index) => currYear + index)
