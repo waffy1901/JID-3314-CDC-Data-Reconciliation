@@ -8,6 +8,7 @@ export default function Home() {
   const [reportSummaries, setReportSummaries] = useState(null)
   const [currReport, setCurrReport] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [visibleReportsCount, setVisibleReportsCount] = useState(5);
 
   // Get the report summaries on page load
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function Home() {
   const handleCreatedReport = () => {
     setIsModalOpen(false)
     fetchReportSummaries()
+    setVisibleReportsCount(5)
   }
 
   return (
@@ -52,7 +54,7 @@ export default function Home() {
             Create New Report
           </button>
           {reportSummaries &&
-            reportSummaries.map((summary) => (
+            reportSummaries.slice(0, visibleReportsCount).map((summary) => (
               <div
                 key={summary.ID}
                 onClick={() => handleSummaryClick(summary.ID)}
@@ -69,6 +71,11 @@ export default function Home() {
                 <h2></h2>
               </div>
             ))}
+            {reportSummaries && visibleReportsCount < reportSummaries.length && (
+              <button className= 'bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600' onClick={() => setVisibleReportsCount(reportSummaries.length)}>
+                See More
+              </button>
+            )}
         </div>
         <div className='bg-slate-50 h-full w-full flex flex-col items-center overflow-auto'>
           <Report reportID={currReport} />
