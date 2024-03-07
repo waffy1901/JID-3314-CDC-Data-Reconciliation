@@ -6,12 +6,17 @@ export default function CreateReport({ onDone }) {
   const [cdcFile, setCDCFile] = useState(null)
   const [isAutomatic, setIsAutomatic] = useState(true)
   const [inputValue, setInputValue] = useState('')
+  const [isCDCFilter, setIsCDCFilter] = useState(true)
 
   const currYear = 2023
   const yearList = Array.from({ length: 101}, (_, index) => currYear + index)
 
   const handleCheckboxChange = (e) => {
     setIsAutomatic(e.target.checked)
+  }
+
+  const handleCDCFilterChange = (e) => {
+    setIsCDCFilter(e.target.checked)
   }
 
   const handleStateFileChange = (e) => {
@@ -119,6 +124,10 @@ export default function CreateReport({ onDone }) {
             </select>
             </>
             )}
+            <label>
+              <input type='checkbox' checked={isCDCFilter} onChange={handleCDCFilterChange} />
+              Compare Existing Diseases in CDC Only
+            </label>
 
             {
               // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
