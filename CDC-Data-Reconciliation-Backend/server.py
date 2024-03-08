@@ -136,8 +136,6 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
         subprocess_args.append('-f')
     
     process = await asyncio.create_subprocess_exec(*subprocess_args)
-    
-    process = await asyncio.create_subprocess_exec(sys.executable, os.path.join(app.dir, "compare.py"), '-c', cdc_save_to, '-s', state_save_to, '-o', res_file)
     await process.wait()
     
 
