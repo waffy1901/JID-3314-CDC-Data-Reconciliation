@@ -46,6 +46,7 @@ export default function CreateReport({ onDone }) {
       // Setting form data to year and cdcFile
       const formdata = new FormData()
       formdata.append("cdc_file", cdcFile)
+      formdata.append("isCDCFilter", isCDCFilter)
 
       // Run the automatic report fetching
       try {
@@ -74,6 +75,7 @@ export default function CreateReport({ onDone }) {
       const formdata = new FormData()
       formdata.append("state_file", stateFile)
       formdata.append("cdc_file", cdcFile)
+      formdata.append("isCDCFilter", isCDCFilter)
 
       try {
         const response = await fetch(config.API_URL + "/manual_report", {
