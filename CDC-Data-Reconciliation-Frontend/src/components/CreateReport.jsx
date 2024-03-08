@@ -50,7 +50,7 @@ export default function CreateReport({ onDone }) {
 
       // Run the automatic report fetching
       try {
-        const response = await fetch(config.API_URL + `/automatic_report?year=${inputValue}`, {
+        const response = await fetch(config.API_URL + `/automatic_report?year=${inputValue}&isCDCFilter=${isCDCFilter}`, {
           method: "POST",
           body: formdata,
         })
@@ -78,7 +78,7 @@ export default function CreateReport({ onDone }) {
       formdata.append("isCDCFilter", isCDCFilter)
 
       try {
-        const response = await fetch(config.API_URL + "/manual_report", {
+        const response = await fetch(config.API_URL + `/manual_report?isCDCFilter=${isCDCFilter}`, {
           method: "POST",
           body: formdata,
         })

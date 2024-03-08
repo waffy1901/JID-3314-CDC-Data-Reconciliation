@@ -99,7 +99,7 @@ app.liteConn.commit()
 
 
 @app.post("/manual_report")
-async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None), isCDCFilter: bool = Form(False)):
+async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None)):
     folder_name = "temp"
     if not os.path.exists(os.path.join(app.dir, "temp")):
         os.makedirs(os.path.join(app.dir, "temp"))
@@ -186,7 +186,7 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
 
 
 @app.post("/automatic_report")
-async def automatic_report(year: int, cdc_file:  UploadFile = File(None), isCDCFilter: bool = Form(False)):
+async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile = File(None)):
     # Run query to retrieve data from NBS ODSE database
     (column_names, state_content) = run_query(year)
     if not len(state_content) > 0:
