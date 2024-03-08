@@ -46,10 +46,11 @@ export default function CreateReport({ onDone }) {
       // Setting form data to year and cdcFile
       const formdata = new FormData()
       formdata.append("cdc_file", cdcFile)
+      formdata.append("isCDCFilter", isCDCFilter)
 
       // Run the automatic report fetching
       try {
-        const response = await fetch(config.API_URL + `/automatic_report?year=${inputValue}`, {
+        const response = await fetch(config.API_URL + `/automatic_report?year=${inputValue}&isCDCFilter=${isCDCFilter}`, {
           method: "POST",
           body: formdata,
         })
@@ -74,9 +75,10 @@ export default function CreateReport({ onDone }) {
       const formdata = new FormData()
       formdata.append("state_file", stateFile)
       formdata.append("cdc_file", cdcFile)
+      formdata.append("isCDCFilter", isCDCFilter)
 
       try {
-        const response = await fetch(config.API_URL + "/manual_report", {
+        const response = await fetch(config.API_URL + `/manual_report?isCDCFilter=${isCDCFilter}`, {
           method: "POST",
           body: formdata,
         })

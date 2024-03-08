@@ -99,7 +99,7 @@ app.liteConn.commit()
 
 
 @app.post("/manual_report")
-async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None)):
+async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None)):
     folder_name = "temp"
     if not os.path.exists(os.path.join(app.dir, "temp")):
         os.makedirs(os.path.join(app.dir, "temp"))
@@ -121,7 +121,18 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
         f.write(state_content)
 
     res_file = os.path.join(app.dir, folder_name, id, "results.csv")
-    process = await asyncio.create_subprocess_exec(sys.executable, os.path.join(app.dir, "compare.py"), '-c', cdc_save_to, '-s', state_save_to, '-o', res_file)
+    
+    # Creating argument list for running compare.py
+    subprocess_args = [sys.executable,
+                       os.path.join(app.dir, "compare.py"),
+                       '-c', cdc_save_to,
+                       '-s', state_save_to,
+                       '-o', res_file]
+    
+    if isCDCFilter:
+        subprocess_args.append('-f')
+    
+    process = await asyncio.create_subprocess_exec(*subprocess_args)
     await process.wait()
     
 
@@ -173,7 +184,7 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
 
 
 @app.post("/automatic_report")
-async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
+async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile = File(None)):
     # Run query to retrieve data from NBS ODSE database
     (column_names, state_content) = run_query(year)
     if not len(state_content) > 0:
@@ -208,7 +219,17 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
 
     # Do comparison
     res_file = os.path.join(app.dir, folder_name, id, "results.csv")
-    process = await asyncio.create_subprocess_exec(sys.executable, os.path.join(app.dir, "compare.py"), '-c', cdc_save_to, '-s', state_save_to, '-o', res_file)
+    # Creating argument list for running compare.py
+    subprocess_args = [sys.executable,
+                       os.path.join(app.dir, "compare.py"),
+                       '-c', cdc_save_to,
+                       '-s', state_save_to,
+                       '-o', res_file]
+    
+    if isCDCFilter:
+        subprocess_args.append('-f')
+    
+    process = await asyncio.create_subprocess_exec(*subprocess_args)
     await process.wait()
 
 
