@@ -6,12 +6,17 @@ export default function CreateReport({ onDone }) {
   const [cdcFile, setCDCFile] = useState(null)
   const [isAutomatic, setIsAutomatic] = useState(true)
   const [inputValue, setInputValue] = useState('')
+  const [isCDCFilter, setIsCDCFilter] = useState(false)
 
   const currYear = 2023
   const yearList = Array.from({ length: 101}, (_, index) => currYear + index)
 
   const handleCheckboxChange = (e) => {
     setIsAutomatic(e.target.checked)
+  }
+
+  const handleCDCFilterChange = (e) => {
+    setIsCDCFilter(e.target.checked)
   }
 
   const handleStateFileChange = (e) => {
@@ -41,10 +46,11 @@ export default function CreateReport({ onDone }) {
       // Setting form data to year and cdcFile
       const formdata = new FormData()
       formdata.append("cdc_file", cdcFile)
+      formdata.append("isCDCFilter", isCDCFilter)
 
       // Run the automatic report fetching
       try {
-        const response = await fetch(config.API_URL + `/automatic_report?year=${inputValue}`, {
+        const response = await fetch(config.API_URL + `/automatic_report?year=${inputValue}&isCDCFilter=${isCDCFilter}`, {
           method: "POST",
           body: formdata,
         })
@@ -69,9 +75,10 @@ export default function CreateReport({ onDone }) {
       const formdata = new FormData()
       formdata.append("state_file", stateFile)
       formdata.append("cdc_file", cdcFile)
+      formdata.append("isCDCFilter", isCDCFilter)
 
       try {
-        const response = await fetch(config.API_URL + "/manual_report", {
+        const response = await fetch(config.API_URL + `/manual_report?isCDCFilter=${isCDCFilter}`, {
           method: "POST",
           body: formdata,
         })
@@ -119,6 +126,10 @@ export default function CreateReport({ onDone }) {
             </select>
             </>
             )}
+            <label>
+              <input type='checkbox' checked={isCDCFilter} onChange={handleCDCFilterChange} />
+              Compare Existing Diseases in CDC Only
+            </label>
 
             {
               // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is

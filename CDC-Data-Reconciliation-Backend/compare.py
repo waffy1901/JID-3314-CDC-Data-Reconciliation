@@ -9,9 +9,6 @@ class CaseResult:
         self.caseID = caseID
         self.eventCode = eventCode
         self.eventName = eventName
-        # self.caseClassStatus = caseClassStatus
-        # self.state = state
-        # self.eventDate = eventDate   -- Shouldn't we have eventDate in the state CSV file? Query does not currently return it
         self.MMWRYear = MMWRYear
         self.MMWRWeek = MMWRWeek
         self.reason = reason
@@ -24,7 +21,7 @@ stats = {}
 results: list[CaseResult] = []
 
 
-def get_state_dict(state_file):
+def get_state_dict(state_file, eventCodes=None):
     state_dict = {}
     # Open the state CSV file
     with open(state_file, newline='', encoding='utf-8') as csvfile:
@@ -35,7 +32,9 @@ def get_state_dict(state_file):
             # If the EventCode is not a number, skip the row (Getting rid of values like MAPPING and ZT_PP_Condition3)
             if row['EventCode'].isnumeric() == False:
                 continue
-
+            # Here we are filtering out the rows of the database by the event code that they have
+            if eventCodes is not None and row['EventCode'] not in eventCodes:
+                continue
             if row['CaseID'] in state_dict:
                 # If the case ID already exists in the dictionary, check to see if the new row has a more recent add_time
 
@@ -57,15 +56,18 @@ def get_state_dict(state_file):
     return state_dict
 
 
-def get_cdc_dict(cdc_file):
+def get_cdc_dict(cdc_file, filterCDC = False):
     cdc_dict = {}
     # Open the cdc CSV file
+    cdcEventCodes = set() if filterCDC else None
     with open(cdc_file, newline='') as csvfile:
         # Create a CSV reader object
         reader = csv.DictReader(csvfile)
         # Loop through each row in the CSV file
         for row in reader:
             # Add the row as a dictionary to the list
+            if filterCDC:
+                cdcEventCodes.add(row['EventCode'])
             if row['CaseID'] in cdc_dict:
                 results.append(CaseResult(row['CaseID'], row['EventCode'],
                                row['EventName'], row['MMWRYear'], row['MMWRWeek'], "Duplicate Case ID found in CDC CSV File", "1"))
@@ -78,7 +80,7 @@ def get_cdc_dict(cdc_file):
                 if row['EventCode'] not in stats:
                     stats[row['EventCode']] = {'eventName': row['EventName'], 'totalCases': 0, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 0, 'totalWrongAttributes': 0}
 
-    return cdc_dict
+    return cdc_dict, cdcEventCodes
 
 # place the stats stuff here
 def comp(state_dict, cdc_dict):
@@ -149,11 +151,14 @@ def main():
     parser.add_argument('-s', '--state', help='Local Path to State CSV file')
     parser.add_argument('-c', '--cdc', help='Local Path to CDC CSV file')
     parser.add_argument('-o', '--output', help='Local Path to Output CSV file')
-
+    # if the parameter below is specified the value stored is true
+    parser.add_argument('-f', '--filter', action='store_true', help='Filter by CDC eventCodes')
     args = parser.parse_args()
 
-    state_dict = get_state_dict(args.state)
-    cdc_dict = get_cdc_dict(args.cdc)
+    filterByCDC = args.filter
+    
+    cdc_dict, cdcEventCodes = get_cdc_dict(args.cdc, filterByCDC)
+    state_dict = get_state_dict(args.state, cdcEventCodes)
 
     comp(state_dict, cdc_dict)
 
@@ -173,7 +178,6 @@ def main():
     if output_directory == '':
         output_directory = '.'
     
-    # i was not sure how to handle reportID in the csv, so i have left it out from this. If it needs to be added into the csv then do it here
     # writing stats data to the csv
     with open(os.path.join(output_directory, 'stats.csv'), 'w', newline='') as csvfile:
         fieldNames = ['EventCode', 'EventName', 'TotalCases', 'TotalDuplicates',

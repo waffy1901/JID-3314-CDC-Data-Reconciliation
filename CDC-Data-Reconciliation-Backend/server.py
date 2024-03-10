@@ -10,6 +10,7 @@ import uuid
 import pyodbc
 import json
 import sqlite3
+import shutil
 
 app = FastAPI()
 
@@ -38,7 +39,7 @@ with open(config_file_path, "r") as f:
 # Connect to the SQL Server
 connection_string = 'DRIVER={' + app.config["driver"] + \
     '}' + \
-    f';SERVER={app.config["server"]};DATABASE={app.config["database"]};UID={app.config["username"]};PWD={app.config["password"]}'
+    f';SERVER={app.config["server"]};DATABASE={app.config["database"]};UID={app.config["db_username"]};PWD={app.config["db_password"]}'
 
 app.conn = pyodbc.connect(connection_string)
 
@@ -85,17 +86,29 @@ cur.execute('''
         TotalWrongAttributes INTEGER,
         FOREIGN KEY (ReportID) REFERENCES Reports(ID)
 )''')
+
+# Statistics table
+cur.execute('''
+    CREATE TABLE IF NOT EXISTS Config(
+        ID INTEGER PRIMARY KEY NOT NULL,
+        FieldName TEXT NOT NULL,
+        FieldValue TEXT NOT NULL
+)''')
+
 app.liteConn.commit()
 
 
 @app.post("/manual_report")
-async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None)):
+async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None)):
     folder_name = "temp"
     if not os.path.exists(os.path.join(app.dir, "temp")):
         os.makedirs(os.path.join(app.dir, "temp"))
 
     id = str(uuid.uuid4())
     os.makedirs(os.path.join(app.dir, folder_name, id))
+    
+    # Fetching the archive_path for saving the Report
+    archive_path = await get_config_setting("archive_path")
 
     cdc_content = await cdc_file.read()
     cdc_save_to = os.path.join(app.dir, folder_name, id, cdc_file.filename)
@@ -108,8 +121,20 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
         f.write(state_content)
 
     res_file = os.path.join(app.dir, folder_name, id, "results.csv")
-    process = await asyncio.create_subprocess_exec(sys.executable, os.path.join(app.dir, "compare.py"), '-c', cdc_save_to, '-s', state_save_to, '-o', res_file)
+    
+    # Creating argument list for running compare.py
+    subprocess_args = [sys.executable,
+                       os.path.join(app.dir, "compare.py"),
+                       '-c', cdc_save_to,
+                       '-s', state_save_to,
+                       '-o', res_file]
+    
+    if isCDCFilter:
+        subprocess_args.append('-f')
+    
+    process = await asyncio.create_subprocess_exec(*subprocess_args)
     await process.wait()
+    
 
     res = []
     with open(res_file, newline='') as csvfile:
@@ -133,6 +158,15 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
             tup = (reportId,) + tuple(row.values())
             stats_list.append(tup)
 
+    if archive_path:
+        # Making a folder for the specific reportId
+        archive_save_to = os.path.join(archive_path, str(reportId))
+        os.makedirs(archive_save_to, exist_ok=True)
+
+        # writing the newly created results file to the archive folder too
+        shutil.copy2(res_file, archive_save_to)
+        shutil.copy2(stats_file, archive_save_to)
+
     # Add reportId to each row
     new_res = [(reportId,) + row for row in res]
 
@@ -150,7 +184,7 @@ async def manual_report(state_file: UploadFile = File(None), cdc_file:  UploadFi
 
 
 @app.post("/automatic_report")
-async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
+async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile = File(None)):
     # Run query to retrieve data from NBS ODSE database
     (column_names, state_content) = run_query(year)
     if not len(state_content) > 0:
@@ -161,6 +195,12 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
     if not os.path.exists(os.path.join(app.dir, folder_name)):
         os.makedirs(os.path.join(app.dir, folder_name))
 
+    # Fetching the archive_path for saving the Report
+    archive_path = await get_config_setting("archive_path")
+    # Making sure the archive_path has been set, otherwise throwing an exception
+    
+    
+    
     id = str(uuid.uuid4())
     os.makedirs(os.path.join(app.dir, folder_name, id))
 
@@ -179,8 +219,19 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
 
     # Do comparison
     res_file = os.path.join(app.dir, folder_name, id, "results.csv")
-    process = await asyncio.create_subprocess_exec(sys.executable, os.path.join(app.dir, "compare.py"), '-c', cdc_save_to, '-s', state_save_to, '-o', res_file)
+    # Creating argument list for running compare.py
+    subprocess_args = [sys.executable,
+                       os.path.join(app.dir, "compare.py"),
+                       '-c', cdc_save_to,
+                       '-s', state_save_to,
+                       '-o', res_file]
+    
+    if isCDCFilter:
+        subprocess_args.append('-f')
+    
+    process = await asyncio.create_subprocess_exec(*subprocess_args)
     await process.wait()
+
 
     # Add results to the response
     res = []
@@ -203,6 +254,15 @@ async def automatic_report(year: int, cdc_file:  UploadFile = File(None)):
         for row in reader:
             tup = (reportId,) + tuple(row.values())
             stats_list.append(tup)
+    
+    if archive_path:
+        # Making a folder for the specific reportId
+        archive_save_to = os.path.join(archive_path, str(reportId))
+        os.makedirs(archive_save_to, exist_ok=True)
+
+        # writing the newly created results file to the archive folder too
+        shutil.copy2(res_file, archive_save_to)
+        shutil.copy2(stats_file, archive_save_to)
 
     # Add reportId to each row
     new_res = [(reportId,) + row for row in res]
@@ -319,6 +379,41 @@ def run_query(year: int):
     # data = [dict(zip(column_names, row)) for row in row_data]
 
     return (column_names, data)
+
+@app.get("/config/{field_name}")
+async def get_config_setting(field_name: str):
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute("SELECT * FROM Config WHERE FieldName = ?", (field_name,))
+        value = cur.fetchall()
+        if len(value) > 0:
+            # value is [(idx, field_name, field_value)] so need to return value[0][2]
+            return value[0][2]
+        else: return []
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        return None
+    
+@app.post("/config")
+async def set_config_setting(field_name: str, value: str, password: str):
+    # Do not allow changing config settings if password is wrong
+    if password != app.config["config_password"]:
+        raise HTTPException(status_code = 401, detail = "Unauthorized: password incorrect") 
+    
+    current_setting = await get_config_setting(field_name)
+    # print(f"Setting config setting {field_name} to {value}. Previous value: {current_setting}")
+    try:
+        cur = app.liteConn.cursor()
+        # If the setting already exists, update it
+        if len(current_setting) > 0:
+            cur.execute("UPDATE Config SET FieldValue = ? WHERE FieldName = ?", (value, field_name))
+        else:
+            # Otherwise, create the entry
+            cur.execute("INSERT INTO Config (FieldName, FieldValue) VALUES (?, ?)", (field_name, value))
+        app.liteConn.commit()
+    except Exception as e:
+        app.liteConn.rollback()
+        raise e
 
 
 if __name__ == "__main__":
