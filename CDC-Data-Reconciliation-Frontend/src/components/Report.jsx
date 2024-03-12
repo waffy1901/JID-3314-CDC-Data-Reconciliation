@@ -36,6 +36,9 @@ export default function Report({ reportID }) {
   const [statColumnFilters, setStatColumnFilters] = useState([])
   const [statGlobalFilter, setStatGlobalFilter] = useState("")
 
+  const [currentDisease, setCurrentDisease] = useState("")
+  const [currentDiscType, setCurrentDiscType] = useState("")
+
   const discColumns = useMemo(() => [
     {
       header: "CaseID",
@@ -296,9 +299,14 @@ export default function Report({ reportID }) {
   }
 
   const handleStatClick = (col, row) => {
+    // clear the filters of the report discrepancies table
     setDiscColumnFilters(null)
+    // set the current disease for the header of the report discrepancies table
+    setCurrentDisease(row.EventName)
+    let discrepancyType = ""
     switch (col.id) {
       case "TotalDuplicates":
+        discrepancyType = "Duplicates"
         if (row.TotalDuplicates === 0) return
 
         setDiscColumnFilters([
@@ -311,7 +319,9 @@ export default function Report({ reportID }) {
             value: row.EventCode,
           },
         ])
+        break
       case "TotalMissingFromCDC":
+        discrepancyType = "Missing From CDC"
         if (row.TotalMissingFromCDC === 0) return
 
         setDiscColumnFilters([
@@ -327,6 +337,7 @@ export default function Report({ reportID }) {
         break
 
       case "TotalWrongAttributes":
+        discrepancyType = "Wrong Attributes"
         if (row.TotalWrongAttributes === 0) return
 
         setDiscColumnFilters([
@@ -341,6 +352,7 @@ export default function Report({ reportID }) {
         ])
         break
       case "TotalMissingFromState":
+        discrepancyType = "Missing From State"
         if (row.TotalMissingFromState === 0) return
 
         setDiscColumnFilters([
@@ -354,12 +366,17 @@ export default function Report({ reportID }) {
           },
         ])
         break
+      default:
+        discrepancyType = ""
     }
+    setCurrentDiscType(discrepancyType)
   }
 
   const clearDiscFilters = () => {
     setDiscColumnFilters([])
     setDiscGlobalFilter("")
+    setCurrentDisease("")
+    setCurrentDiscType("")
   }
 
   const clearStatFilters = () => {
@@ -390,6 +407,9 @@ export default function Report({ reportID }) {
 
               <table className='w-full text-center mb-4 shadow-md'>
                 <thead className='bg-slate-100'>
+                <tr>
+                  <th colSpan={5} className="text-2xl">Report Statistics</th>
+                </tr>
                   <tr className='border-b-2 border-slate-900'>
                     <th className='px-4 py-2 font-semibold'>Total Cases</th>
                     <th className='px-4 py-2 font-semibold'>Total Duplicates</th>
@@ -441,6 +461,9 @@ export default function Report({ reportID }) {
                   <div className='border border-slate-400 rounded-xl my-3'>
                     <table className='table-auto'>
                       <thead>
+                        <tr>
+                          <th colSpan={7} className="text-2xl">Disease Statistics</th>
+                        </tr>
                         {statTable.getHeaderGroups().map((headerGroup) => (
                           <tr key={headerGroup.id} className='border-b border-slate-400'>
                             {headerGroup.headers.map((header) => {
@@ -567,7 +590,8 @@ export default function Report({ reportID }) {
               )}
             </>
           )}
-
+          
+          {/* Report Discrepancies Table */}
           <div>
             <div className='w-full flex flex-row items-center justify-between'>
               <DebouncedInput
@@ -597,6 +621,11 @@ export default function Report({ reportID }) {
             <div className='border border-slate-400 rounded-xl my-3'>
               <table className='table-auto'>
                 <thead>
+                  <tr>
+                    <th colSpan={7} className="text-2xl">
+                      {currentDisease && currentDiscType ? `${currentDisease} ${currentDiscType}` : 'Report Discrepancies'}
+                    </th>
+                  </tr>
                   {discTable.getHeaderGroups().map((headerGroup) => (
                     <tr key={headerGroup.id} className='border-b border-slate-400'>
                       {headerGroup.headers.map((header) => {
