@@ -37,3 +37,6 @@ def main():
         '}' + \
         f';SERVER={currConfig["server"]};DATABASE={currConfig["database"]};UID={currConfig["db_username"]};PWD={currConfig["db_password"]}'
     connection = pyodbc.connect(connection_string)
+
+if __name__ == "__main__": 
+    main()
