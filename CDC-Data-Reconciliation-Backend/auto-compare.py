@@ -7,16 +7,8 @@ from fastapi import FastAPI, File, Response, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import json
 
-app = FastAPI()
-
-origins = [
-    "http://localhost:5173"
-]
-
-app.add_middleware(CORSMiddleware, allow_origins=origins,
-                   allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
-
-
+currConfig = None
+connection = None
 # Method to test if you have the correct ODBC Driver
 # print("List of ODBC Drivers:")
 # dlist = pyodbc.drivers()
@@ -24,12 +16,12 @@ app.add_middleware(CORSMiddleware, allow_origins=origins,
 #     print('LIST OF DRIVERS:' + drvr)
 
 # Load config.json
-app.dir = os.path.dirname(__file__)
+theDir = os.path.dirname(__file__)
 
 
-config_file_path = os.path.join(app.dir, "config.json")
+config_file_path = os.path.join(theDir "config.json")
 with open(config_file_path, "r") as f:
-    app.config = json.load(f)
+    currConfig = json.load(f)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -41,7 +33,7 @@ def main():
     args = parser.parse_args()
 
     # Connect to the SQL Server
-    connection_string = 'DRIVER={' + app.config["driver"] + \
+    connection_string = 'DRIVER={' + currConfig["driver"] + \
         '}' + \
-        f';SERVER={app.config["server"]};DATABASE={app.config["database"]};UID={app.config["db_username"]};PWD={app.config["db_password"]}'
-    app.conn = pyodbc.connect(connection_string)
+        f';SERVER={currConfig["server"]};DATABASE={currConfig["database"]};UID={currConfig["db_username"]};PWD={currConfig["db_password"]}'
+    connection = pyodbc.connect(connection_string)
