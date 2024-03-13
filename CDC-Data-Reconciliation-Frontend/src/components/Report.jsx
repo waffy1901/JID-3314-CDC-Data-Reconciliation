@@ -423,7 +423,7 @@ export default function Report({ reportID }) {
               <table className='w-full text-center mb-4 shadow-md'>
                 <thead className='bg-slate-100'>
                 <tr>
-                  <th colSpan={5} className="text-2xl">Report Statistics</th>
+                  <th colSpan={5} className="text-2xl p-2">Report Statistics</th>
                 </tr>
                   <tr className='border-b-2 border-slate-900'>
                     <th className='px-4 py-2 font-semibold'>Total Cases</th>
@@ -477,7 +477,7 @@ export default function Report({ reportID }) {
                     <table className='table-auto'>
                       <thead>
                         <tr>
-                          <th colSpan={7} className="text-2xl">Disease Statistics</th>
+                          <th colSpan={7} className="text-2xl p-2">Disease Statistics</th>
                         </tr>
                         {statTable.getHeaderGroups().map((headerGroup) => (
                           <tr key={headerGroup.id} className='border-b border-slate-400'>
@@ -637,7 +637,7 @@ export default function Report({ reportID }) {
               <table className='table-auto'>
                 <thead>
                   <tr>
-                    <th colSpan={7} className="text-2xl">
+                    <th colSpan={7} className="text-2xl p-2">
                       {currentDisease && currentDiscType ? `${currentDisease} ${currentDiscType}` : 'Report Discrepancies'}
                     </th>
                   </tr>
