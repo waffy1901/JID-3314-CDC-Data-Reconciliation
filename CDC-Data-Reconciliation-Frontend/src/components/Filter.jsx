@@ -19,7 +19,10 @@ export default function Filter({ column }) {
       <DebouncedInput
         type='text'
         value={columnFilterValue ?? ""}
-        onChange={(value) => column.setFilterValue(String(value))}
+        onChange={(value) => {
+          if (columnFilterValue === value) return
+          column.setFilterValue(String(value))
+        }}
         placeholder={`Search... (${column.getFacetedUniqueValues().size})`}
         className='border shadow rounded w-full px-2 font-normal'
         list={column.id + "list"}

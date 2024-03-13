@@ -163,8 +163,22 @@ export default function Report({ reportID }) {
         pageSize: 5,
       },
     },
-    onColumnFiltersChange: setDiscColumnFilters,
-    onGlobalFilterChange: setDiscGlobalFilter,
+    onColumnFiltersChange: (columnFilters) => {
+      if (currentDiscType != "" && currentDisease != "") {
+        setCurrentDiscType("")
+        setCurrentDisease("")
+      }
+
+      setDiscColumnFilters(columnFilters)
+    },
+    onGlobalFilterChange: (filter) => {
+      if (currentDiscType != "" && currentDisease != "") {
+        setCurrentDiscType("")
+        setCurrentDisease("")
+      }
+
+      setDiscGlobalFilter(filter)
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -300,7 +314,8 @@ export default function Report({ reportID }) {
 
   const handleStatClick = (col, row) => {
     // clear the filters of the report discrepancies table
-    setDiscColumnFilters(null)
+    discTable.setColumnFilters([])
+    discTable.setGlobalFilter("")
     // set the current disease for the header of the report discrepancies table
     setCurrentDisease(row.EventName)
     let discrepancyType = ""
@@ -309,7 +324,7 @@ export default function Report({ reportID }) {
         discrepancyType = "Duplicates"
         if (row.TotalDuplicates === 0) return
 
-        setDiscColumnFilters([
+        discTable.setColumnFilters([
           {
             id: "ReasonID",
             value: "1",
@@ -324,7 +339,7 @@ export default function Report({ reportID }) {
         discrepancyType = "Missing From CDC"
         if (row.TotalMissingFromCDC === 0) return
 
-        setDiscColumnFilters([
+        discTable.setColumnFilters([
           {
             id: "ReasonID",
             value: "2",
@@ -340,7 +355,7 @@ export default function Report({ reportID }) {
         discrepancyType = "Wrong Attributes"
         if (row.TotalWrongAttributes === 0) return
 
-        setDiscColumnFilters([
+        discTable.setColumnFilters([
           {
             id: "ReasonID",
             value: "3",
@@ -355,7 +370,7 @@ export default function Report({ reportID }) {
         discrepancyType = "Missing From State"
         if (row.TotalMissingFromState === 0) return
 
-        setDiscColumnFilters([
+        discTable.setColumnFilters([
           {
             id: "ReasonID",
             value: "4",
@@ -373,15 +388,15 @@ export default function Report({ reportID }) {
   }
 
   const clearDiscFilters = () => {
-    setDiscColumnFilters([])
-    setDiscGlobalFilter("")
+    discTable.setColumnFilters([])
+    discTable.setGlobalFilter("")
     setCurrentDisease("")
     setCurrentDiscType("")
   }
 
   const clearStatFilters = () => {
-    setStatColumnFilters([])
-    setStatGlobalFilter("")
+    statTable.setColumnFilters([])
+    statTable.setGlobalFilter("")
   }
 
   return (
@@ -436,7 +451,7 @@ export default function Report({ reportID }) {
                   <div className='w-full flex flex-row items-center justify-between'>
                     <DebouncedInput
                       value={statGlobalFilter ?? ""}
-                      onChange={(value) => setStatGlobalFilter(String(value))}
+                      onChange={(value) => statTable.setGlobalFilter(String(value))}
                       className='p-2 font-lg shadow border border-block'
                       placeholder='Search all columns...'
                     />
@@ -596,7 +611,7 @@ export default function Report({ reportID }) {
             <div className='w-full flex flex-row items-center justify-between'>
               <DebouncedInput
                 value={discGlobalFilter ?? ""}
-                onChange={(value) => setDiscGlobalFilter(String(value))}
+                onChange={(value) => discTable.setGlobalFilter(String(value))}
                 className='p-2 font-lg shadow border border-block'
                 placeholder='Search all columns...'
               />
