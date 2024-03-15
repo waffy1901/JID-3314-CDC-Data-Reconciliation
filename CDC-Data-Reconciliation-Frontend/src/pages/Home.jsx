@@ -65,8 +65,7 @@ export default function Home() {
                 <h2 className='text-xl font-semibold'>Report: {summary.ID}</h2>
                 <h2>Discrepancies: {summary.NumberOfDiscrepancies}</h2>
                 <h2>
-                  Time Created: {new Date(summary.CreatedAtDate).toLocaleDateString("en-US")}{" "}
-                  {new Date("2000-01-01T" + summary.TimeOfCreation).toLocaleTimeString("en-US")} UTC
+                  Time Created: {new Date(`${summary.CreatedAtDate}T${summary.TimeOfCreation}Z`).toLocaleString("en-US")}
                 </h2>
                 <h2></h2>
               </div>

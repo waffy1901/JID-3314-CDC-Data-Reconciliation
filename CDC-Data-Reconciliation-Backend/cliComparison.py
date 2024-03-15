@@ -16,15 +16,15 @@ conn = None
 #     print('LIST OF DRIVERS:' + drvr)
 
 # Load config.json
-theDir = os.path.dirname(__file__)
+configDir = os.path.dirname(__file__)
 
-config_file_path = os.path.join(theDir, "config.json")
+config_file_path = os.path.join(configDir, "config.json")
 with open(config_file_path, "r") as f:
     config = json.load(f)
 
 def get_state_csv(year: int):
     query = None
-    query_file_path = os.path.join(theDir, "query.sql")
+    query_file_path = os.path.join(configDir, "query.sql")
     with open(query_file_path, 'r') as f:
         query = f.read()
 
@@ -36,7 +36,7 @@ def get_state_csv(year: int):
     state_content = cursor.fetchall()
 
     id = str(uuid.uuid4())
-    state_save_to = os.path.join(theDir, f"{id}.csv")
+    state_save_to = os.path.join(configDir, f"{id}.csv")
     with open(state_save_to, "w", newline='') as f:
         writer = csv.writer(f)
         writer.writerow(column_names)
@@ -50,11 +50,11 @@ def main():
 
     parser = argparse.ArgumentParser(
         prog="AutoCompare", description='Auto Comparison')
-    parser.add_argument('-c', '--cdc', help='Local Path to CDC CSV file')
-    parser.add_argument('-o', '--output', help='Name of folder that should be created to store the report files')
-    parser.add_argument('-y', '--year', help='Year to compare')
-    # if the parameter below is specified the value stored is true
-    parser.add_argument('-f', '--filter', action='store_true', help='Filter by CDC eventCodes')
+    parser.add_argument('-c', '--cdc', required=True, help='Local Path to CDC CSV file')
+    parser.add_argument('-o', '--output', required=True, help='Name of folder that should be created to store the report files')
+    parser.add_argument('-y', '--year', required=True, help='Year to compare')
+    # defaulting to filtering by CDC event codes
+    parser.add_argument('-nf', '--nofilter', default=False, action="store_true", help='Do not filter by CDC eventCodes')
     args = parser.parse_args()
 
     if (args.cdc is None or args.output is None or args.year is None):
@@ -70,7 +70,7 @@ def main():
     # Get the state CSV
     state_csv = get_state_csv(args.year)
 
-    filterByCDC = args.filter
+    filterByCDC = not args.nofilter
     
     cdc_dict, cdcEventCodes = compare.get_cdc_dict(args.cdc, filterByCDC)
     state_dict = compare.get_state_dict(state_csv, cdcEventCodes)
@@ -80,7 +80,7 @@ def main():
     os.remove(state_csv)
 
     # Create output folder
-    output_folder = os.path.join(theDir, args.output)
+    output_folder = os.path.join(configDir, args.output)
     os.makedirs(output_folder)
 
     # Create Results CSV File and write the results to it
@@ -109,3 +109,4 @@ def main():
 
 if __name__ == "__main__": 
     main()
+    
