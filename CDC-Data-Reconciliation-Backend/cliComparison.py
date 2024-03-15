@@ -54,7 +54,7 @@ def main():
     parser.add_argument('-o', '--output', required=True, help='Name of folder that should be created to store the report files')
     parser.add_argument('-y', '--year', required=True, help='Year to compare')
     # defaulting to filtering by CDC event codes
-    parser.add_argument('-nf', '--nofilter', default=False, action="store_true", help='Filter by CDC eventCodes')
+    parser.add_argument('-nf', '--nofilter', default=False, action="store_true", help='Do not filter by CDC eventCodes')
     args = parser.parse_args()
 
     if (args.cdc is None or args.output is None or args.year is None):
