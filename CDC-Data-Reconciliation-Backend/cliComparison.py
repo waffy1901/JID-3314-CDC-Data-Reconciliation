@@ -54,8 +54,7 @@ def main():
     parser.add_argument('-o', '--output', required=True, help='Name of folder that should be created to store the report files')
     parser.add_argument('-y', '--year', required=True, help='Year to compare')
     # defaulting to filtering by CDC event codes
-    # to disable filtering, add -f False (or some other falsy value - e.g., '0', 'f', 'n')
-    parser.add_argument('-f', '--filter', type=lambda x: (str(x).lower() in ['true', '1', 't', 'y', 'yes']), default=True, help='Filter by CDC eventCodes')
+    parser.add_argument('-nf', '--nofilter', default=False, action="store_true", help='Filter by CDC eventCodes')
     args = parser.parse_args()
 
     if (args.cdc is None or args.output is None or args.year is None):
@@ -71,7 +70,7 @@ def main():
     # Get the state CSV
     state_csv = get_state_csv(args.year)
 
-    filterByCDC = args.filter
+    filterByCDC = not args.nofilter
     
     cdc_dict, cdcEventCodes = compare.get_cdc_dict(args.cdc, filterByCDC)
     state_dict = compare.get_state_dict(state_csv, cdcEventCodes)
