@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import asyncio
+import argparse
 import csv
 import os
 import sys
@@ -22,7 +23,7 @@ origins = [
 app.add_middleware(CORSMiddleware, allow_origins=origins,
                    allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-app.mount("/assets", StaticFiles(directory="../CDC-Data-Reconciliation-Frontend/dist/assets"), name="assets")
+app.mount("/assets", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "..", "CDC-Data-Reconciliation-Frontend", "dist", "assets")), name="assets")
 
 # Method to test if you have the correct ODBC Driver
 # print("List of ODBC Drivers:")
@@ -425,7 +426,7 @@ async def serve_react_app(catchall: str):
 
 if __name__ == "__main__":
     # Run the API with uvicorn
-    uvicorn.run("server:app", host="0.0.0.0", port=8000)
+    uvicorn.run("server:app", host="0.0.0.0", port=app.config["port"])
 
     # Use this command to run the API with reloading enabled (DOES NOT WORK ON WINDOWS)
     # uvicorn.run("server:app", host="localhost", port=8000, reload=True)
