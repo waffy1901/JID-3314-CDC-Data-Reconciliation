@@ -420,7 +420,7 @@ async def set_config_setting(field_name: str, value: str, password: str):
 # Route to serve React index.html (for client-side routing)
 @app.get("/{catchall:path}")
 async def serve_react_app(catchall: str):
-    return FileResponse("../CDC-Data-Reconciliation-Frontend/dist/index.html")
+    return FileResponse(os.path.join(os.path.dirname(__file__), "..", "CDC-Data-Reconciliation-Frontend", "dist", "index.html"))
 
 
 if __name__ == "__main__":
