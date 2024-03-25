@@ -39,11 +39,13 @@ app.dir = os.path.dirname(__file__)
 config_file_path = os.path.join(app.dir, "config.json")
 with open(config_file_path, "r") as f:
     app.config = json.load(f)
+    db_username = os.getenv('DB_USERNAME')
+    db_password = os.getenv('DB_PASSWORD')
 
 # Connect to the SQL Server
 connection_string = 'DRIVER={' + app.config["driver"] + \
     '}' + \
-    f';SERVER={app.config["server"]};DATABASE={app.config["database"]};UID={app.config["db_username"]};PWD={app.config["db_password"]}'
+    f';SERVER={app.config["server"]};DATABASE={app.config["database"]};UID={db_username};PWD={db_password}'
 
 app.conn = pyodbc.connect(connection_string)
 
