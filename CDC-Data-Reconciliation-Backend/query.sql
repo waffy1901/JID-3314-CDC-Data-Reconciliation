@@ -1,5 +1,5 @@
 SELECT 
-Public_health_case.public_health_case_uid,Public_health_case.add_time,
+Public_health_case.add_time,
 Public_health_case.local_id AS CaseID
        , substring(Public_health_case.jurisdiction_cd,4,3) as CountyReporting
 	   , Public_health_case.cd as EventCode
