@@ -1,7 +1,8 @@
 import uvicorn
 from fastapi import FastAPI, File, Response, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import asyncio
 import csv
 import os
@@ -21,6 +22,7 @@ origins = [
 app.add_middleware(CORSMiddleware, allow_origins=origins,
                    allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
+app.mount("/assets", StaticFiles(directory="../CDC-Data-Reconciliation-Frontend/dist/assets"), name="assets")
 
 # Method to test if you have the correct ODBC Driver
 # print("List of ODBC Drivers:")
@@ -414,11 +416,16 @@ async def set_config_setting(field_name: str, value: str, password: str):
     except Exception as e:
         app.liteConn.rollback()
         raise e
+    
+# Route to serve React index.html (for client-side routing)
+@app.get("/{catchall:path}")
+async def serve_react_app(catchall: str):
+    return FileResponse("../CDC-Data-Reconciliation-Frontend/dist/index.html")
 
 
 if __name__ == "__main__":
     # Run the API with uvicorn
-    uvicorn.run("server:app", host="localhost", port=8000)
+    uvicorn.run("server:app", host="0.0.0.0", port=8000)
 
     # Use this command to run the API with reloading enabled (DOES NOT WORK ON WINDOWS)
     # uvicorn.run("server:app", host="localhost", port=8000, reload=True)
