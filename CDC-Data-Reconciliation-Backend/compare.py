@@ -104,8 +104,8 @@ def comp(state_dict, cdc_dict):
         else:
             i = 0
             for attribute in state_row:
-                # Skip the first 2 attributes since they are not included in CDC CSV file
-                if i < 2:
+                # Skip the first attribute since they are not included in CDC CSV file
+                if i < 1:
                     i += 1
                     continue
 
