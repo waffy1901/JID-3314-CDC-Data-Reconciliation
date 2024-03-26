@@ -7,6 +7,7 @@ export default function Settings() {
   const [password, setPassword] = useState('')
   const [passFailed, setPassFailed] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [archiveEmpty, setArchiveEmpty] = useState(true)
 
   const handleArchivePathChange = (e) => {
     setTempArchivePath(e.target.value)
@@ -28,9 +29,11 @@ export default function Settings() {
         const data = await response.json()
         if (data.length > 0) {
           setArchivePath(data)
+          setArchiveEmpty(false)
           console.log("Fetched config - archive path is " + data)
         } else {
           console.log("Fetched config, but there's no setting for archive path yet.")
+          setArchiveEmpty(true)
         }
       } else {
         console.error("Failed to fetch config!")
@@ -50,6 +53,7 @@ export default function Settings() {
 
       if (response.ok) {
         setArchivePath(tempArchivePath)
+        setArchiveEmpty(false)
         console.log("Config submitted successfully!")
         setPassFailed(false)
         setSuccess(true)
@@ -76,9 +80,15 @@ export default function Settings() {
             id='archive_path' 
             onChange={handleArchivePathChange} 
             className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
-            placeholder='Enter archive path'
+            placeholder='Edit archive path'
             value={tempArchivePath}
           />
+        
+        <div className='mt-4'>
+          {archiveEmpty && <p className='text-red-500 text-s bold text-center'>
+              Warning: archive path is unset.<br></br>
+              Created reports will not be downloaded automatically.</p>}
+        </div>
         </div>
         <div className='mb-6'>
           <label htmlFor='password' className='block text-gray-700 text-sm font-bold mb-2'>
