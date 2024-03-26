@@ -1,4 +1,4 @@
-add_time,CaseID,CountyReporting,EventCode,EventName,MMWRYear,MMWRWeek,CaseClassStatus,Sex,BirthDate,Age,AgeType,Race,Ethnicty
+add_time,CaseID,CountyReporting,EventCode,EventName,MMWRYear,MMWRWeek,CaseClassStatus,Sex,BirthDate,Age,AgeType,Race,Ethnicity
 2023-02-10 15:18:30.933,CAS10001004GA01,004,11065,2019 Novel Coronavirus,2023,06,Not a Case/Deleted,1,1990-01-01,33,0,2,2
 2023-02-22 08:54:11.103,CAS10001023GA01,004,11065,2019 Novel Coronavirus,2023,08,Suspect,2,2023-02-06,16,3,1,9
 2023-02-22 08:54:11.103,CAS10001023GA01,004,11065,2019 Novel Coronavirus,2023,08,Suspect,2,2023-02-06,16,3,2,9

@@ -33,7 +33,7 @@ Public_health_case.local_id AS CaseID
 	   else '9' end as Race
        ,case when Person.ethnic_group_ind ='2135-2' then '1'
 	   when Person.ethnic_group_ind ='2186-5' then '2'
-	   else '9' end as Ethnicty
+	   else '9' end as Ethnicity
 FROM Notification with (nolock)
        INNER JOIN Act_relationship with (nolock) ON Notification.notification_uid = Act_relationship.source_act_uid
               AND Notification.cd = 'NOTF'
