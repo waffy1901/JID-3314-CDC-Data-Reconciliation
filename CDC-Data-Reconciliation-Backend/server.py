@@ -389,7 +389,7 @@ async def get_config_setting(field_name: str):
         if len(value) > 0:
             # value is [(idx, field_name, field_value)] so need to return value[0][2]
             return value[0][2]
-        else: return []
+        else: return None
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return None
@@ -405,7 +405,7 @@ async def set_config_setting(field_name: str, value: str, password: str):
     try:
         cur = app.liteConn.cursor()
         # If the setting already exists, update it
-        if len(current_setting) > 0:
+        if current_setting is not None:
             cur.execute("UPDATE Config SET FieldValue = ? WHERE FieldName = ?", (value, field_name))
         else:
             # Otherwise, create the entry
