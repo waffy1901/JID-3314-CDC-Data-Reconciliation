@@ -58,8 +58,8 @@ export default function Home() {
               <div
                 key={summary.ID}
                 onClick={() => handleSummaryClick(summary.ID)}
-                className={`w-4/5 rounded-md p-4 shadow-lg ${
-                  summary.ID === currReport ? "bg-slate-500" : "bg-white hover:bg-slate-100"
+                className={`w-4/5 rounded-md p-4 shadow-lg text-slate-950 ${
+                  summary.ID === currReport ? "bg-slate-500 cursor-default" : "bg-white hover:bg-slate-100 cursor-pointer"
                 }`}
               >
                 <h2 className='text-xl font-semibold'>Report {summary.ID}</h2>
