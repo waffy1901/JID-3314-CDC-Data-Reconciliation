@@ -100,6 +100,7 @@ export default function CreateReport({ onDone }) {
       <div className='bg-slate-300 w-[400px] rounded-xl mx-auto'>
         <form onSubmit={handleSubmit} className='h-full'>
           <div className='flex flex-col gap-6 items-center justify-center h-full my-8'>
+            <label style={{fontWeight: 'bold', color: '#4c80ae'}} >Create New Report</label>
             <label>
               <input type='checkbox' checked={isAutomatic} onChange={handleCheckboxChange} style={{ marginRight: '4px'}} />
               Use Automatic Report
@@ -144,7 +145,7 @@ export default function CreateReport({ onDone }) {
               </>
             )}
             <button type='submit' className='bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae]'>
-              Submit
+              Submit &#10003;
             </button>
           </div>
         </form>
