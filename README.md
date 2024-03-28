@@ -6,7 +6,7 @@ Our tool compares data between the CDC database and databases from the 50 U.S. s
 - Static and dynamic table headers
 - Visually appealing settings page with color-coded error/success messages
 - Command-line interface for comparing cdc and state health department data
-- Database username and password encryption
+- Database username and password environment variables for enhanced security
 - Warning highlighted in red if the archive folder path is not set
 - Error message displayed if unable to create a report
 ### Bug Fixes
