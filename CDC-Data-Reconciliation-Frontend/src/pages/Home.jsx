@@ -48,7 +48,7 @@ export default function Home() {
       <div className='flex flex-row items-center h-full w-full'>
         <div className='w-[340px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 overflow-auto'>
           <button
-            className='bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600 shadow-lg'
+            className='bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae] shadow-lg'
             onClick={() => setIsModalOpen(true)}
           >
             Create New Report
@@ -59,7 +59,7 @@ export default function Home() {
                 key={summary.ID}
                 onClick={() => handleSummaryClick(summary.ID)}
                 className={`w-4/5 rounded-md p-4 shadow-lg text-slate-950 ${
-                  summary.ID === currReport ? "bg-slate-500 cursor-default" : "bg-white hover:bg-slate-100 cursor-pointer"
+                  summary.ID === currReport ? "bg-[#b8cde0] cursor-default" : "bg-white hover:bg-slate-100 cursor-pointer"
                 }`}
               >
                 <h2 className='text-xl font-semibold'>Report {summary.ID}</h2>
@@ -68,7 +68,7 @@ export default function Home() {
               </div>
             ))}
             {reportSummaries && visibleReportsCount < reportSummaries.length && (
-              <button className= 'bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600' onClick={() => setVisibleReportsCount(reportSummaries.length)}>
+              <button className= 'bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae]' onClick={() => setVisibleReportsCount(reportSummaries.length)}>
                 See More
               </button>
             )}

@@ -141,7 +141,7 @@ export default function CreateReport({ onDone }) {
                 <input type='file' id='state_file' onChange={handleStateFileChange} />
               </>
             )}
-            <button type='submit' className='bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600'>
+            <button type='submit' className='bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae]'>
               Submit
             </button>
           </div>
