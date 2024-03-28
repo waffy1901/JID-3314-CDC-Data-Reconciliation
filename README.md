@@ -1,6 +1,19 @@
 # CDC Data Reconciliation Tool
 Our tool compares data between the CDC database and databases from the 50 U.S. state health departments. The data from the states is regarded as “the source of truth”. If any data in the CDC database errs from the state databases in any way, it will be regarded as a discrepancy that may be remedied. 
 # Release Notes
+## Version 0.4.0 
+### New Features
+- Static and dynamic table headers
+- Visually appealing settings page with color-coded error/success messages
+- Command-line interface for comparing cdc and state health department data
+- Database username and password encryption
+- Warning highlighted in red if the archive folder path is not set
+- Error message displayed if unable to create a report
+### Bug Fixes
+- Debounced input and manual filters were updating the state to the same value, causing the onColumnFiltersChange to be run more than once - the disease statistics and report discrepancies tables are now filtering properly
+- Timestamps on reports in the report history match one’s local timezone
+### Known Issues
+- If you click on one stat in the disease statistics table, the report discrepancies table header will update dynamically as intended - if you go to directly click on another stat, it will change the table title back to report discrepancies
 ## Version 0.3.0 
 ### New Features
 - Download .csv report of disease-specific data from the statistics table
