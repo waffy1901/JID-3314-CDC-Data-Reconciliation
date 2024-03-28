@@ -141,7 +141,9 @@ export default function CreateReport({ onDone }) {
             {!isAutomatic && (
               <>
                 <label htmlFor='state_file'>Upload State .csv File</label>
+                <div style={{ marginLeft: '100px'}}>
                 <input type='file' id='state_file' onChange={handleStateFileChange} />
+                </div>
               </>
             )}
             <button type='submit' className='bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae]'>
