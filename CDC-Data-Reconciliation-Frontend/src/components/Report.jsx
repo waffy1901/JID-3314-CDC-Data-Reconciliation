@@ -412,7 +412,7 @@ export default function Report({ reportID }) {
             <>
               <button
                 type='button'
-                className='bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 mb-4'
+                className='bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] mb-4'
                 onClick={toggleDiseaseStats}
               >
                 {showDiseaseStats ? "Hide" : "Show"} Disease Specific Stats
@@ -420,29 +420,31 @@ export default function Report({ reportID }) {
 
               {/* Overall Report Statistics */}
 
-              <table className='w-full text-center mb-4 shadow-md'>
-                <thead className='bg-slate-100'>
-                <tr>
-                  <th colSpan={5} className="text-2xl p-2">Report Statistics</th>
-                </tr>
-                  <tr className='border-b-2 border-slate-900'>
-                    <th className='px-4 py-2 font-semibold'>Total Cases</th>
-                    <th className='px-4 py-2 font-semibold'>Total Duplicates</th>
-                    <th className='px-4 py-2 font-semibold'>Total Missing From CDC</th>
-                    <th className='px-4 py-2 font-semibold'>Total Missing From States</th>
-                    <th className='px-4 py-2 font-semibold'>Total Wrong Attributes</th>
-                  </tr>
-                </thead>
-                <tbody className='bg-white'>
+              <div className="border border-slate-400 rounded-xl shadow-md overflow-hidden">
+                <table className='w-full text-center'>
+                  <thead className='bg-[#d4e1ec]'>
                   <tr>
-                    <td className='px-4 py-2'>{totalStatistics.TotalCases}</td>
-                    <td className='px-4 py-2'>{totalStatistics.TotalDuplicates}</td>
-                    <td className='px-4 py-2'>{totalStatistics.TotalMissingFromCDC}</td>
-                    <td className='px-4 py-2'>{totalStatistics.TotalMissingFromState}</td>
-                    <td className='px-4 py-2'>{totalStatistics.TotalWrongAttributes}</td>
+                    <th colSpan={5} className="text-2xl p-2">Report Statistics</th>
                   </tr>
-                </tbody>
-              </table>
+                    <tr className='border-b-2 border-slate-900'>
+                      <th className='px-4 py-2 font-semibold'>Total Cases</th>
+                      <th className='px-4 py-2 font-semibold'>Total Duplicates</th>
+                      <th className='px-4 py-2 font-semibold'>Total Missing From CDC</th>
+                      <th className='px-4 py-2 font-semibold'>Total Missing From States</th>
+                      <th className='px-4 py-2 font-semibold'>Total Wrong Attributes</th>
+                    </tr>
+                  </thead>
+                  <tbody className='bg-white'>
+                    <tr>
+                      <td className='px-4 py-2'>{totalStatistics.TotalCases}</td>
+                      <td className='px-4 py-2'>{totalStatistics.TotalDuplicates}</td>
+                      <td className='px-4 py-2'>{totalStatistics.TotalMissingFromCDC}</td>
+                      <td className='px-4 py-2'>{totalStatistics.TotalMissingFromState}</td>
+                      <td className='px-4 py-2'>{totalStatistics.TotalWrongAttributes}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
 
               {/* Disease Specific Statistics */}
@@ -457,7 +459,7 @@ export default function Report({ reportID }) {
                     />
                     <button
                       type="button"
-                      className="bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 flex flex-row items-center justify-around gap-2"
+                      className="bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] flex flex-row items-center justify-around gap-2"
                       onClick={clearStatFilters}
                     >
                       Clear Filters
@@ -466,16 +468,16 @@ export default function Report({ reportID }) {
 
                     <button
                       type='button'
-                      className='bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 flex flex-row items-center justify-around gap-2'
+                      className='bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] flex flex-row items-center justify-around gap-2'
                       onClick={handleStatsDownload}
                     >
                       Download CSV
                       <MdFileDownload size={23} />
                     </button>
                   </div>
-                  <div className='border border-slate-400 rounded-xl my-3'>
+                  <div className='border border-slate-400 rounded-xl shadow-md my-3 overflow-hidden'>
                     <table className='table-auto'>
-                      <thead>
+                      <thead className='bg-[#d4e1ec]'>
                         <tr>
                           <th colSpan={7} className="text-2xl p-2">Disease Statistics</th>
                         </tr>
@@ -605,7 +607,7 @@ export default function Report({ reportID }) {
               )}
             </>
           )}
-          
+
           {/* Report Discrepancies Table */}
           <div>
             <div className='w-full flex flex-row items-center justify-between'>
@@ -617,7 +619,7 @@ export default function Report({ reportID }) {
               />
               <button
                 type="button"
-                className="bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 flex flex-row items-center justify-around gap-2"
+                className="bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] flex flex-row items-center justify-around gap-2"
                 onClick={clearDiscFilters}
               >
                 Clear Filters
@@ -626,16 +628,16 @@ export default function Report({ reportID }) {
 
               <button
                 type='button'
-                className='bg-blue-400 text-white px-5 py-2 rounded-md hover:bg-blue-600 flex flex-row items-center justify-around gap-2'
+                className='bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] flex flex-row items-center justify-around gap-2'
                 onClick={handleResultsDownload}
               >
                 Download CSV
                 <MdFileDownload size={23} />
               </button>
             </div>
-            <div className='border border-slate-400 rounded-xl my-3'>
+            <div className='border border-slate-400 rounded-xl shadow-md my-3 overflow-hidden'>
               <table className='table-auto'>
-                <thead>
+                <thead className='bg-[#d4e1ec]'>
                   <tr>
                     <th colSpan={7} className="text-2xl p-2">
                       {currentDisease && currentDiscType ? `${currentDisease} ${currentDiscType}` : 'Report Discrepancies'}
