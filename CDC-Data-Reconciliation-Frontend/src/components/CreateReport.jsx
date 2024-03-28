@@ -140,7 +140,7 @@ export default function CreateReport({ onDone }) {
 
             {!isAutomatic && (
               <>
-                <label htmlFor='state_file'>Upload State .csv File</label>
+                <label htmlFor='state_file' style={{fontWeight: 'bold'}}>Upload State .csv File</label>
                 <div style={{ marginLeft: '100px'}}>
                 <input type='file' id='state_file' onChange={handleStateFileChange} />
                 </div>
