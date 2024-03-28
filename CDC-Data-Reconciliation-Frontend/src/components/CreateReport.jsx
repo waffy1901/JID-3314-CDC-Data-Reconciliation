@@ -100,18 +100,18 @@ export default function CreateReport({ onDone }) {
       <div className='bg-slate-300 w-[400px] rounded-xl mx-auto'>
         <form onSubmit={handleSubmit} className='h-full'>
           <div className='flex flex-col gap-6 items-center justify-center h-full my-8'>
-            <label style={{fontWeight: 'bold', color: '#4c80ae'}} >Create New Report</label>
+            <label className="font-bold text-[#4c80ae]" >Create New Report</label>
             <label>
-              <input type='checkbox' checked={isAutomatic} onChange={handleCheckboxChange} style={{ marginRight: '4px'}} />
+              <input type='checkbox'className="mr-4" checked={isAutomatic} onChange={handleCheckboxChange} />
               Use Automatic Report
             </label>
-            <label htmlFor='cdc_file' style={{fontWeight: 'bold'}}>Upload CDC <span style={{fontStyle: 'italic'}}>.csv</span> File:</label>
-            <div style={{ marginLeft: '100px'}}>
+            <label htmlFor='cdc_file' className="font-bold">Upload CDC <span className="italic">.csv</span> File:</label>
+            <div className="ml-24">
             <input type='file' id='cdc_file' onChange={handleCDCFileChange}  />
             </div>
             {isAutomatic && (
             <>
-            <label  style={{fontWeight: 'bold'}}>Specify Year to Query From : </label>
+            <label  className="font-bold">Specify Year to Query From : </label>
             <select
               value={inputValue}
               onChange={handleInputChange}
@@ -141,7 +141,7 @@ export default function CreateReport({ onDone }) {
             {!isAutomatic && (
               <>
                 <label htmlFor='state_file' style={{fontWeight: 'bold'}}>Upload State .csv File</label>
-                <div style={{ marginLeft: '100px'}}>
+                <div className="ml-24">
                 <input type='file' id='state_file' onChange={handleStateFileChange} />
                 </div>
               </>
