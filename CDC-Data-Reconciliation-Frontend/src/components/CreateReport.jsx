@@ -101,14 +101,16 @@ export default function CreateReport({ onDone }) {
         <form onSubmit={handleSubmit} className='h-full'>
           <div className='flex flex-col gap-6 items-center justify-center h-full my-8'>
             <label>
-              <input type='checkbox' checked={isAutomatic} onChange={handleCheckboxChange} />
+              <input type='checkbox' checked={isAutomatic} onChange={handleCheckboxChange} style={{ marginRight: '4px'}} />
               Use Automatic Report
             </label>
-            <label htmlFor='cdc_file'>Upload CDC .csv File</label>
-            <input type='file' id='cdc_file' onChange={handleCDCFileChange} />
+            <label htmlFor='cdc_file' style={{fontWeight: 'bold'}}>Upload CDC <span style={{fontStyle: 'italic'}}>.csv</span> File:</label>
+            <div style={{ marginLeft: '100px'}}>
+            <input type='file' id='cdc_file' onChange={handleCDCFileChange}  />
+            </div>
             {isAutomatic && (
             <>
-            <label>Specify Year to Query From</label>
+            <label  style={{fontWeight: 'bold'}}>Specify Year to Query From : </label>
             <select
               value={inputValue}
               onChange={handleInputChange}
@@ -127,7 +129,7 @@ export default function CreateReport({ onDone }) {
             </>
             )}
             <label>
-              <input type='checkbox' checked={isCDCFilter} onChange={handleCDCFilterChange} />
+              <input type='checkbox' checked={isCDCFilter} onChange={handleCDCFilterChange} style={{ marginRight: '4px'}} />
               Compare Existing Diseases in CDC Only
             </label>
 
