@@ -97,7 +97,7 @@ export default function CreateReport({ onDone }) {
 
   return (
     <div className='flex flex-col items-center'>
-      <div className='bg-white w-[400px] rounded-m mx-auto'>
+      <div className='bg-white w-[400px] rounded-md mx-auto'>
         <form onSubmit={handleSubmit} className='h-full'>
           <div className='flex flex-col gap-6  h-full my-8'>
             <div className="items-center justify-center mx-auto">
