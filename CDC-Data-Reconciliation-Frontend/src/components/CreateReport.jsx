@@ -99,23 +99,26 @@ export default function CreateReport({ onDone }) {
     <div className='flex flex-col items-center'>
       <div className='bg-slate-300 w-[400px] rounded-xl mx-auto'>
         <form onSubmit={handleSubmit} className='h-full'>
-          <div className='flex flex-col gap-6 items-center justify-center h-full my-8'>
-            <label className="font-bold text-[#4c80ae]" >Create New Report</label>
+          <div className='flex flex-col gap-6  h-full my-8'>
+            <div className="items-center justify-center mx-auto">
+            <label className="font-bold text-black text-2xl" >Create New Report</label>
+            </div>
             <label>
-              <input type='checkbox'className="mr-4" checked={isAutomatic} onChange={handleCheckboxChange} />
+              <input type='checkbox'className="ml-4 mr-2" checked={isAutomatic} onChange={handleCheckboxChange} />
               Use Automatic Report
             </label>
-            <label htmlFor='cdc_file' className="font-bold">Upload CDC <span className="italic">.csv</span> File:</label>
-            <div className="ml-24">
+            <label htmlFor='cdc_file' className="font-bold ml-4">Upload CDC <span className="italic">.csv</span> File:</label>
+            <div className="ml-4">
             <input type='file' id='cdc_file' onChange={handleCDCFileChange}  />
             </div>
             {isAutomatic && (
             <>
-            <label  className="font-bold">Specify Year to Query From : </label>
-            <select
+
+            <label className="font-bold ml-4">Specify Year to Query From: </label>
+            <select className="border border-black rounded-sm bg-gray-100 text-left  ml-4"
+              style={{ width: '150px'}}
               value={inputValue}
               onChange={handleInputChange}
-              style={{ border: '1px solid black', borderRadius: '2px', backgroundColor: 'whitesmoke'}}
             >
               <option
                 value="">Select a Year
@@ -130,7 +133,7 @@ export default function CreateReport({ onDone }) {
             </>
             )}
             <label>
-              <input type='checkbox' checked={isCDCFilter} onChange={handleCDCFilterChange} style={{ marginRight: '4px'}} />
+              <input type='checkbox' className=" ml-4 mr-2" checked={isCDCFilter} onChange={handleCDCFilterChange} />
               Compare Existing Diseases in CDC Only
             </label>
 
@@ -140,15 +143,17 @@ export default function CreateReport({ onDone }) {
 
             {!isAutomatic && (
               <>
-                <label htmlFor='state_file' style={{fontWeight: 'bold'}}>Upload State .csv File</label>
-                <div className="ml-24">
+                <label htmlFor='state_file' className="font-bold ml-4">Upload State .csv File</label>
+                <div className="ml-4">
                 <input type='file' id='state_file' onChange={handleStateFileChange} />
                 </div>
               </>
             )}
-            <button type='submit' className='bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae]'>
-              Submit &#10003;
+            <div className="items-center justify-center mx-auto">
+            <button type='submit' className='bg-[#7aa2c4] text-white px-4 py-2 w-20 rounded-md hover:bg-[#4c80ae]'>
+              Submit
             </button>
+            </div>
           </div>
         </form>
       </div>
