@@ -138,7 +138,7 @@ export default function CreateReport({ onDone }) {
             )}
             {!isAutomatic && (
               <>
-                <label htmlFor='state_file' className="font-bold ml-4">Upload State <span className="italic">.csv</span> File</label>
+                <label htmlFor='state_file' className="font-bold ml-4">Upload State <span className="italic">.csv</span> File:</label>
                 <div className="ml-4">
                 <input type='file' id='state_file' onChange={handleStateFileChange} />
                 </div>
