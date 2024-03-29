@@ -433,7 +433,8 @@ async def serve_react_app(catchall: str):
 
 if __name__ == "__main__":
     # Run the API with uvicorn
-    uvicorn.run("server:app", host="0.0.0.0", port=app.config["port"])
+    # If application is slow, try increasing the number of workers
+    uvicorn.run("server:app", host="0.0.0.0", port=app.config["port"], workers=1)
 
     # Use this command to run the API with reloading enabled (DOES NOT WORK ON WINDOWS)
     # uvicorn.run("server:app", host="localhost", port=8000, reload=True)
