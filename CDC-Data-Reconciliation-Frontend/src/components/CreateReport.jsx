@@ -118,8 +118,7 @@ export default function CreateReport({ onDone }) {
             <>
 
             <label className="font-bold ml-4">Specify Year to Query From: </label>
-            <select className="border border-black rounded-sm bg-gray-100 text-left  ml-4"
-              style={{ width: '150px'}}
+            <select className="border border-black rounded-sm bg-gray-100 text-left  ml-4 w-[150px]"
               value={inputValue}
               onChange={handleInputChange}
             >

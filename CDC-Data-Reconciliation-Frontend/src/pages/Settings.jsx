@@ -80,7 +80,7 @@ export default function Settings() {
             id='archive_path' 
             onChange={handleArchivePathChange} 
             className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
-            placeholder='Edit archive path'
+            placeholder={archiveEmpty ? 'Enter archive path' : 'Edit archive path'}
             value={tempArchivePath}
           />
         
