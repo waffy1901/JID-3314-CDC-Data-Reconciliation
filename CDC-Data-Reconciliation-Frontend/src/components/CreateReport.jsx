@@ -107,10 +107,13 @@ export default function CreateReport({ onDone }) {
               <input type='checkbox'className="ml-4 mr-2" checked={isAutomatic} onChange={handleCheckboxChange} />
               Use Automatic Report
             </label>
+            <hr></hr>
             <label htmlFor='cdc_file' className="font-bold ml-4">Upload CDC <span className="italic">.csv</span> File:</label>
             <div className="ml-4">
             <input type='file' id='cdc_file' onChange={handleCDCFileChange}  />
+
             </div>
+            <hr></hr>
             {isAutomatic && (
             <>
 
@@ -130,6 +133,7 @@ export default function CreateReport({ onDone }) {
                 </option>
               ))}
             </select>
+            <hr></hr>
             </>
             )}
             <label>
@@ -143,6 +147,7 @@ export default function CreateReport({ onDone }) {
 
             {!isAutomatic && (
               <>
+              <hr></hr>
                 <label htmlFor='state_file' className="font-bold ml-4">Upload State .csv File</label>
                 <div className="ml-4">
                 <input type='file' id='state_file' onChange={handleStateFileChange} />
