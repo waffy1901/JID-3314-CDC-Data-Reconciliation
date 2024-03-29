@@ -133,9 +133,18 @@ export default function CreateReport({ onDone }) {
                 </option>
               ))}
             </select>
-            <hr></hr>
+            
             </>
             )}
+            {!isAutomatic && (
+              <>
+                <label htmlFor='state_file' className="font-bold ml-4">Upload State <span className="italic">.csv</span> File:</label>
+                <div className="ml-4">
+                <input type='file' id='state_file' onChange={handleStateFileChange} />
+                </div>
+              </>
+            )}
+            <hr></hr>
             <label>
               <input type='checkbox' className=" ml-4 mr-2" checked={isCDCFilter} onChange={handleCDCFilterChange} />
               Compare Existing Diseases in CDC Only
@@ -145,15 +154,7 @@ export default function CreateReport({ onDone }) {
               // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
             }
 
-            {!isAutomatic && (
-              <>
-              <hr></hr>
-                <label htmlFor='state_file' className="font-bold ml-4">Upload State .csv File</label>
-                <div className="ml-4">
-                <input type='file' id='state_file' onChange={handleStateFileChange} />
-                </div>
-              </>
-            )}
+            
             <div className="items-center justify-center mx-auto">
             <button type='submit' className='bg-[#7aa2c4] text-white px-4 py-2 w-20 rounded-md hover:bg-[#4c80ae]'>
               Submit
