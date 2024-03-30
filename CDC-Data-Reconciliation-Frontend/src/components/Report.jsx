@@ -407,19 +407,10 @@ export default function Report({ reportID }) {
             <h2 className='text-2xl font-bold'>Results</h2>
             <h3>Number of Cases Different: {results.length}</h3>
           </div>
-          {/* Toggle Button for Disease Specific Stats */}
+
           {statistics && (
             <>
-              <button
-                type='button'
-                className='bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] mb-4'
-                onClick={toggleDiseaseStats}
-              >
-                {showDiseaseStats ? "Hide" : "Show"} Disease Specific Stats
-              </button>
-
               {/* Overall Report Statistics */}
-
               <div className="border border-slate-400 rounded-xl shadow-md overflow-hidden">
                 <table className='w-full text-center'>
                   <thead className='bg-[#d4e1ec]'>
@@ -445,7 +436,15 @@ export default function Report({ reportID }) {
                   </tbody>
                 </table>
               </div>
-
+              
+              {/* Toggle Button for Disease Specific Stats */}
+              <button
+                type='button'
+                className='bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] mb-4 mt-2'
+                onClick={toggleDiseaseStats}
+              >
+                {showDiseaseStats ? "Hide" : "Show"} Disease Specific Stats
+              </button>
 
               {/* Disease Specific Statistics */}
               {showDiseaseStats && (

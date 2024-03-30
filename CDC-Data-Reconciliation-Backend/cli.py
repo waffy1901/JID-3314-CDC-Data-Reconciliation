@@ -9,12 +9,6 @@ import compare
 config = None
 conn = None
 
-# Method to test if you have the correct ODBC Driver
-# print("List of ODBC Drivers:")
-# dlist = pyodbc.drivers()
-# for drvr in dlist:
-#     print('LIST OF DRIVERS:' + drvr)
-
 # Load config.json
 configDir = os.path.dirname(__file__)
 
@@ -45,7 +39,6 @@ def get_state_csv(year: int):
         writer.writerows(state_content)
 
     return state_save_to
-
     
 def main():
     global conn
@@ -107,7 +100,6 @@ def main():
             writer.writerow({'EventCode': eventCode, 'EventName': data['eventName'], 'TotalCases': data['totalCases'],
                              'TotalDuplicates': data['totalDuplicates'], 'TotalMissingFromCDC': data['totalMissingCDC'],
                              'TotalMissingFromState': data['totalMissingState'], 'TotalWrongAttributes': data['totalWrongAttributes']})
-
 
 if __name__ == "__main__": 
     main()
