@@ -63,11 +63,14 @@ export default function CreateReport({ onDone }) {
         } else {
           console.error("Failed to fetch automatic report!")
           setShowError(true);
-          const errorMessage = await response.text();
+          const errorMessage = await response.detail();
           setErrorMessage(errorMessage);
         }
       } catch (e) {
         console.error("Error fetching automatic report - " + e)
+        setShowError(true);
+        const errorMessage = await response.detail();
+        setErrorMessage(errorMessage);
       }
 
       // ran if the automatic report checkbox is not ticked
@@ -94,11 +97,14 @@ export default function CreateReport({ onDone }) {
         } else {
           console.error("Files failed to upload!")
           setShowError(true);
-          const errorMessage = await response.text();
+          const errorMessage = await response.detail();
           setErrorMessage(errorMessage);
         }
       } catch (e) {
         console.error("Error Creating Report - " + e)
+        setShowError(true);
+        const errorMessage = await response.detail();
+        setErrorMessage(errorMessage);
       }
     }
   }
@@ -107,29 +113,10 @@ export default function CreateReport({ onDone }) {
   const Error = ({ message }) => (
     <>
       {/* Overlay div */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        zIndex: 50,
-      }} />
+      <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 z-40"/>
   
       {/* Popup div */}
-      <div style={{
-        position: 'fixed',
-        top: '50%', 
-        left: '50%', 
-        transform: 'translate(-50%, -50%)',
-        background: 'white',
-        padding: '20px',
-        zIndex: 100,
-        width: 'auto',
-        textAlign: 'center',
-        borderRadius: '5px',
-      }}>
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-5 z-50 w-auto text-center rounded">
         <p>{message}</p>
         <button 
           onClick={() => setShowError(false)}
