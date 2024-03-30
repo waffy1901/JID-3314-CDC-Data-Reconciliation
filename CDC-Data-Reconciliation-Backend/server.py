@@ -26,15 +26,8 @@ app.add_middleware(CORSMiddleware, allow_origins=origins,
 if os.path.exists(os.path.join(os.path.dirname(__file__), "..", "CDC-Data-Reconciliation-Frontend", "dist", "assets")):
     app.mount("/assets", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "..", "CDC-Data-Reconciliation-Frontend", "dist", "assets")), name="assets")
 
-# Method to test if you have the correct ODBC Driver
-# print("List of ODBC Drivers:")
-# dlist = pyodbc.drivers()
-# for drvr in dlist:
-#     print('LIST OF DRIVERS:' + drvr)
-
 # Load config.json
 app.dir = os.path.dirname(__file__)
-
 
 config_file_path = os.path.join(app.dir, "config.json")
 with open(config_file_path, "r") as f:
@@ -103,7 +96,6 @@ cur.execute('''
 
 app.liteConn.commit()
 
-
 @app.post("/manual_report")
 async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None)):
     folder_name = "temp"
@@ -140,7 +132,6 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
     
     process = await asyncio.create_subprocess_exec(*subprocess_args)
     await process.wait()
-    
 
     res = []
     with open(res_file, newline='') as csvfile:
@@ -150,7 +141,6 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
         for row in reader:
             # Add the row as a dictionary to the list
             res.append(tuple(row.values()))
-
 
     numDiscrepancies = len(res)
     reportId = insert_report(numDiscrepancies)
@@ -188,7 +178,6 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
 
     return Response(status_code=200)
 
-
 @app.post("/automatic_report")
 async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile = File(None)):
     # Run query to retrieve data from NBS ODSE database
@@ -203,9 +192,6 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
 
     # Fetching the archive_path for saving the Report
     archive_path = await get_config_setting("archive_path")
-    # Making sure the archive_path has been set, otherwise throwing an exception
-    
-    
     
     id = str(uuid.uuid4())
     os.makedirs(os.path.join(app.dir, folder_name, id))
@@ -237,7 +223,6 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     
     process = await asyncio.create_subprocess_exec(*subprocess_args)
     await process.wait()
-
 
     # Add results to the response
     res = []
@@ -284,7 +269,6 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
     return Response(status_code=200)
-
 
 @app.get("/reports")
 async def get_report_summaries():
@@ -347,8 +331,7 @@ def insert_report(noOfDiscrepancies):
         return report_id
     except Exception as e:
         app.liteConn.rollback()
-        raise e
-    
+        raise e  
 
 def insert_statistics(stats):
     try:
@@ -367,7 +350,6 @@ def insert_cases(res):
     except Exception as e:
         app.liteConn.rollback()
         raise e
-
 
 def run_query(year: int):
     query = None
@@ -429,7 +411,6 @@ async def serve_react_app(catchall: str):
         return FileResponse(os.path.join(os.path.dirname(__file__), "..", "CDC-Data-Reconciliation-Frontend", "dist", "index.html"))
     else:
         raise HTTPException(status_code=404, detail="File not found")
-
 
 if __name__ == "__main__":
     # Run the API with uvicorn
