@@ -101,7 +101,7 @@ export default function CreateReport({ onDone }) {
         <form onSubmit={handleSubmit} className='h-full'>
           <div className='flex flex-col gap-6  h-full my-8'>
             <div className="items-center justify-center mx-auto">
-            <label className="font-bold text-black text-2xl" >Create New Report</label>
+              <label className="font-bold text-black text-2xl" >Create New Report</label>
             </div>
             <label>
               <input type='checkbox'className="ml-4 mr-2" checked={isAutomatic} onChange={handleCheckboxChange} />
@@ -110,8 +110,7 @@ export default function CreateReport({ onDone }) {
             <hr></hr>
             <label htmlFor='cdc_file' className="font-bold ml-4">Upload CDC <span className="italic">.csv</span> File:</label>
             <div className="ml-4">
-            <input type='file' id='cdc_file' onChange={handleCDCFileChange}  />
-
+              <input type='file' id='cdc_file' onChange={handleCDCFileChange}  />
             </div>
             <hr></hr>
             {isAutomatic && (
@@ -139,7 +138,7 @@ export default function CreateReport({ onDone }) {
               <>
                 <label htmlFor='state_file' className="font-bold ml-4">Upload State <span className="italic">.csv</span> File:</label>
                 <div className="ml-4">
-                <input type='file' id='state_file' onChange={handleStateFileChange} />
+                  <input type='file' id='state_file' onChange={handleStateFileChange} />
                 </div>
               </>
             )}
@@ -152,12 +151,11 @@ export default function CreateReport({ onDone }) {
             {
               // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
             }
-
             
             <div className="items-center justify-center mx-auto">
-            <button type='submit' className='bg-[#7aa2c4] text-white px-4 py-2 w-20 rounded-md hover:bg-[#4c80ae]'>
-              Submit
-            </button>
+              <button type='submit' className='bg-[#7aa2c4] text-white px-4 py-2 w-20 rounded-md hover:bg-[#4c80ae]'>
+                Submit
+              </button>
             </div>
           </div>
         </form>
