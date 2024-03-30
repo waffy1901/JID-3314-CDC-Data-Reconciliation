@@ -63,14 +63,18 @@ export default function CreateReport({ onDone }) {
         } else {
           console.error("Failed to fetch automatic report!")
           setShowError(true);
-          const errorMessage = await response.detail();
+          const res = await response.json();
+          const errorMessage = res.detail;
           setErrorMessage(errorMessage);
         }
       } catch (e) {
         console.error("Error fetching automatic report - " + e)
         setShowError(true);
-        const errorMessage = await response.detail();
-        setErrorMessage(errorMessage);
+        if (typeof e.message === 'string') {
+          setErrorMessage(e.message);
+        } else {
+          setErrorMessage("Internal Server Error")
+        }
       }
 
       // ran if the automatic report checkbox is not ticked
@@ -97,14 +101,18 @@ export default function CreateReport({ onDone }) {
         } else {
           console.error("Files failed to upload!")
           setShowError(true);
-          const errorMessage = await response.detail();
+          const res = await response.json();
+          const errorMessage = res.detail;
           setErrorMessage(errorMessage);
         }
       } catch (e) {
         console.error("Error Creating Report - " + e)
         setShowError(true);
-        const errorMessage = await response.detail();
-        setErrorMessage(errorMessage);
+        if (typeof e.message === 'string') {
+          setErrorMessage(e.message);
+        } else {
+          setErrorMessage("Internal Server Error")
+        }
       }
     }
   }
@@ -117,11 +125,11 @@ export default function CreateReport({ onDone }) {
   
       {/* Popup div */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-5 z-50 w-auto text-center rounded">
-        <p>{message}</p>
-        <button 
-          onClick={() => setShowError(false)}
-          className='bg-[#7aa2c4] text-white px-1 py-1 rounded-md hover:bg-[#4c80ae] w-16'
-        >
+        <label className="font-bold text-black text-xl mb-4 block">
+          Error creating report
+        </label>
+        <p className="mb-4">{message}</p>
+        <button onClick={() => setShowError(false)} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mt-4">
           Close
         </button>
       </div>
