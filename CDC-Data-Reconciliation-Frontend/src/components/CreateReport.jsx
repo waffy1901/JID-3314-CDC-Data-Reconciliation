@@ -7,6 +7,8 @@ export default function CreateReport({ onDone }) {
   const [isAutomatic, setIsAutomatic] = useState(true)
   const [inputValue, setInputValue] = useState('')
   const [isCDCFilter, setIsCDCFilter] = useState(true)
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const currYear = 2023
   const yearList = Array.from({ length: 101}, (_, index) => currYear + index)
@@ -60,6 +62,9 @@ export default function CreateReport({ onDone }) {
           onDone()
         } else {
           console.error("Failed to fetch automatic report!")
+          setShowError(true);
+          const errorMessage = await response.text();
+          setErrorMessage(errorMessage);
         }
       } catch (e) {
         console.error("Error fetching automatic report - " + e)
@@ -88,6 +93,9 @@ export default function CreateReport({ onDone }) {
           onDone()
         } else {
           console.error("Files failed to upload!")
+          setShowError(true);
+          const errorMessage = await response.text();
+          setErrorMessage(errorMessage);
         }
       } catch (e) {
         console.error("Error Creating Report - " + e)
@@ -95,8 +103,50 @@ export default function CreateReport({ onDone }) {
     }
   }
 
+  // I am not really sure if I should make a separate component for the Error Popup or not, but for now im doing this
+  const Error = ({ message }) => (
+    <>
+      {/* Overlay div */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        zIndex: 50,
+      }} />
+  
+      {/* Popup div */}
+      <div style={{
+        position: 'fixed',
+        top: '50%', 
+        left: '50%', 
+        transform: 'translate(-50%, -50%)',
+        background: 'white',
+        padding: '20px',
+        zIndex: 100,
+        width: 'auto',
+        textAlign: 'center',
+        borderRadius: '5px',
+      }}>
+        <p>{message}</p>
+        <button 
+          onClick={() => setShowError(false)}
+          className='bg-[#7aa2c4] text-white px-1 py-1 rounded-md hover:bg-[#4c80ae] w-16'
+        >
+          Close
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <div className='flex flex-col items-center'>
+      {
+      // this is where i am inserting the popup with the error message if the reponse does not come back ok
+      }
+      {showError && <Error message={errorMessage} />}
       <div className='bg-white w-[400px] rounded-md mx-auto'>
         <form onSubmit={handleSubmit} className='h-full'>
           <div className='flex flex-col gap-6  h-full my-8'>
