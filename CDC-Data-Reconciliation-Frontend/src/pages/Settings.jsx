@@ -7,6 +7,7 @@ export default function Settings() {
   const [password, setPassword] = useState('')
   const [passFailed, setPassFailed] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [archiveEmpty, setArchiveEmpty] = useState(true)
 
   const handleArchivePathChange = (e) => {
     setTempArchivePath(e.target.value)
@@ -28,9 +29,11 @@ export default function Settings() {
         const data = await response.json()
         if (data.length > 0) {
           setArchivePath(data)
+          setArchiveEmpty(false)
           console.log("Fetched config - archive path is " + data)
         } else {
           console.log("Fetched config, but there's no setting for archive path yet.")
+          setArchiveEmpty(true)
         }
       } else {
         console.error("Failed to fetch config!")
@@ -50,6 +53,7 @@ export default function Settings() {
 
       if (response.ok) {
         setArchivePath(tempArchivePath)
+        setArchiveEmpty(false)
         console.log("Config submitted successfully!")
         setPassFailed(false)
         setSuccess(true)
@@ -64,21 +68,54 @@ export default function Settings() {
   }
 
   return (
-    <>
-      <div className='text-center mt-10 text-xl'><b>Configure settings here:</b></div>
-      <form onSubmit={handleSubmit} className="h-full mt-5">
-        <div className='flex flex-col gap-4 items-center h-full my-8'>
-          <label htmlFor='archive_path'>Current archive folder path: {archivePath}</label>
-          <input type='text' id='archive_path' onChange={handleArchivePathChange} />
-          <label htmlFor='password'>Password</label>
-          <input type='text' id='password' onChange={handlePasswordChange} />
-          <button type='submit' className='bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600'>
-              Submit
+    <div className='max-w-lg mx-auto p-8'>
+      <h1 className='text-3xl font-bold text-center mb-6'>Configure Settings</h1>
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <div className='mb-4'>
+          <label htmlFor='archive_path' className='block text-gray-700 text-sm font-bold mb-2'>
+            Current archive folder path: {archivePath}
+          </label>
+          <input 
+            type='text' 
+            id='archive_path' 
+            onChange={handleArchivePathChange} 
+            className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
+            placeholder={archiveEmpty ? 'Enter archive path' : 'Edit archive path'}
+            value={tempArchivePath}
+          />
+        
+        <div className='mt-4'>
+          {archiveEmpty && <p className='text-red-500 text-s bold text-center'>
+              Warning: archive path is unset.<br></br>
+              Created reports will not be downloaded automatically.</p>}
+        </div>
+        </div>
+        <div className='mb-6'>
+          <label htmlFor='password' className='block text-gray-700 text-sm font-bold mb-2'>
+            Password
+          </label>
+          <input 
+            type='password' 
+            id='password' 
+            onChange={handlePasswordChange} 
+            className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
+            placeholder='Enter password'
+          />
+          {/* Placeholder for message */}
+          <div className='h-6 p-4'>
+            {passFailed && <p className='text-red-500 text-s italic text-center'>Incorrect password!</p>}
+            {success && <p className='text-green-500 text-s italic text-center'>Successfully updated settings!</p>}
+          </div>
+        </div>
+        <div className='flex justify-center mt-4'>
+          <button 
+            type='submit' 
+            className='bg-[#7aa2c4] hover:bg-[#4c80ae] text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline'
+          >
+            Submit
           </button>
-          {passFailed && <label>Incorrect password.</label>}
-          {success && <label>Successfully updated settings.</label>}
         </div>
       </form>
-    </>
-  )
+    </div>
+  )    
 }

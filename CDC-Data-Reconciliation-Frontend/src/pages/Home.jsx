@@ -46,9 +46,9 @@ export default function Home() {
       </Modal>
 
       <div className='flex flex-row items-center h-full w-full'>
-        <div className='w-[600px] bg-slate-200 h-full flex flex-col items-center gap-4 p-8 overflow-auto'>
+        <div className='w-[340px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 overflow-auto'>
           <button
-            className='bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600'
+            className='bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae] shadow-lg'
             onClick={() => setIsModalOpen(true)}
           >
             Create New Report
@@ -58,21 +58,17 @@ export default function Home() {
               <div
                 key={summary.ID}
                 onClick={() => handleSummaryClick(summary.ID)}
-                className={`w-4/5 rounded-lg p-4 ${
-                  summary.ID === currReport ? "bg-indigo-600 text-slate-200" : "bg-indigo-300 hover:bg-indigo-400"
+                className={`w-4/5 rounded-md p-4 shadow-lg text-slate-950 ${
+                  summary.ID === currReport ? "bg-[#b8cde0] cursor-default" : "bg-white hover:bg-slate-100 cursor-pointer"
                 }`}
               >
-                <h2 className='text-xl font-semibold'>Report: {summary.ID}</h2>
+                <h2 className='text-xl font-semibold'>Report {summary.ID}</h2>
                 <h2>Discrepancies: {summary.NumberOfDiscrepancies}</h2>
-                <h2>
-                  Time Created: {new Date(summary.CreatedAtDate).toLocaleDateString("en-US")}{" "}
-                  {new Date("2000-01-01T" + summary.TimeOfCreation).toLocaleTimeString("en-US")} UTC
-                </h2>
-                <h2></h2>
+                <h2>{new Date(`${summary.CreatedAtDate}T${summary.TimeOfCreation}Z`).toLocaleString("en-US")}</h2>
               </div>
             ))}
             {reportSummaries && visibleReportsCount < reportSummaries.length && (
-              <button className= 'bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600' onClick={() => setVisibleReportsCount(reportSummaries.length)}>
+              <button className= 'bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae]' onClick={() => setVisibleReportsCount(reportSummaries.length)}>
                 See More
               </button>
             )}

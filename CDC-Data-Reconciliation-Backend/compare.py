@@ -3,7 +3,6 @@ import argparse
 from datetime import datetime
 import os
 
-
 class CaseResult:
     def __init__(self, caseID, eventCode, eventName, MMWRYear, MMWRWeek, reason, reasonID) -> None:
         self.caseID = caseID
@@ -19,7 +18,6 @@ class CaseResult:
 stats = {}
 
 results: list[CaseResult] = []
-
 
 def get_state_dict(state_file, eventCodes=None):
     state_dict = {}
@@ -54,7 +52,6 @@ def get_state_dict(state_file, eventCodes=None):
                 state_dict[row['CaseID']] = row
 
     return state_dict
-
 
 def get_cdc_dict(cdc_file, filterCDC = False):
     cdc_dict = {}
@@ -104,8 +101,8 @@ def comp(state_dict, cdc_dict):
         else:
             i = 0
             for attribute in state_row:
-                # Skip the first 2 attributes since they are not included in CDC CSV file
-                if i < 2:
+                # Skip the first attribute since they are not included in CDC CSV file
+                if i < 1:
                     i += 1
                     continue
 
@@ -143,7 +140,6 @@ def comp(state_dict, cdc_dict):
             stats[cdc_row['EventCode']]['totalCases'] += 1
         else:
             stats[cdc_row['EventCode']] = {'eventName': cdc_row['EventName'], 'totalCases': 1, 'totalDuplicates': 0, 'totalMissingCDC': 0, 'totalMissingState': 1, 'totalWrongAttributes': 0}
-
 
 def main():
     parser = argparse.ArgumentParser(

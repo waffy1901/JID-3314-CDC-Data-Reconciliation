@@ -1,9 +1,9 @@
 SELECT 
-Public_health_case.public_health_case_uid,Public_health_case.add_time,
+Public_health_case.add_time,
 Public_health_case.local_id AS CaseID
        , substring(Public_health_case.jurisdiction_cd,4,3) as CountyReporting
-	   , Public_health_case.cd as EventCode
 	   , Public_health_case.cd_desc_txt as EventName
+	   , Public_health_case.cd as EventCode
        , Public_health_case.mmwr_year as MMWRYear,Public_health_case.mmwr_week as MMWRWeek,
 	   
 	   case when Public_health_case.case_class_cd = 'C' then 'Confirmed'
@@ -33,16 +33,14 @@ Public_health_case.local_id AS CaseID
 	   else '9' end as Race
        ,case when Person.ethnic_group_ind ='2135-2' then '1'
 	   when Person.ethnic_group_ind ='2186-5' then '2'
-	   else '9' end as Ethnicty
-FROM Notification with (nolock)
-       INNER JOIN Act_relationship with (nolock) ON Notification.notification_uid = Act_relationship.source_act_uid
-              AND Notification.cd = 'NOTF'
-       INNER JOIN Public_health_case with (nolock) ON Act_relationship.target_act_uid = Public_health_case.public_health_case_uid
+	   else '9' end as Ethnicity
+FROM Public_health_case with (nolock)
        INNER JOIN Participation with (nolock) ON Participation.act_uid = Public_health_case.public_health_case_uid
               AND Participation.type_cd = 'SubjOfPHC'
        INNER JOIN Person with (nolock) ON Person.person_uid = Participation.subject_entity_uid
-       
-       LEFT OUTER JOIN Person_race with (nolock) ON Person.person_uid = Person_race.person_uid
+          LEFT OUTER JOIN Person_race with (nolock) ON Person.person_uid = Person_race.person_uid
       
-WHERE Notification.auto_resend_ind = 'T'
+WHERE Public_health_case.record_status_cd!='LOG_DEL'
+
+
        AND Public_health_case.mmwr_year = ?

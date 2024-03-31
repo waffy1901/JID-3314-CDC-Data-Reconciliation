@@ -1,7 +1,8 @@
 import uvicorn
 from fastapi import FastAPI, File, Response, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import asyncio
 import csv
 import os
@@ -21,25 +22,23 @@ origins = [
 app.add_middleware(CORSMiddleware, allow_origins=origins,
                    allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-
-# Method to test if you have the correct ODBC Driver
-# print("List of ODBC Drivers:")
-# dlist = pyodbc.drivers()
-# for drvr in dlist:
-#     print('LIST OF DRIVERS:' + drvr)
+# Serve the static files from the React app only if the assets folder exists
+if os.path.exists(os.path.join(os.path.dirname(__file__), "..", "CDC-Data-Reconciliation-Frontend", "dist", "assets")):
+    app.mount("/assets", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "..", "CDC-Data-Reconciliation-Frontend", "dist", "assets")), name="assets")
 
 # Load config.json
 app.dir = os.path.dirname(__file__)
 
-
 config_file_path = os.path.join(app.dir, "config.json")
 with open(config_file_path, "r") as f:
     app.config = json.load(f)
+    db_username = os.getenv('DB_USERNAME')
+    db_password = os.getenv('DB_PASSWORD')
 
 # Connect to the SQL Server
 connection_string = 'DRIVER={' + app.config["driver"] + \
     '}' + \
-    f';SERVER={app.config["server"]};DATABASE={app.config["database"]};UID={app.config["db_username"]};PWD={app.config["db_password"]}'
+    f';SERVER={app.config["server"]};DATABASE={app.config["database"]};UID={db_username};PWD={db_password}'
 
 app.conn = pyodbc.connect(connection_string)
 
@@ -97,7 +96,6 @@ cur.execute('''
 
 app.liteConn.commit()
 
-
 @app.post("/manual_report")
 async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None)):
     folder_name = "temp"
@@ -134,7 +132,6 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
     
     process = await asyncio.create_subprocess_exec(*subprocess_args)
     await process.wait()
-    
 
     res = []
     with open(res_file, newline='') as csvfile:
@@ -144,7 +141,6 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
         for row in reader:
             # Add the row as a dictionary to the list
             res.append(tuple(row.values()))
-
 
     numDiscrepancies = len(res)
     reportId = insert_report(numDiscrepancies)
@@ -182,13 +178,12 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
 
     return Response(status_code=200)
 
-
 @app.post("/automatic_report")
 async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile = File(None)):
     # Run query to retrieve data from NBS ODSE database
     (column_names, state_content) = run_query(year)
     if not len(state_content) > 0:
-        raise Exception("Query resulted in no data")
+        raise HTTPException(status_code=404, detail="Query resulted in no data")
 
     # Create temp file structure
     folder_name = "temp"
@@ -197,9 +192,6 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
 
     # Fetching the archive_path for saving the Report
     archive_path = await get_config_setting("archive_path")
-    # Making sure the archive_path has been set, otherwise throwing an exception
-    
-    
     
     id = str(uuid.uuid4())
     os.makedirs(os.path.join(app.dir, folder_name, id))
@@ -231,7 +223,6 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     
     process = await asyncio.create_subprocess_exec(*subprocess_args)
     await process.wait()
-
 
     # Add results to the response
     res = []
@@ -278,7 +269,6 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     os.rmdir(os.path.join(app.dir, folder_name, id))
 
     return Response(status_code=200)
-
 
 @app.get("/reports")
 async def get_report_summaries():
@@ -341,8 +331,7 @@ def insert_report(noOfDiscrepancies):
         return report_id
     except Exception as e:
         app.liteConn.rollback()
-        raise e
-    
+        raise e  
 
 def insert_statistics(stats):
     try:
@@ -361,7 +350,6 @@ def insert_cases(res):
     except Exception as e:
         app.liteConn.rollback()
         raise e
-
 
 def run_query(year: int):
     query = None
@@ -389,7 +377,7 @@ async def get_config_setting(field_name: str):
         if len(value) > 0:
             # value is [(idx, field_name, field_value)] so need to return value[0][2]
             return value[0][2]
-        else: return []
+        else: return None
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return None
@@ -405,7 +393,7 @@ async def set_config_setting(field_name: str, value: str, password: str):
     try:
         cur = app.liteConn.cursor()
         # If the setting already exists, update it
-        if len(current_setting) > 0:
+        if current_setting is not None:
             cur.execute("UPDATE Config SET FieldValue = ? WHERE FieldName = ?", (value, field_name))
         else:
             # Otherwise, create the entry
@@ -414,11 +402,20 @@ async def set_config_setting(field_name: str, value: str, password: str):
     except Exception as e:
         app.liteConn.rollback()
         raise e
-
+    
+# Route to serve React index.html (for client-side routing)
+@app.get("/{catchall:path}")
+async def serve_react_app(catchall: str):
+    # Return the index.html file from the React app only if the file exists
+    if os.path.exists(os.path.join(os.path.dirname(__file__), "..", "CDC-Data-Reconciliation-Frontend", "dist", "index.html")):
+        return FileResponse(os.path.join(os.path.dirname(__file__), "..", "CDC-Data-Reconciliation-Frontend", "dist", "index.html"))
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
 
 if __name__ == "__main__":
     # Run the API with uvicorn
-    uvicorn.run("server:app", host="localhost", port=8000)
+    # If application is slow, try increasing the number of workers
+    uvicorn.run("server:app", host="0.0.0.0", port=app.config["port"], workers=1)
 
     # Use this command to run the API with reloading enabled (DOES NOT WORK ON WINDOWS)
     # uvicorn.run("server:app", host="localhost", port=8000, reload=True)

@@ -6,7 +6,9 @@ export default function CreateReport({ onDone }) {
   const [cdcFile, setCDCFile] = useState(null)
   const [isAutomatic, setIsAutomatic] = useState(true)
   const [inputValue, setInputValue] = useState('')
-  const [isCDCFilter, setIsCDCFilter] = useState(false)
+  const [isCDCFilter, setIsCDCFilter] = useState(true)
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const currYear = 2023
   const yearList = Array.from({ length: 101}, (_, index) => currYear + index)
@@ -60,9 +62,19 @@ export default function CreateReport({ onDone }) {
           onDone()
         } else {
           console.error("Failed to fetch automatic report!")
+          setShowError(true);
+          const res = await response.json();
+          const errorMessage = res.detail;
+          setErrorMessage(errorMessage);
         }
       } catch (e) {
         console.error("Error fetching automatic report - " + e)
+        setShowError(true);
+        if (typeof e.message === 'string') {
+          setErrorMessage(e.message);
+        } else {
+          setErrorMessage("Internal Server Error")
+        }
       }
 
       // ran if the automatic report checkbox is not ticked
@@ -88,31 +100,71 @@ export default function CreateReport({ onDone }) {
           onDone()
         } else {
           console.error("Files failed to upload!")
+          setShowError(true);
+          const res = await response.json();
+          const errorMessage = res.detail;
+          setErrorMessage(errorMessage);
         }
       } catch (e) {
         console.error("Error Creating Report - " + e)
+        setShowError(true);
+        if (typeof e.message === 'string') {
+          setErrorMessage(e.message);
+        } else {
+          setErrorMessage("Internal Server Error")
+        }
       }
     }
   }
 
+  // I am not really sure if I should make a separate component for the Error Popup or not, but for now im doing this
+  const Error = ({ message }) => (
+    <>
+      {/* Overlay div */}
+      <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 z-40"/>
+  
+      {/* Popup div */}
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-5 z-50 w-auto text-center rounded">
+        <label className="font-bold text-black text-xl mb-4 block">
+          Error creating report
+        </label>
+        <p className="mb-4">{message}</p>
+        <button onClick={() => setShowError(false)} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mt-4">
+          Close
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <div className='flex flex-col items-center'>
-      <div className='bg-slate-300 w-[400px] rounded-xl mx-auto'>
+      {
+      // this is where i am inserting the popup with the error message if the reponse does not come back ok
+      }
+      {showError && <Error message={errorMessage} />}
+      <div className='bg-white w-[400px] rounded-md mx-auto'>
         <form onSubmit={handleSubmit} className='h-full'>
-          <div className='flex flex-col gap-6 items-center justify-center h-full my-8'>
+          <div className='flex flex-col gap-6  h-full my-8'>
+            <div className="items-center justify-center mx-auto">
+              <label className="font-bold text-black text-2xl" >Create New Report</label>
+            </div>
             <label>
-              <input type='checkbox' checked={isAutomatic} onChange={handleCheckboxChange} />
+              <input type='checkbox'className="ml-4 mr-2" checked={isAutomatic} onChange={handleCheckboxChange} />
               Use Automatic Report
             </label>
-            <label htmlFor='cdc_file'>Upload CDC .csv File</label>
-            <input type='file' id='cdc_file' onChange={handleCDCFileChange} />
+            <hr></hr>
+            <label htmlFor='cdc_file' className="font-bold ml-4">Upload CDC <span className="italic">.csv</span> File:</label>
+            <div className="ml-4">
+              <input type='file' id='cdc_file' onChange={handleCDCFileChange}  />
+            </div>
+            <hr></hr>
             {isAutomatic && (
             <>
-            <label>Specify Year to Query From</label>
-            <select
+
+            <label className="font-bold ml-4">Specify Year to Query From: </label>
+            <select className="border border-black rounded-sm bg-gray-100 text-left  ml-4 w-[150px]"
               value={inputValue}
               onChange={handleInputChange}
-              style={{ border: '1px solid black', borderRadius: '2px', backgroundColor: 'whitesmoke'}}
             >
               <option
                 value="">Select a Year
@@ -124,26 +176,32 @@ export default function CreateReport({ onDone }) {
                 </option>
               ))}
             </select>
+            
             </>
             )}
+            {!isAutomatic && (
+              <>
+                <label htmlFor='state_file' className="font-bold ml-4">Upload State <span className="italic">.csv</span> File:</label>
+                <div className="ml-4">
+                  <input type='file' id='state_file' onChange={handleStateFileChange} />
+                </div>
+              </>
+            )}
+            <hr></hr>
             <label>
-              <input type='checkbox' checked={isCDCFilter} onChange={handleCDCFilterChange} />
+              <input type='checkbox' className=" ml-4 mr-2" checked={isCDCFilter} onChange={handleCDCFilterChange} />
               Compare Existing Diseases in CDC Only
             </label>
 
             {
               // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
             }
-
-            {!isAutomatic && (
-              <>
-                <label htmlFor='state_file'>Upload State .csv File</label>
-                <input type='file' id='state_file' onChange={handleStateFileChange} />
-              </>
-            )}
-            <button type='submit' className='bg-blue-400 text-white px-4 py-2 rounded-md hover:bg-blue-600'>
-              Submit
-            </button>
+            
+            <div className="items-center justify-center mx-auto">
+              <button type='submit' className='bg-[#7aa2c4] text-white px-4 py-2 w-20 rounded-md hover:bg-[#4c80ae]'>
+                Submit
+              </button>
+            </div>
           </div>
         </form>
       </div>
