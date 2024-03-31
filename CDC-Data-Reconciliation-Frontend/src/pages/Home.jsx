@@ -46,7 +46,7 @@ export default function Home() {
       </Modal>
 
       <div className='flex flex-row items-center h-full w-full'>
-        <div className='w-[340px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 overflow-auto'>
+        <div className='w-[340px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 pb-8 overflow-auto'>
           <button
             className='bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae] shadow-lg'
             onClick={() => setIsModalOpen(true)}
