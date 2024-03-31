@@ -68,7 +68,7 @@ export default function Home() {
               </div>
             ))}
             {reportSummaries && visibleReportsCount < reportSummaries.length && (
-              <button className= 'bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae]' onClick={() => setVisibleReportsCount(reportSummaries.length)}>
+              <button className= 'bg-[#7aa2c4] text-white px-3 py-1 rounded-md hover:bg-[#4c80ae] text-sm' onClick={() => setVisibleReportsCount(reportSummaries.length)}>
                 See More
               </button>
             )}
