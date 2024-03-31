@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import Report from "../components/Report"
+import Button from "../components/Button"
 import Modal from "../components/Modal"
 import CreateReport from "../components/CreateReport"
 import config from "../config.json"
@@ -47,12 +48,11 @@ export default function Home() {
 
       <div className='flex flex-row items-center h-full w-full'>
         <div className='w-[340px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 pb-8 overflow-auto'>
-          <button
-            className='bg-[#7aa2c4] text-white px-4 py-2 rounded-md hover:bg-[#4c80ae] shadow-lg'
-            onClick={() => setIsModalOpen(true)}
-          >
-            Create New Report
-          </button>
+          <Button
+            text='Create New Report'
+            className='px-4 py-2 shadow-lg'
+            onClick={() => setIsModalOpen(true)}>
+          </Button>
           {reportSummaries &&
             reportSummaries.slice(0, visibleReportsCount).map((summary) => (
               <div
@@ -68,9 +68,13 @@ export default function Home() {
               </div>
             ))}
             {reportSummaries && visibleReportsCount < reportSummaries.length && (
-              <button className= 'bg-[#7aa2c4] text-white px-3 py-1 rounded-md hover:bg-[#4c80ae] text-sm' onClick={() => setVisibleReportsCount(reportSummaries.length)}>
-                See More
-              </button>
+              <div>
+                <Button
+                  text='See More'
+                  className= 'px-3 py-1 text-sm'
+                  onClick={() => setVisibleReportsCount(reportSummaries.length)}>
+                </Button>
+              </div>
             )}
         </div>
         <div className='bg-slate-50 h-full w-full flex flex-col items-center overflow-auto'>

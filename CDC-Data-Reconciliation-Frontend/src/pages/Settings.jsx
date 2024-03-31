@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import config from "../config.json"
+import Button from "../components/Button"
 
 export default function Settings() {
   const [tempArchivePath, setTempArchivePath] = useState('')
@@ -42,7 +43,7 @@ export default function Settings() {
       console.error("Error fetching config - " + e)
     }
   }
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     console.log("Submitting archive path " + tempArchivePath)
@@ -75,15 +76,15 @@ export default function Settings() {
           <label htmlFor='archive_path' className='block text-gray-700 text-sm font-bold mb-2'>
             Current archive folder path: {archivePath}
           </label>
-          <input 
-            type='text' 
-            id='archive_path' 
-            onChange={handleArchivePathChange} 
+          <input
+            type='text'
+            id='archive_path'
+            onChange={handleArchivePathChange}
             className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
             placeholder={archiveEmpty ? 'Enter archive path' : 'Edit archive path'}
             value={tempArchivePath}
           />
-        
+
         <div className='mt-4'>
           {archiveEmpty && <p className='text-red-500 text-s bold text-center'>
               Warning: archive path is unset.<br></br>
@@ -94,10 +95,10 @@ export default function Settings() {
           <label htmlFor='password' className='block text-gray-700 text-sm font-bold mb-2'>
             Password
           </label>
-          <input 
-            type='password' 
-            id='password' 
-            onChange={handlePasswordChange} 
+          <input
+            type='password'
+            id='password'
+            onChange={handlePasswordChange}
             className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
             placeholder='Enter password'
           />
@@ -108,14 +109,14 @@ export default function Settings() {
           </div>
         </div>
         <div className='flex justify-center mt-4'>
-          <button 
-            type='submit' 
-            className='bg-[#7aa2c4] hover:bg-[#4c80ae] text-white py-2 px-4 rounded focus:outline-none focus:shadow-outline'
-          >
-            Submit
-          </button>
+          <Button
+            type='submit'
+            text='Submit'
+            onClick={() => {}}
+            className='py-2 px-4 focus:outline-none focus:shadow-outline'
+          />
         </div>
       </form>
     </div>
-  )    
+  )
 }
