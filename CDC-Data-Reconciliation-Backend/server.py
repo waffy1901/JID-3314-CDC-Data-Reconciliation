@@ -183,7 +183,7 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     # Run query to retrieve data from NBS ODSE database
     (column_names, state_content) = run_query(year)
     if not len(state_content) > 0:
-        raise Exception("Query resulted in no data")
+        raise HTTPException(status_code=404, detail="Query resulted in no data")
 
     # Create temp file structure
     folder_name = "temp"
