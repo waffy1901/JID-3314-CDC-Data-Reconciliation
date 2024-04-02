@@ -12,6 +12,12 @@ import pyodbc
 import json
 import sqlite3
 import shutil
+import mimetypes
+
+# Fix mimetypes for .js and .css files
+mimetypes.init()
+mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("text/css", ".css")
 
 app = FastAPI()
 
