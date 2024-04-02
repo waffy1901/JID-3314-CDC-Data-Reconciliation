@@ -6,13 +6,13 @@ export default function Navbar() {
       <div className='flex flex-row justify-start gap-6 items-center text-xl'>
         <NavLink
           to='/'
-          className={({ isActive }) => (isActive ? "text-slate-100 font-bold" : "font-bold text-slate-900")}
+          className={({ isActive }) => (isActive ? "text-slate-100 font-bold underline" : "font-bold text-slate-900 hover:text-slate-100")}
         >
           Home
         </NavLink>
         <NavLink
           to='/settings'
-          className={({ isActive }) => (isActive ? "text-slate-100 font-bold" : "font-bold text-slate-900")}
+          className={({ isActive }) => (isActive ? "text-slate-100 font-bold underline" : "font-bold text-slate-900 hover:text-slate-100")}
         >
           Settings
         </NavLink>
