@@ -1,3 +1,4 @@
+import subprocess
 import uvicorn
 from fastapi import FastAPI, File, Response, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -136,8 +137,16 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
     if isCDCFilter:
         subprocess_args.append('-f')
     
-    process = await asyncio.create_subprocess_exec(*subprocess_args)
-    await process.wait()
+    try:
+        process = await asyncio.create_subprocess_exec(*subprocess_args,
+                                                        stderr=subprocess.PIPE)
+        _, stderr = await process.communicate()  # Wait for subprocess to finish and get stderr
+        if process.returncode != 0:  # Non-zero return code indicates an error
+            error_message = stderr.decode().strip()  # Decode error message from bytes to string
+            raise RuntimeError(f"Subprocess failed with error: {error_message}")
+    except Exception as e:
+        print(f"Error running comparison: {e}")
+        raise HTTPException(status_code=500, detail="Error running comparison")
 
     res = []
     with open(res_file, newline='') as csvfile:
@@ -176,11 +185,7 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
     insert_statistics(stats_list)
 
     # remove temp files / folder
-    os.remove(cdc_save_to)
-    os.remove(state_save_to)
-    os.remove(res_file)
-    os.remove(stats_file)
-    os.rmdir(os.path.join(app.dir, folder_name, id))
+    shutil.rmtree(os.path.join(app.dir, folder_name, id))
 
     return Response(status_code=200)
 
@@ -189,7 +194,7 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     # Run query to retrieve data from NBS ODSE database
     (column_names, state_content) = run_query(year)
     if not len(state_content) > 0:
-        raise HTTPException(status_code=404, detail="Query resulted in no data")
+        raise HTTPException(status_code=400, detail="Query resulted in no data")
 
     # Create temp file structure
     folder_name = "temp"
@@ -227,9 +232,17 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     if isCDCFilter:
         subprocess_args.append('-f')
     
-    process = await asyncio.create_subprocess_exec(*subprocess_args)
-    await process.wait()
-
+    try:
+        process = await asyncio.create_subprocess_exec(*subprocess_args,
+                                                        stderr=subprocess.PIPE)
+        _, stderr = await process.communicate()  # Wait for subprocess to finish and get stderr
+        if process.returncode != 0:  # Non-zero return code indicates an error
+            error_message = stderr.decode().strip()  # Decode error message from bytes to string
+            raise RuntimeError(f"Subprocess failed with error: {error_message}")
+    except Exception as e:
+        print(f"Error running comparison: {e}")
+        raise HTTPException(status_code=500, detail="Error running comparison")
+    
     # Add results to the response
     res = []
     with open(res_file, newline='') as csvfile:
@@ -268,11 +281,7 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     insert_statistics(stats_list)
     
     # remove temp files / folder
-    os.remove(cdc_save_to)
-    os.remove(state_save_to)
-    os.remove(res_file)
-    os.remove(stats_file)
-    os.rmdir(os.path.join(app.dir, folder_name, id))
+    shutil.rmtree(os.path.join(app.dir, folder_name, id))
 
     return Response(status_code=200)
 
