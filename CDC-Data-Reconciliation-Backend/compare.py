@@ -22,7 +22,7 @@ results: list[CaseResult] = []
 def get_state_dict(state_file, eventCodes=None):
     state_dict = {}
     # Open the state CSV file
-    with open(state_file, newline='', encoding='utf-8') as csvfile:
+    with open(state_file, newline='', encoding='utf-8-sig') as csvfile:
         # Create a CSV reader object
         reader = csv.DictReader(csvfile)
         # Loop through each row in the CSV file
@@ -57,7 +57,7 @@ def get_cdc_dict(cdc_file, filterCDC = False):
     cdc_dict = {}
     # Open the cdc CSV file
     cdcEventCodes = set() if filterCDC else None
-    with open(cdc_file, newline='') as csvfile:
+    with open(cdc_file, newline='', encoding='utf-8-sig') as csvfile:
         # Create a CSV reader object
         reader = csv.DictReader(csvfile)
         # Loop through each row in the CSV file
