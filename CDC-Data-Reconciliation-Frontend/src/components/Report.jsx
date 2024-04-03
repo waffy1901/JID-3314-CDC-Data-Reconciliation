@@ -440,8 +440,8 @@ export default function Report({ reportID }) {
 
               {/* Toggle Button for Disease Specific Stats */}
               <Button
-                text={`${showDiseaseStats ? "Hide" : "Show"} Disease Specific Stats`}
-                className='px-5 py-2 mb-4 mt-2'
+                text={`${showDiseaseStats ? "Hide" : "Show"} Disease Stats`}
+                className={`${showDiseaseStats ? 'px-3' : 'px-2'} py-2 mb-4 mt-2`}
                 onClick={toggleDiseaseStats}>
               </Button>
 
@@ -457,7 +457,7 @@ export default function Report({ reportID }) {
                     />
                     <Button
                       text='Clear Filters'
-                      className='px-5 py-2 flex flex-row items-center justify-around gap-2'
+                      className='px-5 py-2 flex flex-row items-center justify-around gap-2 mr-3'
                       onClick={clearStatFilters}
                     >
                       <MdFilterAltOff size={23} />
@@ -615,7 +615,7 @@ export default function Report({ reportID }) {
               />
               <Button
                 text='Clear Filters'
-                className='px-5 py-2 flex flex-row items-center justify-around gap-2'
+                className='px-5 py-2 flex flex-row items-center justify-around gap-2 mr-3'
                 onClick={clearDiscFilters}
               >
                 <MdFilterAltOff size={23} />
