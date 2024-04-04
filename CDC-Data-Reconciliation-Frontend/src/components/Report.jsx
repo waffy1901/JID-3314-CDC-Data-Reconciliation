@@ -440,8 +440,8 @@ export default function Report({ reportID }) {
 
               {/* Toggle Button for Disease Specific Stats */}
               <Button
-                text={`${showDiseaseStats ? "Hide" : "Show"} Disease Specific Stats`}
-                className='px-5 py-2 mb-4 mt-2'
+                text={`${showDiseaseStats ? "Hide" : "Show"} Disease Stats`}
+                className='px-4 py-2 flex flex-row items-center justify-around gap-2'
                 onClick={toggleDiseaseStats}>
               </Button>
 
@@ -449,19 +449,21 @@ export default function Report({ reportID }) {
               {showDiseaseStats && (
                 <div>
                   <div className='w-full flex flex-row items-center justify-between'>
-                    <DebouncedInput
-                      value={statGlobalFilter ?? ""}
-                      onChange={(value) => statTable.setGlobalFilter(String(value))}
-                      className='p-2 font-lg shadow border border-block'
-                      placeholder='Search all columns...'
-                    />
-                    <Button
-                      text='Clear Filters'
-                      className='px-5 py-2 flex flex-row items-center justify-around gap-2'
-                      onClick={clearStatFilters}
-                    >
-                      <MdFilterAltOff size={23} />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <DebouncedInput
+                        value={statGlobalFilter ?? ""}
+                        onChange={(value) => statTable.setGlobalFilter(String(value))}
+                        className='p-2 font-lg shadow border border-block'
+                        placeholder='Search all columns...'
+                      />
+                      <Button
+                        text='Clear Filters'
+                        className='px-5 py-2 flex flex-row items-center justify-around gap-2'
+                        onClick={clearStatFilters}
+                      >
+                        <MdFilterAltOff size={23} />
+                      </Button>
+                    </div>
 
                     <Button
                       text='Download CSV'
@@ -607,6 +609,7 @@ export default function Report({ reportID }) {
           {/* Report Discrepancies Table */}
           <div>
             <div className='w-full flex flex-row items-center justify-between'>
+              <div className="flex items-center gap-2">
               <DebouncedInput
                 value={discGlobalFilter ?? ""}
                 onChange={(value) => discTable.setGlobalFilter(String(value))}
@@ -620,6 +623,7 @@ export default function Report({ reportID }) {
               >
                 <MdFilterAltOff size={23} />
               </Button>
+              </div>
 
               <Button
                 text='Download CSV'
