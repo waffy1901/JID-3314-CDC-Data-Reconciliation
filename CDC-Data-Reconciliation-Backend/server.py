@@ -110,18 +110,18 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
         os.makedirs(os.path.join(app.dir, "temp"))
 
     id = str(uuid.uuid4())
-    os.makedirs(os.path.join(app.dir, folder_name, id))
+    os.makedirs(os.path.join(app.dir, folder_name, id), mode=0o777)
     
     # Fetching the archive_path for saving the Report
     archive_path = await get_config_setting("archive_path")
 
     cdc_content = await cdc_file.read()
-    cdc_save_to = os.path.join(app.dir, folder_name, id, cdc_file.filename)
+    cdc_save_to = os.path.join(app.dir, folder_name, id, "cdc.csv")
     with open(cdc_save_to, "wb") as f:
         f.write(cdc_content)
 
     state_content = await state_file.read()
-    state_save_to = os.path.join(app.dir, folder_name, id, state_file.filename)
+    state_save_to = os.path.join(app.dir, folder_name, id, "state.csv")
     with open(state_save_to, "wb") as f:
         f.write(state_content)
 
@@ -205,7 +205,7 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     archive_path = await get_config_setting("archive_path")
     
     id = str(uuid.uuid4())
-    os.makedirs(os.path.join(app.dir, folder_name, id))
+    os.makedirs(os.path.join(app.dir, folder_name, id), mode=0o777)
 
     # Write queried state data to csv
     state_save_to = os.path.join(app.dir, folder_name, id, "state.csv")
@@ -216,7 +216,7 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
 
     # Write user-uploaded CDC data to local csv
     cdc_content = await cdc_file.read()
-    cdc_save_to = os.path.join(app.dir, folder_name, id, cdc_file.filename)
+    cdc_save_to = os.path.join(app.dir, folder_name, id, "cdc.csv")
     with open(cdc_save_to, "wb") as f:
         f.write(cdc_content)
 
