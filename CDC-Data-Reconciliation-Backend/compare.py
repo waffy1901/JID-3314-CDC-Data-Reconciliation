@@ -19,6 +19,12 @@ stats = {}
 
 results: list[CaseResult] = []
 
+def parse_time(time_string):
+    try:
+        return datetime.strptime(time_string, "%Y-%m-%d %H:%M:%S.%f")
+    except ValueError:
+        return datetime.strptime(time_string, "%Y-%m-%d %H:%M:%S")
+
 def get_state_dict(state_file, eventCodes=None):
     state_dict = {}
     # Open the state CSV file
@@ -37,12 +43,10 @@ def get_state_dict(state_file, eventCodes=None):
                 # If the case ID already exists in the dictionary, check to see if the new row has a more recent add_time
 
                 existing_date_string = state_dict[row['CaseID']]['add_time']
-                existing_datetime = datetime.strptime(
-                    existing_date_string, "%Y-%m-%d %H:%M:%S.%f")
+                existing_datetime = parse_time(existing_date_string)
 
                 new_date_string = row['add_time']
-                new_datetime = datetime.strptime(
-                    new_date_string, "%Y-%m-%d %H:%M:%S.%f")
+                new_datetime = parse_time(new_date_string)
 
                 if new_datetime > existing_datetime:
                     state_dict[row['CaseID']] = row
