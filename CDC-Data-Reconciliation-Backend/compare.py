@@ -84,7 +84,7 @@ def get_cdc_dict(cdc_file, filterCDC = False):
     return cdc_dict, cdcEventCodes
 
 # place the stats stuff here
-def comp(state_dict, cdc_dict):
+def comp(state_dict, cdc_dict, compare_attributes=None):
     for state_case_id in state_dict:
         state_row = state_dict[state_case_id]
         
@@ -109,6 +109,13 @@ def comp(state_dict, cdc_dict):
                 if i < 1:
                     i += 1
                     continue
+                
+                # Determine which attributes to compare: specified ones or all
+                attributes_to_compare = compare_attributes if compare_attributes else state_row.keys()
+                for attribute in attributes_to_compare:
+                    # Skip if the attribute is not in the CDC dict
+                    if attribute not in cdc_dict[state_case_id]:
+                        continue
 
                 state_attribute = state_row[attribute]
                 cdc_attribute = cdc_dict[state_case_id][attribute]
@@ -153,6 +160,7 @@ def main():
     parser.add_argument('-o', '--output', help='Local Path to Output CSV file')
     # if the parameter below is specified the value stored is true
     parser.add_argument('-f', '--filter', action='store_true', help='Filter by CDC eventCodes')
+    parser.add_argument('-a', '--attributes', nargs='*', help='Attributes to compare, compares all by default')
     args = parser.parse_args()
 
     filterByCDC = args.filter
@@ -160,7 +168,7 @@ def main():
     cdc_dict, cdcEventCodes = get_cdc_dict(args.cdc, filterByCDC)
     state_dict = get_state_dict(args.state, cdcEventCodes)
 
-    comp(state_dict, cdc_dict)
+    comp(state_dict, cdc_dict, args.attributes)
 
     # Create Results CSV File and write the results to it
     with open(args.output, 'w', newline='') as csvfile:
