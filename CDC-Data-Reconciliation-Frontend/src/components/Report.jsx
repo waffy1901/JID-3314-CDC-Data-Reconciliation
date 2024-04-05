@@ -610,19 +610,19 @@ export default function Report({ reportID }) {
           <div>
             <div className='w-full flex flex-row items-center justify-between'>
               <div className="flex items-center gap-2">
-              <DebouncedInput
-                value={discGlobalFilter ?? ""}
-                onChange={(value) => discTable.setGlobalFilter(String(value))}
-                className='p-2 font-lg shadow border border-block'
-                placeholder='Search all columns...'
-              />
-              <Button
-                text='Clear Filters'
-                className='px-5 py-2 flex flex-row items-center justify-around gap-2'
-                onClick={clearDiscFilters}
-              >
-                <MdFilterAltOff size={23} />
-              </Button>
+                <DebouncedInput
+                  value={discGlobalFilter ?? ""}
+                  onChange={(value) => discTable.setGlobalFilter(String(value))}
+                  className='p-2 font-lg shadow border border-block'
+                  placeholder='Search all columns...'
+                />
+                <Button
+                  text='Clear Filters'
+                  className='px-5 py-2 flex flex-row items-center justify-around gap-2'
+                  onClick={clearDiscFilters}
+                >
+                  <MdFilterAltOff size={23} />
+                </Button>
               </div>
 
               <Button
