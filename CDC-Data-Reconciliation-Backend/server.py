@@ -433,4 +433,4 @@ if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=app.config["port"], workers=1)
 
     # Use this command to run the API with reloading enabled (DOES NOT WORK ON WINDOWS)
-    # uvicorn.run("server:app", host="localhost", port=8000, reload=True)
+    # uvicorn.run("server:app", host="localhost", port=app.config["port"], reload=True)
