@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
 import DebouncedInput from "./DebouncedInput"
+import Button from "../components/Button"
 import Filter from "./Filter"
 import config from "../config.json"
 import { FaSortDown, FaSortUp } from "react-icons/fa6"
@@ -10,7 +11,7 @@ import {
   MdKeyboardDoubleArrowRight,
   MdKeyboardArrowRight,
   MdFileDownload,
-  MdFilterAltOff, 
+  MdFilterAltOff,
 } from "react-icons/md"
 
 import {
@@ -436,43 +437,41 @@ export default function Report({ reportID }) {
                   </tbody>
                 </table>
               </div>
-              
+
               {/* Toggle Button for Disease Specific Stats */}
-              <button
-                type='button'
-                className='bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] mb-4 mt-2'
-                onClick={toggleDiseaseStats}
-              >
-                {showDiseaseStats ? "Hide" : "Show"} Disease Specific Stats
-              </button>
+              <Button
+                text={`${showDiseaseStats ? "Hide" : "Show"} Disease Stats`}
+                className='px-4 py-2 flex flex-row items-center justify-around gap-2'
+                onClick={toggleDiseaseStats}>
+              </Button>
 
               {/* Disease Specific Statistics */}
               {showDiseaseStats && (
                 <div>
                   <div className='w-full flex flex-row items-center justify-between'>
-                    <DebouncedInput
-                      value={statGlobalFilter ?? ""}
-                      onChange={(value) => statTable.setGlobalFilter(String(value))}
-                      className='p-2 font-lg shadow border border-block'
-                      placeholder='Search all columns...'
-                    />
-                    <button
-                      type="button"
-                      className="bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] flex flex-row items-center justify-around gap-2"
-                      onClick={clearStatFilters}
-                    >
-                      Clear Filters
-                      <MdFilterAltOff size={23} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <DebouncedInput
+                        value={statGlobalFilter ?? ""}
+                        onChange={(value) => statTable.setGlobalFilter(String(value))}
+                        className='p-2 font-lg shadow border border-block'
+                        placeholder='Search all columns...'
+                      />
+                      <Button
+                        text='Clear Filters'
+                        className='px-5 py-2 flex flex-row items-center justify-around gap-2'
+                        onClick={clearStatFilters}
+                      >
+                        <MdFilterAltOff size={23} />
+                      </Button>
+                    </div>
 
-                    <button
-                      type='button'
-                      className='bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] flex flex-row items-center justify-around gap-2'
+                    <Button
+                      text='Download CSV'
+                      className='px-5 py-2 flex flex-row items-center justify-around gap-2'
                       onClick={handleStatsDownload}
                     >
-                      Download CSV
                       <MdFileDownload size={23} />
-                    </button>
+                    </Button>
                   </div>
                   <div className='border border-slate-400 rounded-xl shadow-md my-3 overflow-hidden'>
                     <table className='table-auto'>
@@ -610,29 +609,29 @@ export default function Report({ reportID }) {
           {/* Report Discrepancies Table */}
           <div>
             <div className='w-full flex flex-row items-center justify-between'>
+              <div className="flex items-center gap-2">
               <DebouncedInput
                 value={discGlobalFilter ?? ""}
                 onChange={(value) => discTable.setGlobalFilter(String(value))}
                 className='p-2 font-lg shadow border border-block'
                 placeholder='Search all columns...'
               />
-              <button
-                type="button"
-                className="bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] flex flex-row items-center justify-around gap-2"
+              <Button
+                text='Clear Filters'
+                className='px-5 py-2 flex flex-row items-center justify-around gap-2'
                 onClick={clearDiscFilters}
               >
-                Clear Filters
                 <MdFilterAltOff size={23} />
-              </button>
+              </Button>
+              </div>
 
-              <button
-                type='button'
-                className='bg-[#7aa2c4] text-white px-5 py-2 rounded-md hover:bg-[#4c80ae] flex flex-row items-center justify-around gap-2'
+              <Button
+                text='Download CSV'
+                className='px-5 py-2 flex flex-row items-center justify-around gap-2'
                 onClick={handleResultsDownload}
               >
-                Download CSV
                 <MdFileDownload size={23} />
-              </button>
+              </Button>
             </div>
             <div className='border border-slate-400 rounded-xl shadow-md my-3 overflow-hidden'>
               <table className='table-auto'>

@@ -1,4 +1,5 @@
 import { useState } from "react"
+import Button from '../components/Button'
 import config from "../config.json"
 
 export default function CreateReport({ onDone }) {
@@ -122,16 +123,18 @@ export default function CreateReport({ onDone }) {
     <>
       {/* Overlay div */}
       <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 z-40"/>
-  
+
       {/* Popup div */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-5 z-50 w-auto text-center rounded">
         <label className="font-bold text-black text-xl mb-4 block">
-          Error creating report
+          Error Creating Report
         </label>
         <p className="mb-4">{message}</p>
-        <button onClick={() => setShowError(false)} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mt-4">
-          Close
-        </button>
+        <Button
+          text='Close'
+          className='px-4 py-2 mt-4'
+          onClick={() => setShowError(false)}>
+        </Button>
       </div>
     </>
   );
@@ -176,7 +179,7 @@ export default function CreateReport({ onDone }) {
                 </option>
               ))}
             </select>
-            
+
             </>
             )}
             {!isAutomatic && (
@@ -196,11 +199,14 @@ export default function CreateReport({ onDone }) {
             {
               // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
             }
-            
+
             <div className="items-center justify-center mx-auto">
-              <button type='submit' className='bg-[#7aa2c4] text-white px-4 py-2 w-20 rounded-md hover:bg-[#4c80ae]'>
-                Submit
-              </button>
+              <Button
+                type='submit'
+                text='Submit'
+                onClick={() => {}}
+                className='px-4 py-2 w-20'>
+              </Button>
             </div>
           </div>
         </form>
