@@ -118,7 +118,6 @@ export default function CreateReport({ onDone }) {
     }
   }
 
-  // I am not really sure if I should make a separate component for the Error Popup or not, but for now im doing this
   const Error = ({ message }) => (
     <>
       {/* Overlay div */}
@@ -142,7 +141,7 @@ export default function CreateReport({ onDone }) {
   return (
     <div className='flex flex-col items-center'>
       {
-      // this is where i am inserting the popup with the error message if the reponse does not come back ok
+      // inserting the popup with the error message if the reponse does not come back ok
       }
       {showError && <Error message={errorMessage} />}
       <div className='bg-white w-[400px] rounded-md mx-auto'>
