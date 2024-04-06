@@ -104,18 +104,16 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
             
         else:
             i = 0
-            for attribute in state_row:
+            # Determine which attributes to compare: specified ones or all
+            attributes_to_compare = compare_attributes if compare_attributes is not None else state_row.keys()
+            for attribute in attributes_to_compare:
                 # Skip the first attribute since they are not included in CDC CSV file
                 if i < 1:
                     i += 1
                     continue
-                
-                # Determine which attributes to compare: specified ones or all
-                attributes_to_compare = compare_attributes if compare_attributes else state_row.keys()
-                for attribute in attributes_to_compare:
-                    # Skip if the attribute is not in the CDC dict
-                    if attribute not in cdc_dict[state_case_id]:
-                        continue
+                # Skip if the attribute is not in the CDC dict
+                if attribute not in cdc_dict[state_case_id]:
+                    continue
 
                 state_attribute = state_row[attribute]
                 cdc_attribute = cdc_dict[state_case_id][attribute]
