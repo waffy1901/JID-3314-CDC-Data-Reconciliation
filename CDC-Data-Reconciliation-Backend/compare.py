@@ -160,14 +160,11 @@ def main():
     parser.add_argument('-o', '--output', help='Local Path to Output CSV file')
     # if the parameter below is specified the value stored is true
     parser.add_argument('-f', '--filter', action='store_true', help='Filter by CDC eventCodes')
-    parser.add_argument('-a', '--attributes', nargs='*', help='Attributes to compare, compares all by default')
+    parser.add_argument('-a', '--attributes', nargs='*', help='Attributes to compare')
     args = parser.parse_args()
 
-    filterByCDC = args.filter
-    
-    cdc_dict, cdcEventCodes = get_cdc_dict(args.cdc, filterByCDC)
+    cdc_dict, cdcEventCodes = get_cdc_dict(args.cdc, args.filter)
     state_dict = get_state_dict(args.state, cdcEventCodes)
-
     comp(state_dict, cdc_dict, args.attributes)
 
     # Create Results CSV File and write the results to it
