@@ -105,6 +105,7 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
         else:
             # Determine which attributes to compare: specified ones or all
             attributes_to_compare = compare_attributes if compare_attributes is not None else state_row.keys()
+            att_list = []
             for attribute in attributes_to_compare:
                 # Skip if the attribute is not in the CDC dict
                 if attribute not in cdc_dict[state_case_id]:
@@ -121,12 +122,17 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
 
                 # If a case has different attributes between state and CDC DBs, mark it as such
                 if state_attribute != cdc_attribute:
-                    results.append(CaseResult(state_case_id, state_row['EventCode'], state_row['EventName'], state_row[
-                                   'MMWRYear'], state_row['MMWRWeek'], "Case has different attributes between State and CDC CSV Files", "3"))
-                    
-                    # making sure to also count this discrepancy in the stats.csv file
-                    stats[state_row['EventCode']]['totalWrongAttributes'] += 1
-                    break
+                    att_list.append(attribute)
+
+            if (att_list != []):
+                wrong_attribute_string = ", ".join(att_list)
+                reason_string = f"Case differs on {wrong_attribute_string} between State and CDC CSV Files"
+                
+                results.append(CaseResult(state_case_id, state_row['EventCode'], state_row['EventName'], state_row[
+                                   'MMWRYear'], state_row['MMWRWeek'], reason_string, "3"))
+                # making sure to also count this discrepancy in the stats.csv file
+                stats[state_row['EventCode']]['totalWrongAttributes'] += 1
+                
 
             # Remove the case from the CDC dict so we can track what cases are missing from the state side
             del cdc_dict[state_case_id]
