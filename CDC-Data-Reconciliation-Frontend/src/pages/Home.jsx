@@ -46,21 +46,33 @@ export default function Home() {
     setVisibleReportsCount(5)
   }
 
-  const handleOptionClick = (option, index) => {
+  const handleOptionClick = async (option, id) => {
     if (option === "Delete") {
-      deleteReport(index)
-      fetchReportSummaries()
+      const response = await deleteReport(id)
+      if (response.ok) {
+        if (id === currReport) {
+          setCurrReport(null)
+        }
+        fetchReportSummaries()
+      }
+      else {
+        console.error("Failed to delete report " + id)
+      }
     } else if (option === "Rename") {
-      renameReport(index)
+      await renameReport(id)
       fetchReportSummaries()
     }
   }
 
-  const deleteReport = (index) => {
+  const deleteReport = async (index) => {
+    // TODO: Add a popup modal to check if the user is sure they want to delete
     // add a note to the "are you sure?" popup to clarify that archived CSVs are not deleted
+    const response = await fetch(config.API_URL + "/reports/" + index, {method: "DELETE"})
+
+    return response
   }
 
-  const renameReport = (index) => {
+  const renameReport = async (index) => {
     alert("Renaming reports is not implemented yet.")
   }
 
@@ -91,9 +103,11 @@ export default function Home() {
                   <Popover
                     content={
                       dotsOptions.map((option) => (
-                        <div onClick={(e) => {e.stopPropagation(); handleOptionClick(option, summary.ID)}} 
-                             className="text-lg font-normal hover:text-slate-500">
-                          {option}
+                        <div 
+                          key={option}
+                          onClick={(e) => {e.stopPropagation(); handleOptionClick(option, summary.ID)}} 
+                          className="text-lg font-normal hover:text-slate-500">
+                            {option}
                         </div>
                       ))
                     }
