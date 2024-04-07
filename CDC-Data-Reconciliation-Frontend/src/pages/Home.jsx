@@ -62,7 +62,12 @@ export default function Home() {
                   summary.ID === currReport ? "bg-[#b8cde0] cursor-default" : "bg-white hover:bg-slate-100 cursor-pointer"
                 }`}
               >
-                <h2 className='text-xl font-semibold'>Report {summary.ID}</h2>
+                <h2 className='text-xl font-semibold'>
+                  Report {summary.ID}
+                  <span className="float-right cursor-pointer hover:text-slate-500">
+                    <p onClick={e => {e.stopPropagation(); console.log(`Clicked more options for ${summary.ID}`)}}>&#160;⋮&#160;</p>
+                  </span>
+                </h2>
                 <h2>Discrepancies: {summary.NumberOfDiscrepancies}</h2>
                 <h2>{new Date(`${summary.CreatedAtDate}T${summary.TimeOfCreation}Z`).toLocaleString("en-US")}</h2>
               </div>
