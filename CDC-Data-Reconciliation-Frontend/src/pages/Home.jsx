@@ -46,6 +46,24 @@ export default function Home() {
     setVisibleReportsCount(5)
   }
 
+  const handleOptionClick = (option, index) => {
+    if (option === "Delete") {
+      deleteReport(index)
+      fetchReportSummaries()
+    } else if (option === "Rename") {
+      renameReport(index)
+      fetchReportSummaries()
+    }
+  }
+
+  const deleteReport = (index) => {
+    // add a note to the "are you sure?" popup to clarify that archived CSVs are not deleted
+  }
+
+  const renameReport = (index) => {
+    alert("Renaming reports is not implemented yet.")
+  }
+
   return (
     <>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
@@ -73,15 +91,15 @@ export default function Home() {
                   <Popover
                     content={
                       dotsOptions.map((option) => (
-                        <div className="text-m font-normal">
+                        <div onClick={(e) => {e.stopPropagation(); handleOptionClick(option, summary.ID)}} 
+                             className="text-lg font-normal hover:text-slate-500">
                           {option}
                         </div>
                       ))
-                      // <p>Popover content lorem ipsum dolor sit amet</p>
                     }
                   >
                     <span className="hover:text-slate-500">
-                      <p>&#160;⋮&#160;</p>
+                      <p className="px-1">⋮</p>
                     </span>
                   </Popover>
                   </span>
