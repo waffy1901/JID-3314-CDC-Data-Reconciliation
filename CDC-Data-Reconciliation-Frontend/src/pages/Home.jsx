@@ -3,6 +3,7 @@ import Report from "../components/Report"
 import Button from "../components/Button"
 import Modal from "../components/Modal"
 import CreateReport from "../components/CreateReport"
+import Popover from "../components/Popover"
 import config from "../config.json"
 
 export default function Home() {
@@ -10,6 +11,11 @@ export default function Home() {
   const [currReport, setCurrReport] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [visibleReportsCount, setVisibleReportsCount] = useState(5);
+
+  const dotsOptions = [
+    "Rename",
+    "Delete",
+  ];
 
   // Get the report summaries on page load
   useEffect(() => {
@@ -45,7 +51,6 @@ export default function Home() {
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <CreateReport onDone={() => handleCreatedReport()} />
       </Modal>
-
       <div className='flex flex-row items-center h-full w-full'>
         <div className='w-[340px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 pb-8 overflow-auto'>
           <Button
@@ -64,8 +69,14 @@ export default function Home() {
               >
                 <h2 className='text-xl font-semibold'>
                   Report {summary.ID}
-                  <span className="float-right cursor-pointer hover:text-slate-500">
-                    <p onClick={e => {e.stopPropagation(); console.log(`Clicked more options for ${summary.ID}`)}}>&#160;⋮&#160;</p>
+                  <span className="float-right cursor-pointer hover:text-slate-500 overflow-visible">
+                  <Popover
+                    content={
+                      <p>Popover content lorem ipsum dolor sit amet</p>
+                    }
+                  >
+                    <p>&#160;⋮&#160;</p>
+                  </Popover>
                   </span>
                 </h2>
                 <h2>Discrepancies: {summary.NumberOfDiscrepancies}</h2>
