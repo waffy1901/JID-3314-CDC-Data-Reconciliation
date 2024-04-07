@@ -103,7 +103,6 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
             stats[state_row['EventCode']]['totalMissingCDC'] += 1
             
         else:
-            i = 0
             # Determine which attributes to compare: specified ones or all
             attributes_to_compare = compare_attributes if compare_attributes is not None else state_row.keys()
             for attribute in attributes_to_compare:
