@@ -10,6 +10,9 @@ export default function CreateReport({ onDone }) {
   const [isCDCFilter, setIsCDCFilter] = useState(true)
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [selectedAttributes, setSelectedAttributes] = useState([
+    "CaseID", "EventCode", "EventName", "MMWRYear", "MMWRWeek"
+  ]);
 
   const currYear = 2023
   const yearList = Array.from({ length: 101}, (_, index) => currYear + index)
@@ -33,6 +36,17 @@ export default function CreateReport({ onDone }) {
     setInputValue(e.target.value)
   }
 
+  const handleAttributeChange = (e) => {
+    const options = e.target.options;
+    const selectedValues = [];
+    for (let i = 0; i < options.length; ++i) {
+      if (options[i].selected) {
+        selectedValues.push(options[i].value);
+      }
+    }
+    setSelectedAttributes(selectedValues);
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -46,10 +60,11 @@ export default function CreateReport({ onDone }) {
         console.error("Year not selected!")
         return
       }
-      // Setting form data to year and cdcFile
+      // Setting form data to year, cdcFile, and attributes
       const formdata = new FormData()
       formdata.append("cdc_file", cdcFile)
       formdata.append("isCDCFilter", isCDCFilter)
+      formdata.append("attributes", JSON.stringify(selectedAttributes));
 
       // Run the automatic report fetching
       try {
@@ -179,6 +194,19 @@ export default function CreateReport({ onDone }) {
               ))}
             </select>
 
+            <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
+            <select className="border border-black rounded-sm bg-gray-100 text-left  ml-4 w-[150px] h-[102px]"
+              multiple id='attributes' 
+              value={selectedAttributes} 
+              onChange={handleAttributeChange}
+            >
+              <option value="CaseID">CaseID</option>
+              <option value="EventCode">EventCode</option>
+              <option value="EventName">EventName</option>
+              <option value="MMWRYear">MMWRYear</option>
+              <option value="MMWRWeek">MMWRWeek</option>
+            </select>
+
             </>
             )}
             {!isAutomatic && (
@@ -187,6 +215,18 @@ export default function CreateReport({ onDone }) {
                 <div className="ml-4">
                   <input type='file' id='state_file' onChange={handleStateFileChange} />
                 </div>
+                <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
+                <select className="border border-black rounded-sm bg-gray-100 text-left  ml-4 w-[150px] h-[102px]"
+                  multiple id='attributes' 
+                  value={selectedAttributes} 
+                  onChange={handleAttributeChange}
+                >
+                  <option value="CaseID">CaseID</option>
+                  <option value="EventCode">EventCode</option>
+                  <option value="EventName">EventName</option>
+                  <option value="MMWRYear">MMWRYear</option>
+                  <option value="MMWRWeek">MMWRWeek</option>
+                </select>
               </>
             )}
             <hr></hr>
