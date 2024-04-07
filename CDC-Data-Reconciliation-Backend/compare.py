@@ -104,8 +104,7 @@ def comp(state_dict, cdc_dict):
             
         else:
             i = 0
-            wrong_att = False
-            
+            att_list = []
             for attribute in state_row:
                 # Skip the first attribute since they are not included in CDC CSV file
                 if i < 1:
@@ -123,30 +122,17 @@ def comp(state_dict, cdc_dict):
 
                 # If a case has different attributes between state and CDC DBs, mark it as such
                 if state_attribute != cdc_attribute:
-                    results.append(CaseResult(state_case_id, state_row['EventCode'], state_row['EventName'], state_row[
-                                   'MMWRYear'], state_row['MMWRWeek'], "Case differs on _ between State and CDC CSV Files", "3"))
-                    
-                    # making sure to also count this discrepancy in the stats.csv file
-                    stats[state_row['EventCode']]['totalWrongAttributes'] += 1
-                    wrong_att = True
-                    break
-                
-            if (wrong_att):
-                # Skipping the first attribute
-                att_list = []
-                for attribute in state_row[1:]:
-                    state_attribute = state_row[attribute]
-                    cdc_attribute = cdc_dict[state_case_id][attribute]
-                    
-                    # Putting non-matching attributes into a list
-                    if state_attribute != cdc_attribute:
-                        att_list.append(attribute)
-                
-                # Joining said list into one string
+                    att_list.append(attribute)
+
+            if (att_list != []):
                 wrong_attribute_string = ", ".join(att_list)
+                reason_string = f"Case differs on {wrong_attribute_string} between State and CDC CSV Files"
                 
-                # Replacing the filler character in the results reason with the wrong attribute list.
-                results[-1].reason = results[-1].reason.replace("_", wrong_attribute_string)
+                results.append(CaseResult(state_case_id, state_row['EventCode'], state_row['EventName'], state_row[
+                                   'MMWRYear'], state_row['MMWRWeek'], reason_string, "3"))
+                # making sure to also count this discrepancy in the stats.csv file
+                stats[state_row['EventCode']]['totalWrongAttributes'] += 1
+                
 
             # Remove the case from the CDC dict so we can track what cases are missing from the state side
             del cdc_dict[state_case_id]
