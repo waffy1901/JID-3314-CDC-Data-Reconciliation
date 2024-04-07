@@ -69,13 +69,20 @@ export default function Home() {
               >
                 <h2 className='text-xl font-semibold'>
                   Report {summary.ID}
-                  <span className="float-right cursor-pointer hover:text-slate-500 overflow-visible">
+                  <span className="float-right cursor-pointer overflow-visible mx-2">
                   <Popover
                     content={
-                      <p>Popover content lorem ipsum dolor sit amet</p>
+                      dotsOptions.map((option) => (
+                        <div className="text-m font-normal">
+                          {option}
+                        </div>
+                      ))
+                      // <p>Popover content lorem ipsum dolor sit amet</p>
                     }
                   >
-                    <p>&#160;⋮&#160;</p>
+                    <span className="hover:text-slate-500">
+                      <p>&#160;⋮&#160;</p>
+                    </span>
                   </Popover>
                   </span>
                 </h2>

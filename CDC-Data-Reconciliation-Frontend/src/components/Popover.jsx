@@ -42,7 +42,7 @@ function Popover({
       ref={wrapperRef}
       onMouseEnter={handleMouseOver}
       onMouseLeave={handleMouseLeft}
-      className="w-fit h-fit relative flex justify-center">
+      className="w-fit h-fit absolute flex justify-center">
       <div
         onClick={(e) => {e.stopPropagation(); setShow(!show)}}
       >
@@ -51,7 +51,7 @@ function Popover({
       <div
         hidden={!show}
         className="absolute left-[100%]"> 
-        <div className="rounded bg-white p-3">
+        <div className="rounded bg-white p-3 shadow-lg">
           {content}
         </div>
       </div>
