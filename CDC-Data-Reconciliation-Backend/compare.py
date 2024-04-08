@@ -5,7 +5,7 @@ import os
 
 
 class CaseResult:
-    def __init__(self, caseID, eventCode, eventName, MMWRYear, MMWRWeek, reason, reasonID, caseClass) -> None:
+    def __init__(self, caseID, eventCode, eventName, MMWRYear, MMWRWeek, reason, reasonID, caseClassStatus) -> None:
         self.caseID = caseID
         self.eventCode = eventCode
         self.eventName = eventName
@@ -13,7 +13,7 @@ class CaseResult:
         self.MMWRWeek = MMWRWeek
         self.reason = reason
         self.reasonID = reasonID
-        self.caseClass = caseClass
+        self.caseClassStatus = caseClassStatus
 
 
 # dictionary holding all stats for this report
@@ -171,8 +171,8 @@ def main():
 
         writer.writeheader()
         for result in results:
-            writer.writerow({'CaseID': result.caseID, 'EventCode': result.eventCode, 'EventName': result.eventName,'MMWRYear': result.MMWRYear, 'CaseClass':result.caseClass,
-                            'MMWRWeek': result.MMWRWeek, 'Reason': result.reason, 'ReasonID': result.reasonID})
+            writer.writerow({'CaseID': result.caseID, 'EventCode': result.eventCode, 'EventName': result.eventName,'MMWRYear': result.MMWRYear, 
+                            'MMWRWeek': result.MMWRWeek, 'Reason': result.reason, 'ReasonID': result.reasonID, 'CaseClassStatus':result.caseClassStatus})
             
     # writing to stats.csv but first grabbing the folder location of results.csv
     output_directory = os.path.dirname(args.output)
