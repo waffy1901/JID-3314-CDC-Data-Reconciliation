@@ -47,7 +47,7 @@ export default function Home() {
       </Modal>
 
       <div className='flex flex-row items-center h-full w-full'>
-        <div className='w-[340px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 pb-8 overflow-auto'>
+        <div className='min-w-[300px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 pb-8 overflow-auto'>
           <Button
             text='Create New Report'
             className='px-4 py-2 shadow-lg'
@@ -77,7 +77,7 @@ export default function Home() {
               </div>
             )}
         </div>
-        <div className='bg-slate-50 h-full w-full flex flex-col items-center overflow-auto'>
+        <div className='bg-slate-50 w-full h-full overflow-auto'>
           <Report reportID={currReport} />
         </div>
       </div>
