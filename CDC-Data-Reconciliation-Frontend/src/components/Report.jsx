@@ -211,6 +211,9 @@ export default function Report({ reportID }) {
   })
 
   useEffect(() => {
+    setStatistics(null)
+    setResults(null)
+    setTotalStatistics(null)
     const fetchReportStatistics = async () => {
       try {
         const statsResponse = await fetch(config.API_URL + "/report_statistics/" + reportID)

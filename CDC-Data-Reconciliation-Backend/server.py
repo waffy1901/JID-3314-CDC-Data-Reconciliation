@@ -333,6 +333,23 @@ async def get_report_statistics(report_id: int):
         print(f"Database error: {e}")
         raise HTTPException(status_code = 500, detail = "Internal Server Error")
 
+@app.delete("/reports/{report_id}")
+async def delete_report(report_id: int):
+    """
+    Deletes a report from all 3 tables.
+    """
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute("DELETE FROM Reports WHERE ID = ?", (report_id,))
+        cur.execute("DELETE FROM Cases WHERE ReportID = ?", (report_id,))
+        cur.execute("DELETE FROM Statistics WHERE ReportID = ?", (report_id,))
+        app.liteConn.commit()
+        return Response(status_code=200)
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        app.liteConn.rollback()
+        return HTTPException(status_code = 500, detail = "Internal Server Error")
+
 def fetch_reports_from_db(report_id: int):
     """
     Function to fetch a report from the SQLite database.
@@ -385,9 +402,6 @@ def run_query(year: int):
     # Return the queried data as a list of dicts
     column_names = [col[0] for col in cursor.description]
     data = cursor.fetchall()
-    # # (List comprehension might be too slow for large datasets;
-    # #  may need to consider pandas or numpy in the future)
-    # data = [dict(zip(column_names, row)) for row in row_data]
 
     return (column_names, data)
 
