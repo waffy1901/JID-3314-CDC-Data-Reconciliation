@@ -15,8 +15,8 @@ configDir = os.path.dirname(__file__)
 config_file_path = os.path.join(configDir, "config.json")
 with open(config_file_path, "r") as f:
     config = json.load(f)
-    db_username = os.getenv('DB_USERNAME')
-    db_password = os.getenv('DB_PASSWORD')
+    db_username = config["database_username"] if config["database_username"] else os.getenv('DB_USERNAME')
+    db_password = config["database_password"] if config["database_password"] else os.getenv('DB_PASSWORD')
 
 def get_state_csv(year: int):
     query = None
