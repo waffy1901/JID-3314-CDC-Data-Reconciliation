@@ -149,6 +149,19 @@ export default function Report({ reportID }) {
       id: "TotalWrongAttributes",
       footer: (props) => props.column.id,
     },
+    {
+      header: "Case Class Status",
+      accessorFn: (row) => row.CaseClassStatus.toString(),
+      cell: (info) => (
+        <span
+          className='text-blue-500 cursor-pointer underline'
+        >
+          {info.getValue()}
+        </span>
+      ),
+      id: "CaseClassStatus",
+      footer: (props) => props.column.id,
+    },
   ])
 
   const discTable = useReactTable({

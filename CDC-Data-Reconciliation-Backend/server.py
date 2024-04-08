@@ -75,6 +75,7 @@ cur.execute('''
         MMWRWeek INTEGER,
         Reason TEXT, 
         ReasonID INTEGER,
+        CaseClassStatus TEXT,
         FOREIGN KEY (ReportID) REFERENCES Reports(ID)
 )''')
 
@@ -362,7 +363,7 @@ def insert_statistics(stats):
 def insert_cases(res):
     try:
         cur = app.liteConn.cursor()
-        cur.executemany("INSERT INTO Cases (ReportID, CaseID, EventCode, EventName, MMWRYear, MMWRWeek, Reason, ReasonID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", res)
+        cur.executemany("INSERT INTO Cases (ReportID, CaseID, EventCode, EventName, MMWRYear, MMWRWeek, Reason, ReasonID, CaseClassStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", res)
         app.liteConn.commit()
     except Exception as e:
         app.liteConn.rollback()
