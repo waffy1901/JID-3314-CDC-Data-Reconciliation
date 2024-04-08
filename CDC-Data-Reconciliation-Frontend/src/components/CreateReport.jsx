@@ -150,7 +150,7 @@ export default function CreateReport({ onDone }) {
   );
 
   return (
-    <div className='flex flex-col items-center'>
+    <div className='flex flex-col items-center py-5'>
       {
       // inserting the popup with the error message if the reponse does not come back ok
       }
