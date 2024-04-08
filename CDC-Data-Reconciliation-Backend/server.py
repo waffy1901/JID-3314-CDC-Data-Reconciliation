@@ -1,6 +1,6 @@
 import subprocess
 import uvicorn
-from fastapi import FastAPI, File, Response, UploadFile, HTTPException
+from fastapi import FastAPI, File, Form, Response, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -104,7 +104,8 @@ cur.execute('''
 app.liteConn.commit()
 
 @app.post("/manual_report")
-async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None)):
+async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
+                        cdc_file:  UploadFile = File(None), attributes: str = Form("[]")):
     folder_name = "temp"
     if not os.path.exists(os.path.join(app.dir, "temp")):
         os.makedirs(os.path.join(app.dir, "temp"))
@@ -136,6 +137,9 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
     
     if isCDCFilter:
         subprocess_args.append('-f')
+    
+    attributes_list = json.loads(attributes)
+    subprocess_args.extend(['-a', *attributes_list])
     
     try:
         process = await asyncio.create_subprocess_exec(*subprocess_args,
@@ -190,7 +194,8 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
     return Response(status_code=200)
 
 @app.post("/automatic_report")
-async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile = File(None)):
+async def automatic_report(year: int, isCDCFilter: bool, 
+                           cdc_file:  UploadFile = File(None), attributes: str = Form("[]")):
     # Run query to retrieve data from NBS ODSE database
     (column_names, state_content) = run_query(year)
     if not len(state_content) > 0:
@@ -231,6 +236,9 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     
     if isCDCFilter:
         subprocess_args.append('-f')
+    
+    attributes_list = json.loads(attributes)
+    subprocess_args.extend(['-a', *attributes_list])
     
     try:
         process = await asyncio.create_subprocess_exec(*subprocess_args,

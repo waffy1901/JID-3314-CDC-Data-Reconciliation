@@ -10,6 +10,10 @@ export default function CreateReport({ onDone }) {
   const [isCDCFilter, setIsCDCFilter] = useState(true)
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [selectedAttributes, setSelectedAttributes] = useState([
+    "EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus",
+    "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"
+  ]);
 
   const currYear = 2023
   const yearList = Array.from({ length: 101}, (_, index) => currYear + index)
@@ -33,6 +37,14 @@ export default function CreateReport({ onDone }) {
     setInputValue(e.target.value)
   }
 
+  const handleAttributeChange = (attribute, checked) => {
+    if (checked) {
+      setSelectedAttributes([...selectedAttributes, attribute]);
+    } else {
+      setSelectedAttributes(selectedAttributes.filter(attr => attr !== attribute));
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -46,10 +58,10 @@ export default function CreateReport({ onDone }) {
         console.error("Year not selected!")
         return
       }
-      // Setting form data to year and cdcFile
+      // Setting form data to year, cdcFile, and attributes
       const formdata = new FormData()
       formdata.append("cdc_file", cdcFile)
-      formdata.append("isCDCFilter", isCDCFilter)
+      formdata.append("attributes", JSON.stringify(selectedAttributes));
 
       // Run the automatic report fetching
       try {
@@ -88,7 +100,6 @@ export default function CreateReport({ onDone }) {
       const formdata = new FormData()
       formdata.append("state_file", stateFile)
       formdata.append("cdc_file", cdcFile)
-      formdata.append("isCDCFilter", isCDCFilter)
 
       try {
         const response = await fetch(config.API_URL + `/manual_report?isCDCFilter=${isCDCFilter}`, {
@@ -178,6 +189,26 @@ export default function CreateReport({ onDone }) {
                 </option>
               ))}
             </select>
+            <hr></hr>
+
+            <div>
+              <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
+              <div className="mt-2 ml-4 grid grid-cols-2 gap-2 justify-center items-center">
+                {["EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus", "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"].map((attribute) => (
+                  <div key={attribute} className="px-1">
+                    <input 
+                      type="checkbox"
+                      id={attribute}
+                      value={attribute}
+                      checked={selectedAttributes.includes(attribute)}
+                      onChange={(e) => handleAttributeChange(attribute, e.target.checked)}
+                    />
+                    <label htmlFor={attribute} className="ml-2">{attribute}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
 
             </>
             )}
@@ -187,6 +218,23 @@ export default function CreateReport({ onDone }) {
                 <div className="ml-4">
                   <input type='file' id='state_file' onChange={handleStateFileChange} />
                 </div>
+                <hr></hr>
+                
+                <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
+                <div className="-mt-4 ml-4 grid grid-cols-2 gap-2 justify-center items-center">
+                {["EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus", "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"].map((attribute) => (
+                  <div key={attribute} className="px-1">
+                    <input 
+                      type="checkbox"
+                      id={attribute}
+                      value={attribute}
+                      checked={selectedAttributes.includes(attribute)}
+                      onChange={(e) => handleAttributeChange(attribute, e.target.checked)}
+                    />
+                    <label htmlFor={attribute} className="ml-2">{attribute}</label>
+                  </div>
+                ))}
+              </div>
               </>
             )}
             <hr></hr>
