@@ -50,6 +50,7 @@ def main():
     parser.add_argument('-y', '--year', required=True, help='Year to compare')
     # defaulting to filtering by CDC event codes
     parser.add_argument('-nf', '--nofilter', default=False, action="store_true", help='Do not filter by CDC eventCodes')
+    parser.add_argument('-a', '--attributes', nargs='*', help='Attributes to compare')
     args = parser.parse_args()
 
     if (args.cdc is None or args.output is None or args.year is None):
@@ -70,7 +71,7 @@ def main():
     cdc_dict, cdcEventCodes = compare.get_cdc_dict(args.cdc, filterByCDC)
     state_dict = compare.get_state_dict(state_csv, cdcEventCodes)
     
-    compare.comp(state_dict, cdc_dict)
+    compare.comp(state_dict, cdc_dict, args.attributes)
 
     os.remove(state_csv)
 
