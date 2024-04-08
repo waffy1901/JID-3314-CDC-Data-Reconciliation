@@ -22,8 +22,9 @@ function Popover({
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
-        setShow(false);
+      if (wrapperRef.current){// && !wrapperRef.current.contains(event.target)) {
+        setTimeout(() => setShow(false), 100)
+        // setShow(false);
       }
     }
 
@@ -42,9 +43,10 @@ function Popover({
       ref={wrapperRef}
       onMouseEnter={handleMouseOver}
       onMouseLeave={handleMouseLeft}
+      onClick={(e) => e.stopPropagation()}
       className="w-fit h-fit relative flex justify-center">
       <div
-        onClick={(e) => {e.stopPropagation(); setShow(!show)}}
+        onClick={() => setShow(!show)}
       >
         {children}
       </div>

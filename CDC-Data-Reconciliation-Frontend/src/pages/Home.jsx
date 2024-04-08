@@ -10,7 +10,9 @@ export default function Home() {
   const [reportSummaries, setReportSummaries] = useState(null)
   const [currReport, setCurrReport] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [visibleReportsCount, setVisibleReportsCount] = useState(5);
+  const [modifyingReportId, setModifyingReportId] = useState(null)
 
   const dotsOptions = [
     "Rename",
@@ -46,33 +48,38 @@ export default function Home() {
     setVisibleReportsCount(5)
   }
 
-  const handleOptionClick = async (option, id) => {
+  const handleOptionClick = (option, id) => {
     if (option === "Delete") {
-      const response = await deleteReport(id)
-      if (response.ok) {
-        if (id === currReport) {
-          setCurrReport(null)
-        }
-        fetchReportSummaries()
-      }
-      else {
-        console.error("Failed to delete report " + id)
-      }
+      setDeleteModalOpen(true)
+      setModifyingReportId(id)
+      
     } else if (option === "Rename") {
-      await renameReport(id)
+      renameReport(id)
       fetchReportSummaries()
     }
   }
 
+  const handleDeleteReport = async () => {
+    const response = await deleteReport(modifyingReportId)
+    if (response.ok) {
+      if (modifyingReportId === currReport) {
+        setCurrReport(null)
+      }
+      fetchReportSummaries()
+    }
+    else {
+      console.error("Failed to delete report " + modifyingReportId)
+    }
+  }
+
   const deleteReport = async (index) => {
-    // TODO: Add a popup modal to check if the user is sure they want to delete
     // add a note to the "are you sure?" popup to clarify that archived CSVs are not deleted
     const response = await fetch(config.API_URL + "/reports/" + index, {method: "DELETE"})
 
     return response
   }
 
-  const renameReport = async (index) => {
+  const renameReport = (index) => {
     alert("Renaming reports is not implemented yet.")
   }
 
@@ -80,6 +87,28 @@ export default function Home() {
     <>
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <CreateReport onDone={() => handleCreatedReport()} />
+      </Modal>
+      <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
+        <div className='bg-white rounded-md p-5'>
+          {/* TODO: Fetch the actual name of the report when it is renamed */}
+          <h2 className="text-black text-lg">
+            Are you sure you wish to delete Report {modifyingReportId}?
+          </h2>
+          <h2 className="text-black text-md text-center">
+            Any archived CSVs are not deleted.
+          </h2>
+          <div className="flex flex-row justify-center gap-10 m-2 mt-5 left-0">
+            <Button
+              text='Cancel'
+              className='px-4 py-2 shadow-lg'
+              onClick={() => setDeleteModalOpen(false)}>
+            </Button>
+            <button className="text-white rounded-md bg-[#e66157] hover:bg-[#c33124] px-4 py-2 shadow-lg"
+              onClick={() => {setDeleteModalOpen(false); handleDeleteReport();}}>
+              Delete
+            </button>
+          </div>
+        </div>
       </Modal>
       <div className='flex flex-row items-center h-full w-full'>
         <div className='w-[340px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 pb-8 overflow-auto'>
@@ -99,13 +128,13 @@ export default function Home() {
               >
                 <h2 className='text-xl font-semibold'>
                   Report {summary.ID}
-                  <span className="float-right overflow-visible -mx-1">
+                  <span className="float-right -mx-1">
                   <Popover
                     content={
                       dotsOptions.map((option) => (
                         <div 
                           key={option}
-                          onClick={(e) => {e.stopPropagation(); handleOptionClick(option, summary.ID)}} 
+                          onClick={(e) => {e.stopPropagation(); handleOptionClick(option, summary.ID);}} 
                           className="text-lg font-normal hover:text-slate-500 cursor-pointer select-none">
                             {option}
                         </div>
@@ -113,7 +142,7 @@ export default function Home() {
                     } 
                   >
                     <span className="relative cursor-pointer hover:text-slate-500">
-                      <p className="px-1 select-none">⋮</p>
+                      <p className="px-1 select-none">⋯</p>
                     </span>
                   </Popover>
                   </span>
