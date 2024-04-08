@@ -401,7 +401,7 @@ export default function Report({ reportID }) {
   }
 
   return (
-    <div className='mt-5 py-5 w-5/6 flex flex-col items-center gap-6'>
+    <div className='mt-5 py-5 px-12 mx-auto w-full max-w-[1400px] min-w-[800px] flex flex-col items-center gap-6'>
       {results && (
         <>
           <div className='flex flex-col items-center mb-5'>
