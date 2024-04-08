@@ -189,10 +189,11 @@ export default function CreateReport({ onDone }) {
                 </option>
               ))}
             </select>
+            <hr></hr>
 
             <div>
               <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
-              <div className="ml-4 flex flex-wrap">
+              <div className="mt-2 ml-4 grid grid-cols-2 gap-2 justify-center items-center">
                 {["EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus", "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"].map((attribute) => (
                   <div key={attribute} className="px-1">
                     <input 
@@ -202,7 +203,7 @@ export default function CreateReport({ onDone }) {
                       checked={selectedAttributes.includes(attribute)}
                       onChange={(e) => handleAttributeChange(attribute, e.target.checked)}
                     />
-                    <label htmlFor={attribute}>{attribute}</label>
+                    <label htmlFor={attribute} className="ml-2">{attribute}</label>
                   </div>
                 ))}
               </div>
@@ -217,8 +218,10 @@ export default function CreateReport({ onDone }) {
                 <div className="ml-4">
                   <input type='file' id='state_file' onChange={handleStateFileChange} />
                 </div>
+                <hr></hr>
+                
                 <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
-                <div className="ml-4 flex flex-wrap">
+                <div className="-mt-4 ml-4 grid grid-cols-2 gap-2 justify-center items-center">
                 {["EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus", "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"].map((attribute) => (
                   <div key={attribute} className="px-1">
                     <input 
@@ -228,7 +231,7 @@ export default function CreateReport({ onDone }) {
                       checked={selectedAttributes.includes(attribute)}
                       onChange={(e) => handleAttributeChange(attribute, e.target.checked)}
                     />
-                    <label htmlFor={attribute}>{attribute}</label>
+                    <label htmlFor={attribute} className="ml-2">{attribute}</label>
                   </div>
                 ))}
               </div>
