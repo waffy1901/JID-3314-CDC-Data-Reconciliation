@@ -194,7 +194,9 @@ export default function CreateReport({ onDone }) {
             <div>
               <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
               <div className="mt-2 ml-4 grid grid-cols-2 gap-2 justify-center items-center">
-                {["EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus", "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"].map((attribute) => (
+                {["EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus", 
+                "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"]
+                .map((attribute) => (
                   <div key={attribute} className="px-1">
                     <input 
                       type="checkbox"
@@ -222,7 +224,9 @@ export default function CreateReport({ onDone }) {
                 
                 <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
                 <div className="-mt-4 ml-4 grid grid-cols-2 gap-2 justify-center items-center">
-                {["EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus", "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"].map((attribute) => (
+                {["EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus", 
+                "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"]
+                .map((attribute) => (
                   <div key={attribute} className="px-1">
                     <input 
                       type="checkbox"
@@ -239,8 +243,13 @@ export default function CreateReport({ onDone }) {
             )}
             <hr></hr>
             <label>
-              <input type='checkbox' className=" ml-4 mr-2" checked={isCDCFilter} onChange={handleCDCFilterChange} />
-              Compare Existing Diseases in CDC Only
+              <input 
+                type='checkbox' 
+                className="ml-4 mr-2" 
+                checked={isCDCFilter} 
+                onChange={handleCDCFilterChange} 
+              />
+              Compare Diseases Only From CDC Dataset
             </label>
 
             {

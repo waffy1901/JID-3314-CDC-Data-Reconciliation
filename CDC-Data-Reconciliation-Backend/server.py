@@ -39,8 +39,8 @@ app.dir = os.path.dirname(__file__)
 config_file_path = os.path.join(app.dir, "config.json")
 with open(config_file_path, "r") as f:
     app.config = json.load(f)
-    db_username = os.getenv('DB_USERNAME')
-    db_password = os.getenv('DB_PASSWORD')
+    db_username = app.config["database_username"] if app.config["database_username"] else os.getenv('DB_USERNAME')
+    db_password = app.config["database_password"] if app.config["database_password"] else os.getenv('DB_PASSWORD')
 
 # Connect to the SQL Server
 connection_string = 'DRIVER={' + app.config["driver"] + \
