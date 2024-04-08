@@ -99,21 +99,21 @@ export default function Home() {
               >
                 <h2 className='text-xl font-semibold'>
                   Report {summary.ID}
-                  <span className="float-right cursor-pointer overflow-visible mx-2">
+                  <span className="float-right overflow-visible -mx-1">
                   <Popover
                     content={
                       dotsOptions.map((option) => (
                         <div 
                           key={option}
                           onClick={(e) => {e.stopPropagation(); handleOptionClick(option, summary.ID)}} 
-                          className="text-lg font-normal hover:text-slate-500">
+                          className="text-lg font-normal hover:text-slate-500 cursor-pointer select-none">
                             {option}
                         </div>
                       ))
-                    }
+                    } 
                   >
-                    <span className="hover:text-slate-500">
-                      <p className="px-1">⋮</p>
+                    <span className="relative cursor-pointer hover:text-slate-500">
+                      <p className="px-1 select-none">⋮</p>
                     </span>
                   </Popover>
                   </span>
