@@ -11,7 +11,8 @@ export default function CreateReport({ onDone }) {
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedAttributes, setSelectedAttributes] = useState([
-    "CaseID", "EventCode", "EventName", "MMWRYear", "MMWRWeek"
+    "EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus",
+    "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"
   ]);
 
   const currYear = 2023
@@ -36,15 +37,12 @@ export default function CreateReport({ onDone }) {
     setInputValue(e.target.value)
   }
 
-  const handleAttributeChange = (e) => {
-    const options = e.target.options;
-    const selectedValues = [];
-    for (let i = 0; i < options.length; ++i) {
-      if (options[i].selected) {
-        selectedValues.push(options[i].value);
-      }
+  const handleAttributeChange = (attribute, checked) => {
+    if (checked) {
+      setSelectedAttributes([...selectedAttributes, attribute]);
+    } else {
+      setSelectedAttributes(selectedAttributes.filter(attr => attr !== attribute));
     }
-    setSelectedAttributes(selectedValues);
   }
 
   const handleSubmit = async (e) => {
@@ -63,7 +61,6 @@ export default function CreateReport({ onDone }) {
       // Setting form data to year, cdcFile, and attributes
       const formdata = new FormData()
       formdata.append("cdc_file", cdcFile)
-      formdata.append("isCDCFilter", isCDCFilter)
       formdata.append("attributes", JSON.stringify(selectedAttributes));
 
       // Run the automatic report fetching
@@ -103,7 +100,6 @@ export default function CreateReport({ onDone }) {
       const formdata = new FormData()
       formdata.append("state_file", stateFile)
       formdata.append("cdc_file", cdcFile)
-      formdata.append("isCDCFilter", isCDCFilter)
 
       try {
         const response = await fetch(config.API_URL + `/manual_report?isCDCFilter=${isCDCFilter}`, {
@@ -194,18 +190,24 @@ export default function CreateReport({ onDone }) {
               ))}
             </select>
 
-            <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
-            <select className="border border-black rounded-sm bg-gray-100 text-left  ml-4 w-[150px] h-[102px]"
-              multiple id='attributes' 
-              value={selectedAttributes} 
-              onChange={handleAttributeChange}
-            >
-              <option value="CaseID">CaseID</option>
-              <option value="EventCode">EventCode</option>
-              <option value="EventName">EventName</option>
-              <option value="MMWRYear">MMWRYear</option>
-              <option value="MMWRWeek">MMWRWeek</option>
-            </select>
+            <div>
+              <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
+              <div className="ml-4 flex flex-wrap">
+                {["EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus", "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"].map((attribute) => (
+                  <div key={attribute} className="px-1">
+                    <input 
+                      type="checkbox"
+                      id={attribute}
+                      value={attribute}
+                      checked={selectedAttributes.includes(attribute)}
+                      onChange={(e) => handleAttributeChange(attribute, e.target.checked)}
+                    />
+                    <label htmlFor={attribute}>{attribute}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
 
             </>
             )}
@@ -216,17 +218,20 @@ export default function CreateReport({ onDone }) {
                   <input type='file' id='state_file' onChange={handleStateFileChange} />
                 </div>
                 <label htmlFor='attributes' className="font-bold ml-4">Select Attributes to Compare:</label>
-                <select className="border border-black rounded-sm bg-gray-100 text-left  ml-4 w-[150px] h-[102px]"
-                  multiple id='attributes' 
-                  value={selectedAttributes} 
-                  onChange={handleAttributeChange}
-                >
-                  <option value="CaseID">CaseID</option>
-                  <option value="EventCode">EventCode</option>
-                  <option value="EventName">EventName</option>
-                  <option value="MMWRYear">MMWRYear</option>
-                  <option value="MMWRWeek">MMWRWeek</option>
-                </select>
+                <div className="ml-4 flex flex-wrap">
+                {["EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus", "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"].map((attribute) => (
+                  <div key={attribute} className="px-1">
+                    <input 
+                      type="checkbox"
+                      id={attribute}
+                      value={attribute}
+                      checked={selectedAttributes.includes(attribute)}
+                      onChange={(e) => handleAttributeChange(attribute, e.target.checked)}
+                    />
+                    <label htmlFor={attribute}>{attribute}</label>
+                  </div>
+                ))}
+              </div>
               </>
             )}
             <hr></hr>
