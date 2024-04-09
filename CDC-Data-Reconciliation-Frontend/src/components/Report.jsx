@@ -57,6 +57,12 @@ export default function Report({ reportID }) {
       footer: (props) => props.column.id,
     },
     {
+      header: "CaseClassStatus",
+      accessorFn: (row) => row.CaseClassStatus.toString(),
+      id: "CaseClassStatus",
+      footer: (props) => props.column.id,
+    },
+    {
       header: "MMWRYear",
       accessorFn: (row) => row.MMWRYear.toString(),
       id: "MMWRYear",
@@ -640,7 +646,7 @@ export default function Report({ reportID }) {
               <table className='table-auto'>
                 <thead className='bg-[#d4e1ec]'>
                   <tr>
-                    <th colSpan={7} className="text-2xl p-2">
+                    <th colSpan={8} className="text-2xl p-2">
                       {currentDisease && currentDiscType ? `${currentDisease} ${currentDiscType}` : 'Report Discrepancies'}
                     </th>
                   </tr>

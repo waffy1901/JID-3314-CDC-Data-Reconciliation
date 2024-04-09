@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 class CaseResult:
-    def __init__(self, caseID, eventCode, eventName, MMWRYear, MMWRWeek, reason, reasonID) -> None:
+    def __init__(self, caseID, eventCode, eventName, MMWRYear, MMWRWeek, reason, reasonID, caseClassStatus) -> None:
         self.caseID = caseID
         self.eventCode = eventCode
         self.eventName = eventName
@@ -12,6 +12,7 @@ class CaseResult:
         self.MMWRWeek = MMWRWeek
         self.reason = reason
         self.reasonID = reasonID
+        self.caseClassStatus = caseClassStatus
 
 
 # dictionary holding all stats for this report
@@ -71,7 +72,7 @@ def get_cdc_dict(cdc_file, filterCDC = False):
                 cdcEventCodes.add(row['EventCode'])
             if row['CaseID'] in cdc_dict:
                 results.append(CaseResult(row['CaseID'], row['EventCode'],
-                               row['EventName'], row['MMWRYear'], row['MMWRWeek'], "Duplicate CaseID found in CDC dataset", "1"))
+                               row['EventName'], row['MMWRYear'], row['MMWRWeek'], "Duplicate CaseID found in CDC dataset", "1", row["CaseClassStatus"]))
                 
                 # adding duplicates to duplicate count if needed
                 stats[row['EventCode']]['totalDuplicates'] += 1
@@ -97,7 +98,7 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
         # If a case ID is in the state DB but not the CDC DB, mark it as a missing case
         if state_case_id not in cdc_dict:
             results.append(CaseResult(
-                state_case_id, state_row['EventCode'], state_row['EventName'], state_row['MMWRYear'], state_row['MMWRWeek'], "CaseID not found in CDC dataset", "2"))
+                state_case_id, state_row['EventCode'], state_row['EventName'], state_row['MMWRYear'], state_row['MMWRWeek'], "CaseID not found in CDC dataset", "2", state_row["CaseClassStatus"]))
             
             # counting the missing case in totalMissingCDC for this eventCode
             stats[state_row['EventCode']]['totalMissingCDC'] += 1
@@ -129,7 +130,7 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
                 reason_string = f"Case differs on {wrong_attribute_string} between State and CDC datasets"
                 
                 results.append(CaseResult(state_case_id, state_row['EventCode'], state_row['EventName'], state_row[
-                                   'MMWRYear'], state_row['MMWRWeek'], reason_string, "3"))
+                                   'MMWRYear'], state_row['MMWRWeek'], reason_string, "3", state_row["CaseClassStatus"]))
                 # making sure to also count this discrepancy in the stats.csv file
                 stats[state_row['EventCode']]['totalWrongAttributes'] += 1
                 
@@ -141,7 +142,7 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
     for cdc_case_id in cdc_dict:
         cdc_row = cdc_dict[cdc_case_id]
         results.append(CaseResult(cdc_case_id, cdc_row['EventCode'], cdc_row['EventName'],
-                       cdc_row['MMWRYear'], cdc_row['MMWRWeek'], "CaseID not found in State dataset", "4"))
+                       cdc_row['MMWRYear'], cdc_row['MMWRWeek'], "CaseID not found in State dataset", "4", cdc_row["CaseClassStatus"]))
         
         # adding in missing from state count, total case count, and caseID to the stats dict
         # only counting cases that are not duplicates, otherwise counting as duplicate
@@ -169,13 +170,13 @@ def main():
     # Create Results CSV File and write the results to it
     with open(args.output, 'w', newline='') as csvfile:
         fieldnames = ['CaseID', 'EventCode', 'EventName', 'MMWRYear',
-                      'MMWRWeek', 'Reason', 'ReasonID']
+                      'MMWRWeek', 'Reason', 'ReasonID', 'CaseClassStatus']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
         for result in results:
             writer.writerow({'CaseID': result.caseID, 'EventCode': result.eventCode, 'EventName': result.eventName,'MMWRYear': result.MMWRYear,
-                            'MMWRWeek': result.MMWRWeek, 'Reason': result.reason, 'ReasonID': result.reasonID})
+                            'MMWRWeek': result.MMWRWeek, 'Reason': result.reason, 'ReasonID': result.reasonID, 'CaseClassStatus':result.caseClassStatus})
             
     # writing to stats.csv but first grabbing the folder location of results.csv
     output_directory = os.path.dirname(args.output)
