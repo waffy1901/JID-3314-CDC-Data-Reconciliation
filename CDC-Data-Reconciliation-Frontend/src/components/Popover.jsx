@@ -23,8 +23,10 @@ function Popover({
   useEffect(() => {
     function handleClickOutside(event) {
       if (wrapperRef.current){// && !wrapperRef.current.contains(event.target)) {
-        setTimeout(() => setShow(false), 100)
-        // setShow(false);
+        // If you have an issue where you click Delete or Rename and the popover disappears but
+        // the modal does not appear, increase this number (how long in ms the popover will
+        // stay and allow the modal to appear)
+        setTimeout(() => setShow(false), 150)
       }
     }
 

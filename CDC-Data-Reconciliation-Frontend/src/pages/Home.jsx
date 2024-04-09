@@ -11,8 +11,11 @@ export default function Home() {
   const [currReport, setCurrReport] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [renameModalOpen, setRenameModalOpen] = useState(false)
+  const [renameName, setRenameName] = useState('')
   const [visibleReportsCount, setVisibleReportsCount] = useState(5);
   const [modifyingReportId, setModifyingReportId] = useState(null)
+  const [modifyingReportName, setModifyingReportName] = useState(null)
 
   const dotsOptions = [
     "Rename",
@@ -48,39 +51,58 @@ export default function Home() {
     setVisibleReportsCount(5)
   }
 
-  const handleOptionClick = (option, id) => {
+  const handleOptionClick = (option, id, name) => {
+    setModifyingReportName(name)
+    setModifyingReportId(id)
     if (option === "Delete") {
       setDeleteModalOpen(true)
-      setModifyingReportId(id)
-      
     } else if (option === "Rename") {
-      renameReport(id)
-      fetchReportSummaries()
+      setRenameModalOpen(true)
     }
   }
 
   const handleDeleteReport = async () => {
-    const response = await deleteReport(modifyingReportId)
-    if (response.ok) {
-      if (modifyingReportId === currReport) {
-        setCurrReport(null)
+    try {
+      const response = await fetch(config.API_URL + "/reports/" + modifyingReportId, {method: "DELETE"})
+      if (response.ok) {
+        if (modifyingReportId === currReport) {
+          setCurrReport(null)
+        }
+        fetchReportSummaries()
       }
-      fetchReportSummaries()
+      else {
+        console.error("Failed to delete report " + modifyingReportId)
+      }
     }
-    else {
-      console.error("Failed to delete report " + modifyingReportId)
+    catch (e) {
+      console.error("Error deleting report - " + e)
     }
   }
 
-  const deleteReport = async (index) => {
-    // add a note to the "are you sure?" popup to clarify that archived CSVs are not deleted
-    const response = await fetch(config.API_URL + "/reports/" + index, {method: "DELETE"})
-
-    return response
+  const handleRenameReport = async (e) => {
+    setRenameModalOpen(false)
+    const newName = renameName
+    // Clear entry field
+    setRenameName('')
+    e.preventDefault();
+    const response = await fetch(config.API_URL + `/reports?report_id=${modifyingReportId}&new_name=${newName}`, {
+      method: "POST"
+    })
+    try {
+      if (response.ok) {
+        fetchReportSummaries()
+      }
+      else {
+        console.error("Failed to rename report " + modifyingReportId)
+      }
+    }
+    catch (e) {
+      console.error("Error renaming report - " + e)
+    }
   }
 
-  const renameReport = (index) => {
-    alert("Renaming reports is not implemented yet.")
+  const handleRenameFieldChange = (e) => {
+    setRenameName(e.target.value)
   }
 
   return (
@@ -90,9 +112,8 @@ export default function Home() {
       </Modal>
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
         <div className='bg-white rounded-md p-5'>
-          {/* TODO: Fetch the actual name of the report when it is renamed */}
           <h2 className="text-black text-lg">
-            Are you sure you wish to delete Report {modifyingReportId}?
+            Are you sure you wish to delete report {modifyingReportName}?
           </h2>
           <h2 className="text-black text-md text-center">
             Any archived CSVs are not deleted.
@@ -108,6 +129,36 @@ export default function Home() {
               Delete
             </button>
           </div>
+        </div>
+      </Modal>
+      <Modal isOpen={renameModalOpen} onClose={() => setRenameModalOpen(false)}>
+        <div className='bg-white rounded-md p-5'>
+          <form onSubmit={handleRenameReport}>
+            <h2 className="text-black text-lg pb-3">
+              Enter the new name for report {modifyingReportName}:
+            </h2>
+            <input
+              type='text'
+              id='new_name'
+              onChange={handleRenameFieldChange}
+              className='shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
+              placeholder='Enter the new name'
+              value={renameName}
+            />
+            <div className="flex flex-row justify-center gap-10 m-2 mt-5 left-0">
+              <Button
+                text='Cancel'
+                className='px-4 py-2 shadow-lg'
+                onClick={() => setRenameModalOpen(false)}>
+              </Button>
+              <Button
+                text='Rename'
+                type='submit'
+                className='px-4 py-2 shadow-lg'
+                onClick={() => {}}>
+              </Button>
+            </div>
+          </form>
         </div>
       </Modal>
       <div className='flex flex-row items-center h-full w-full'>
@@ -127,14 +178,16 @@ export default function Home() {
                 }`}
               >
                 <h2 className='text-xl font-semibold'>
-                  Report {summary.ID}
+                  <span className="text-wrap">
+                    {summary.Name}
+                  </span>
                   <span className="float-right -mx-1">
                   <Popover
                     content={
                       dotsOptions.map((option) => (
                         <div 
                           key={option}
-                          onClick={(e) => {e.stopPropagation(); handleOptionClick(option, summary.ID);}} 
+                          onClick={(e) => {handleOptionClick(option, summary.ID, summary.Name); e.stopPropagation();}} 
                           className="text-lg font-normal hover:text-slate-500 cursor-pointer select-none">
                             {option}
                         </div>
