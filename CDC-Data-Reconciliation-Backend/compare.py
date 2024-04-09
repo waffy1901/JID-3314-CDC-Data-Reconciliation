@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 class CaseResult:
-    def __init__(self, caseID, eventCode, eventName, MMWRYear, MMWRWeek, reason, reasonID) -> None:
+    def __init__(self, caseID, eventCode, eventName, MMWRYear, MMWRWeek, reason, reasonID, caseClassStatus) -> None:
         self.caseID = caseID
         self.eventCode = eventCode
         self.eventName = eventName
@@ -12,6 +12,7 @@ class CaseResult:
         self.MMWRWeek = MMWRWeek
         self.reason = reason
         self.reasonID = reasonID
+        self.caseClassStatus = caseClassStatus
 
 
 # dictionary holding all stats for this report
@@ -71,7 +72,7 @@ def get_cdc_dict(cdc_file, filterCDC = False):
                 cdcEventCodes.add(row['EventCode'])
             if row['CaseID'] in cdc_dict:
                 results.append(CaseResult(row['CaseID'], row['EventCode'],
-                               row['EventName'], row['MMWRYear'], row['MMWRWeek'], "Duplicate Case ID found in CDC CSV File", "1"))
+                               row['EventName'], row['MMWRYear'], row['MMWRWeek'], "Duplicate CaseID found in CDC dataset", "1", row["CaseClassStatus"]))
                 
                 # adding duplicates to duplicate count if needed
                 stats[row['EventCode']]['totalDuplicates'] += 1
@@ -84,7 +85,7 @@ def get_cdc_dict(cdc_file, filterCDC = False):
     return cdc_dict, cdcEventCodes
 
 # place the stats stuff here
-def comp(state_dict, cdc_dict):
+def comp(state_dict, cdc_dict, compare_attributes=None):
     for state_case_id in state_dict:
         state_row = state_dict[state_case_id]
         
@@ -97,17 +98,18 @@ def comp(state_dict, cdc_dict):
         # If a case ID is in the state DB but not the CDC DB, mark it as a missing case
         if state_case_id not in cdc_dict:
             results.append(CaseResult(
-                state_case_id, state_row['EventCode'], state_row['EventName'], state_row['MMWRYear'], state_row['MMWRWeek'], "Case ID not found in CDC CSV File", "2"))
+                state_case_id, state_row['EventCode'], state_row['EventName'], state_row['MMWRYear'], state_row['MMWRWeek'], "CaseID not found in CDC dataset", "2", state_row["CaseClassStatus"]))
             
             # counting the missing case in totalMissingCDC for this eventCode
             stats[state_row['EventCode']]['totalMissingCDC'] += 1
             
         else:
-            i = 0
-            for attribute in state_row:
-                # Skip the first attribute since they are not included in CDC CSV file
-                if i < 1:
-                    i += 1
+            # Determine which attributes to compare: specified ones or all
+            attributes_to_compare = compare_attributes if compare_attributes is not None else state_row.keys()
+            att_list = []
+            for attribute in attributes_to_compare:
+                # Skip if the attribute is not in the CDC dict
+                if attribute not in cdc_dict[state_case_id]:
                     continue
 
                 state_attribute = state_row[attribute]
@@ -121,12 +123,17 @@ def comp(state_dict, cdc_dict):
 
                 # If a case has different attributes between state and CDC DBs, mark it as such
                 if state_attribute != cdc_attribute:
-                    results.append(CaseResult(state_case_id, state_row['EventCode'], state_row['EventName'], state_row[
-                                   'MMWRYear'], state_row['MMWRWeek'], "Case has different attributes between State and CDC CSV Files", "3"))
-                    
-                    # making sure to also count this discrepancy in the stats.csv file
-                    stats[state_row['EventCode']]['totalWrongAttributes'] += 1
-                    break
+                    att_list.append(attribute)
+
+            if (att_list != []):
+                wrong_attribute_string = ", ".join(att_list)
+                reason_string = f"Case differs on {wrong_attribute_string} between State and CDC datasets"
+                
+                results.append(CaseResult(state_case_id, state_row['EventCode'], state_row['EventName'], state_row[
+                                   'MMWRYear'], state_row['MMWRWeek'], reason_string, "3", state_row["CaseClassStatus"]))
+                # making sure to also count this discrepancy in the stats.csv file
+                stats[state_row['EventCode']]['totalWrongAttributes'] += 1
+                
 
             # Remove the case from the CDC dict so we can track what cases are missing from the state side
             del cdc_dict[state_case_id]
@@ -135,7 +142,7 @@ def comp(state_dict, cdc_dict):
     for cdc_case_id in cdc_dict:
         cdc_row = cdc_dict[cdc_case_id]
         results.append(CaseResult(cdc_case_id, cdc_row['EventCode'], cdc_row['EventName'],
-                       cdc_row['MMWRYear'], cdc_row['MMWRWeek'], "Case ID not found in State CSV File", "4"))
+                       cdc_row['MMWRYear'], cdc_row['MMWRWeek'], "CaseID not found in State dataset", "4", cdc_row["CaseClassStatus"]))
         
         # adding in missing from state count, total case count, and caseID to the stats dict
         # only counting cases that are not duplicates, otherwise counting as duplicate
@@ -153,25 +160,23 @@ def main():
     parser.add_argument('-o', '--output', help='Local Path to Output CSV file')
     # if the parameter below is specified the value stored is true
     parser.add_argument('-f', '--filter', action='store_true', help='Filter by CDC eventCodes')
+    parser.add_argument('-a', '--attributes', nargs='*', help='Attributes to compare')
     args = parser.parse_args()
 
-    filterByCDC = args.filter
-    
-    cdc_dict, cdcEventCodes = get_cdc_dict(args.cdc, filterByCDC)
+    cdc_dict, cdcEventCodes = get_cdc_dict(args.cdc, args.filter)
     state_dict = get_state_dict(args.state, cdcEventCodes)
-
-    comp(state_dict, cdc_dict)
+    comp(state_dict, cdc_dict, args.attributes)
 
     # Create Results CSV File and write the results to it
     with open(args.output, 'w', newline='') as csvfile:
         fieldnames = ['CaseID', 'EventCode', 'EventName', 'MMWRYear',
-                      'MMWRWeek', 'Reason', 'ReasonID']
+                      'MMWRWeek', 'Reason', 'ReasonID', 'CaseClassStatus']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
         for result in results:
             writer.writerow({'CaseID': result.caseID, 'EventCode': result.eventCode, 'EventName': result.eventName,'MMWRYear': result.MMWRYear,
-                            'MMWRWeek': result.MMWRWeek, 'Reason': result.reason, 'ReasonID': result.reasonID})
+                            'MMWRWeek': result.MMWRWeek, 'Reason': result.reason, 'ReasonID': result.reasonID, 'CaseClassStatus':result.caseClassStatus})
             
     # writing to stats.csv but first grabbing the folder location of results.csv
     output_directory = os.path.dirname(args.output)

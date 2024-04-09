@@ -57,6 +57,12 @@ export default function Report({ reportID }) {
       footer: (props) => props.column.id,
     },
     {
+      header: "CaseClassStatus",
+      accessorFn: (row) => row.CaseClassStatus.toString(),
+      id: "CaseClassStatus",
+      footer: (props) => props.column.id,
+    },
+    {
       header: "MMWRYear",
       accessorFn: (row) => row.MMWRYear.toString(),
       id: "MMWRYear",
@@ -211,6 +217,9 @@ export default function Report({ reportID }) {
   })
 
   useEffect(() => {
+    setStatistics(null)
+    setResults(null)
+    setTotalStatistics(null)
     const fetchReportStatistics = async () => {
       try {
         const statsResponse = await fetch(config.API_URL + "/report_statistics/" + reportID)
@@ -401,7 +410,7 @@ export default function Report({ reportID }) {
   }
 
   return (
-    <div className='mt-5 py-5 w-5/6 flex flex-col items-center gap-6'>
+    <div className='mt-5 py-5 px-12 mx-auto w-full max-w-[1400px] min-w-[800px] flex flex-col items-center gap-6'>
       {results && (
         <>
           <div className='flex flex-col items-center mb-5'>
@@ -610,19 +619,19 @@ export default function Report({ reportID }) {
           <div>
             <div className='w-full flex flex-row items-center justify-between'>
               <div className="flex items-center gap-2">
-              <DebouncedInput
-                value={discGlobalFilter ?? ""}
-                onChange={(value) => discTable.setGlobalFilter(String(value))}
-                className='p-2 font-lg shadow border border-block'
-                placeholder='Search all columns...'
-              />
-              <Button
-                text='Clear Filters'
-                className='px-5 py-2 flex flex-row items-center justify-around gap-2'
-                onClick={clearDiscFilters}
-              >
-                <MdFilterAltOff size={23} />
-              </Button>
+                <DebouncedInput
+                  value={discGlobalFilter ?? ""}
+                  onChange={(value) => discTable.setGlobalFilter(String(value))}
+                  className='p-2 font-lg shadow border border-block'
+                  placeholder='Search all columns...'
+                />
+                <Button
+                  text='Clear Filters'
+                  className='px-5 py-2 flex flex-row items-center justify-around gap-2'
+                  onClick={clearDiscFilters}
+                >
+                  <MdFilterAltOff size={23} />
+                </Button>
               </div>
 
               <Button
@@ -637,7 +646,7 @@ export default function Report({ reportID }) {
               <table className='table-auto'>
                 <thead className='bg-[#d4e1ec]'>
                   <tr>
-                    <th colSpan={7} className="text-2xl p-2">
+                    <th colSpan={8} className="text-2xl p-2">
                       {currentDisease && currentDiscType ? `${currentDisease} ${currentDiscType}` : 'Report Discrepancies'}
                     </th>
                   </tr>

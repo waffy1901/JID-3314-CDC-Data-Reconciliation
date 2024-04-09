@@ -1,6 +1,6 @@
 import subprocess
 import uvicorn
-from fastapi import FastAPI, File, Response, UploadFile, HTTPException
+from fastapi import FastAPI, File, Form, Response, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -39,8 +39,8 @@ app.dir = os.path.dirname(__file__)
 config_file_path = os.path.join(app.dir, "config.json")
 with open(config_file_path, "r") as f:
     app.config = json.load(f)
-    db_username = os.getenv('DB_USERNAME')
-    db_password = os.getenv('DB_PASSWORD')
+    db_username = app.config["database_username"] if app.config["database_username"] else os.getenv('DB_USERNAME')
+    db_password = app.config["database_password"] if app.config["database_password"] else os.getenv('DB_PASSWORD')
 
 # Connect to the SQL Server
 connection_string = 'DRIVER={' + app.config["driver"] + \
@@ -75,6 +75,7 @@ cur.execute('''
         MMWRWeek INTEGER,
         Reason TEXT, 
         ReasonID INTEGER,
+        CaseClassStatus TEXT,
         FOREIGN KEY (ReportID) REFERENCES Reports(ID)
 )''')
 
@@ -104,7 +105,8 @@ cur.execute('''
 app.liteConn.commit()
 
 @app.post("/manual_report")
-async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), cdc_file:  UploadFile = File(None)):
+async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
+                        cdc_file:  UploadFile = File(None), attributes: str = Form("[]")):
     folder_name = "temp"
     if not os.path.exists(os.path.join(app.dir, "temp")):
         os.makedirs(os.path.join(app.dir, "temp"))
@@ -136,6 +138,9 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
     
     if isCDCFilter:
         subprocess_args.append('-f')
+    
+    attributes_list = json.loads(attributes)
+    subprocess_args.extend(['-a', *attributes_list])
     
     try:
         process = await asyncio.create_subprocess_exec(*subprocess_args,
@@ -190,7 +195,8 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
     return Response(status_code=200)
 
 @app.post("/automatic_report")
-async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile = File(None)):
+async def automatic_report(year: int, isCDCFilter: bool, 
+                           cdc_file:  UploadFile = File(None), attributes: str = Form("[]")):
     # Run query to retrieve data from NBS ODSE database
     (column_names, state_content) = run_query(year)
     if not len(state_content) > 0:
@@ -231,6 +237,9 @@ async def automatic_report(year: int, isCDCFilter: bool, cdc_file:  UploadFile =
     
     if isCDCFilter:
         subprocess_args.append('-f')
+    
+    attributes_list = json.loads(attributes)
+    subprocess_args.extend(['-a', *attributes_list])
     
     try:
         process = await asyncio.create_subprocess_exec(*subprocess_args,
@@ -325,6 +334,23 @@ async def get_report_statistics(report_id: int):
         print(f"Database error: {e}")
         raise HTTPException(status_code = 500, detail = "Internal Server Error")
 
+@app.delete("/reports/{report_id}")
+async def delete_report(report_id: int):
+    """
+    Deletes a report from all 3 tables.
+    """
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute("DELETE FROM Reports WHERE ID = ?", (report_id,))
+        cur.execute("DELETE FROM Cases WHERE ReportID = ?", (report_id,))
+        cur.execute("DELETE FROM Statistics WHERE ReportID = ?", (report_id,))
+        app.liteConn.commit()
+        return Response(status_code=200)
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        app.liteConn.rollback()
+        return HTTPException(status_code = 500, detail = "Internal Server Error")
+
 def fetch_reports_from_db(report_id: int):
     """
     Function to fetch a report from the SQLite database.
@@ -360,7 +386,7 @@ def insert_statistics(stats):
 def insert_cases(res):
     try:
         cur = app.liteConn.cursor()
-        cur.executemany("INSERT INTO Cases (ReportID, CaseID, EventCode, EventName, MMWRYear, MMWRWeek, Reason, ReasonID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", res)
+        cur.executemany("INSERT INTO Cases (ReportID, CaseID, EventCode, EventName, MMWRYear, MMWRWeek, Reason, ReasonID, CaseClassStatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", res)
         app.liteConn.commit()
     except Exception as e:
         app.liteConn.rollback()
@@ -377,9 +403,6 @@ def run_query(year: int):
     # Return the queried data as a list of dicts
     column_names = [col[0] for col in cursor.description]
     data = cursor.fetchall()
-    # # (List comprehension might be too slow for large datasets;
-    # #  may need to consider pandas or numpy in the future)
-    # data = [dict(zip(column_names, row)) for row in row_data]
 
     return (column_names, data)
 
@@ -433,4 +456,4 @@ if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=app.config["port"], workers=1)
 
     # Use this command to run the API with reloading enabled (DOES NOT WORK ON WINDOWS)
-    # uvicorn.run("server:app", host="localhost", port=8000, reload=True)
+    # uvicorn.run("server:app", host="localhost", port=app.config["port"], reload=True)
