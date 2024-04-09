@@ -15,6 +15,7 @@ export default function Home() {
   const [renameName, setRenameName] = useState('')
   const [visibleReportsCount, setVisibleReportsCount] = useState(5);
   const [modifyingReportId, setModifyingReportId] = useState(null)
+  const [modifyingReportName, setModifyingReportName] = useState(null)
 
   const dotsOptions = [
     "Rename",
@@ -50,7 +51,8 @@ export default function Home() {
     setVisibleReportsCount(5)
   }
 
-  const handleOptionClick = (option, id) => {
+  const handleOptionClick = (option, id, name) => {
+    setModifyingReportName(name)
     if (option === "Delete") {
       setDeleteModalOpen(true)
       setModifyingReportId(id)
@@ -61,20 +63,21 @@ export default function Home() {
   }
 
   const handleDeleteReport = async () => {
-    const response = await deleteReport(modifyingReportId)
-    if (response.ok) {
-      if (modifyingReportId === currReport) {
-        setCurrReport(null)
+    try {
+      const response = await fetch(config.API_URL + "/reports/" + index, {method: "DELETE"})
+      if (response.ok) {
+        if (modifyingReportId === currReport) {
+          setCurrReport(null)
+        }
+        fetchReportSummaries()
       }
-      fetchReportSummaries()
+      else {
+        console.error("Failed to delete report " + modifyingReportId)
+      }
     }
-    else {
-      console.error("Failed to delete report " + modifyingReportId)
+    catch (e) {
+      console.error("Error deleting report - " + e)
     }
-  }
-
-  const deleteReport = async (index) => {
-    return fetch(config.API_URL + "/reports/" + index, {method: "DELETE"})
   }
 
   const handleRenameReport = async (e) => {
@@ -83,18 +86,20 @@ export default function Home() {
     // Clear entry field
     setRenameName('')
     e.preventDefault();
-    const response = await renameReport(modifyingReportId, newName)
-    if (response.ok) {
-      fetchReportSummaries()
+    const response = await fetch(config.API_URL + `/reports?report_id=${modifyingReportId}&new_name=${newName}`, {
+      method: "POST"
+    })
+    try {
+      if (response.ok) {
+        fetchReportSummaries()
+      }
+      else {
+        console.error("Failed to rename report " + modifyingReportId)
+      }
     }
-    else {
-      console.error("Failed to rename report " + modifyingReportId)
+    catch (e) {
+      console.error("Error renaming report - " + e)
     }
-  }
-
-  const renameReport = async (index, newName) => {
-    alert("renaming to " + newName)
-    return { ok: true }
   }
 
   const handleRenameFieldChange = (e) => {
@@ -110,7 +115,7 @@ export default function Home() {
         <div className='bg-white rounded-md p-5'>
           {/* TODO: Fetch the actual name of the report when it is renamed */}
           <h2 className="text-black text-lg">
-            Are you sure you wish to delete Report {modifyingReportId}?
+            Are you sure you wish to delete report {modifyingReportName}?
           </h2>
           <h2 className="text-black text-md text-center">
             Any archived CSVs are not deleted.
@@ -133,7 +138,7 @@ export default function Home() {
           <form onSubmit={handleRenameReport}>
             {/* TODO: Fetch the actual name of the report when it is renamed */}
             <h2 className="text-black text-lg pb-3">
-              Enter the new name for Report {modifyingReportId}:
+              Enter the new name for report {modifyingReportName}:
             </h2>
             <input
               type='text'
@@ -176,14 +181,14 @@ export default function Home() {
                 }`}
               >
                 <h2 className='text-xl font-semibold'>
-                  Report {summary.ID}
+                  {summary.Name}
                   <span className="float-right -mx-1">
                   <Popover
                     content={
                       dotsOptions.map((option) => (
                         <div 
                           key={option}
-                          onClick={(e) => {handleOptionClick(option, summary.ID); e.stopPropagation();}} 
+                          onClick={(e) => {handleOptionClick(option, summary.ID, summary.Name); e.stopPropagation();}} 
                           className="text-lg font-normal hover:text-slate-500 cursor-pointer select-none">
                             {option}
                         </div>
