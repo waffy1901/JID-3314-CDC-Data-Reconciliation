@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 class CaseResult:
-    def __init__(self, caseID, eventCode, eventName, MMWRYear, MMWRWeek, reason, reasonID) -> None:
+    def __init__(self, caseID, eventCode, eventName, MMWRYear, MMWRWeek, reason, reasonID, caseClassStatus) -> None:
         self.caseID = caseID
         self.eventCode = eventCode
         self.eventName = eventName
@@ -12,6 +12,7 @@ class CaseResult:
         self.MMWRWeek = MMWRWeek
         self.reason = reason
         self.reasonID = reasonID
+        self.caseClassStatus = caseClassStatus
 
 
 # dictionary holding all stats for this report
@@ -71,7 +72,7 @@ def get_cdc_dict(cdc_file, filterCDC = False):
                 cdcEventCodes.add(row['EventCode'])
             if row['CaseID'] in cdc_dict:
                 results.append(CaseResult(row['CaseID'], row['EventCode'],
-                               row['EventName'], row['MMWRYear'], row['MMWRWeek'], "Duplicate CaseID found in CDC dataset", "1"))
+                               row['EventName'], row['MMWRYear'], row['MMWRWeek'], "Duplicate CaseID found in CDC dataset", "1", row["CaseClassStatus"]))
                 
                 # adding duplicates to duplicate count if needed
                 stats[row['EventCode']]['totalDuplicates'] += 1
@@ -169,13 +170,13 @@ def main():
     # Create Results CSV File and write the results to it
     with open(args.output, 'w', newline='') as csvfile:
         fieldnames = ['CaseID', 'EventCode', 'EventName', 'MMWRYear',
-                      'MMWRWeek', 'Reason', 'ReasonID']
+                      'MMWRWeek', 'Reason', 'ReasonID', 'CaseClassStatus']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         writer.writeheader()
         for result in results:
             writer.writerow({'CaseID': result.caseID, 'EventCode': result.eventCode, 'EventName': result.eventName,'MMWRYear': result.MMWRYear,
-                            'MMWRWeek': result.MMWRWeek, 'Reason': result.reason, 'ReasonID': result.reasonID})
+                            'MMWRWeek': result.MMWRWeek, 'Reason': result.reason, 'ReasonID': result.reasonID, 'CaseClassStatus':result.caseClassStatus})
             
     # writing to stats.csv but first grabbing the folder location of results.csv
     output_directory = os.path.dirname(args.output)

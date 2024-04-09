@@ -79,6 +79,12 @@ export default function Report({ reportID }) {
       id: "ReasonID",
       footer: (props) => props.column.id,
     },
+    {
+      header: "CaseClassStatus",
+      accessorFn: (row) => row.CaseClassStatus.toString(),
+      id: "CaseClassStatus",
+      footer: (props) => props.column.id,
+    },
   ])
 
   const statColumns = useMemo(() => [
