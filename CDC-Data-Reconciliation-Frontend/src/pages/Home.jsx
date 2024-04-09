@@ -112,7 +112,6 @@ export default function Home() {
       </Modal>
       <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)}>
         <div className='bg-white rounded-md p-5'>
-          {/* TODO: Fetch the actual name of the report when it is renamed */}
           <h2 className="text-black text-lg">
             Are you sure you wish to delete report {modifyingReportName}?
           </h2>
@@ -135,7 +134,6 @@ export default function Home() {
       <Modal isOpen={renameModalOpen} onClose={() => setRenameModalOpen(false)}>
         <div className='bg-white rounded-md p-5'>
           <form onSubmit={handleRenameReport}>
-            {/* TODO: Fetch the actual name of the report when it is renamed */}
             <h2 className="text-black text-lg pb-3">
               Enter the new name for report {modifyingReportName}:
             </h2>
