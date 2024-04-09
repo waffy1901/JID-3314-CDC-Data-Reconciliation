@@ -60,7 +60,8 @@ cur.execute('''
         ID INTEGER PRIMARY KEY NOT NULL, 
         CreatedAtDate TEXT,
         TimeOfCreation TEXT, 
-        NumberOfDiscrepancies INTEGER    
+        NumberOfDiscrepancies INTEGER,
+        Name TEXT    
 )''')
 
 # Cases table
@@ -105,7 +106,7 @@ cur.execute('''
 app.liteConn.commit()
 
 @app.post("/manual_report")
-async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None), 
+async def manual_report(isCDCFilter: bool, reportName: str, state_file: UploadFile = File(None), 
                         cdc_file:  UploadFile = File(None), attributes: str = Form("[]")):
     folder_name = "temp"
     if not os.path.exists(os.path.join(app.dir, "temp")):
@@ -163,7 +164,7 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None),
             res.append(tuple(row.values()))
 
     numDiscrepancies = len(res)
-    reportId = insert_report(numDiscrepancies)
+    reportId = insert_report(numDiscrepancies, reportName)
 
     stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
     stats_list = []
@@ -195,7 +196,7 @@ async def manual_report(isCDCFilter: bool, state_file: UploadFile = File(None),
     return Response(status_code=200)
 
 @app.post("/automatic_report")
-async def automatic_report(year: int, isCDCFilter: bool, 
+async def automatic_report(year: int, isCDCFilter: bool, reportName: str,
                            cdc_file:  UploadFile = File(None), attributes: str = Form("[]")):
     # Run query to retrieve data from NBS ODSE database
     (column_names, state_content) = run_query(year)
@@ -263,7 +264,7 @@ async def automatic_report(year: int, isCDCFilter: bool,
             res.append(tuple(row.values()))
 
     numDiscrepancies = len(res)
-    reportId = insert_report(numDiscrepancies)
+    reportId = insert_report(numDiscrepancies, reportName)
 
     stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
     stats_list = []
@@ -333,6 +334,18 @@ async def get_report_statistics(report_id: int):
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         raise HTTPException(status_code = 500, detail = "Internal Server Error")
+    
+@app.post("/reports")
+async def rename_report(report_id: int, new_name: str):
+    try:
+        cur = app.liteConn.cursor()
+        cur.execute("UPDATE Reports SET Name = ? WHERE ID = ?", (f"Report {report_id}" if new_name == "" else new_name, report_id))
+        app.liteConn.commit()
+        return Response(status_code=200)
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+        app.liteConn.rollback()
+        return HTTPException(status_code = 500, detail = "Internal Server Error")
 
 @app.delete("/reports/{report_id}")
 async def delete_report(report_id: int):
@@ -363,11 +376,14 @@ def fetch_reports_from_db(report_id: int):
         print(f"Database error: {e}")
         return None
 
-def insert_report(noOfDiscrepancies):
+def insert_report(noOfDiscrepancies, name = ""):
     try:
         cur = app.liteConn.cursor()
-        cur.execute("INSERT INTO Reports (CreatedAtDate, TimeOfCreation, NumberOfDiscrepancies)  VALUES (DATE('now'), TIME('now'), ?)", (noOfDiscrepancies,))
+        cur.execute("INSERT INTO Reports (CreatedAtDate, TimeOfCreation, NumberOfDiscrepancies, Name)  VALUES (DATE('now'), TIME('now'), ?, ?)", (noOfDiscrepancies, name))
         report_id = cur.lastrowid
+        # Set default name if none provided
+        if name == "":
+            cur.execute("UPDATE Reports SET Name = ? WHERE ID = ?", (f"Report {report_id}", report_id))
         app.liteConn.commit()
         return report_id
     except Exception as e:
