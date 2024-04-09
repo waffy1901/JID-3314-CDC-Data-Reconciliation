@@ -57,6 +57,12 @@ export default function Report({ reportID }) {
       footer: (props) => props.column.id,
     },
     {
+      header: "CaseClassStatus",
+      accessorFn: (row) => row.CaseClassStatus.toString(),
+      id: "CaseClassStatus",
+      footer: (props) => props.column.id,
+    },
+    {
       header: "MMWRYear",
       accessorFn: (row) => row.MMWRYear.toString(),
       id: "MMWRYear",
@@ -77,12 +83,6 @@ export default function Report({ reportID }) {
       header: "ReasonID",
       accessorFn: (row) => row.ReasonID.toString(),
       id: "ReasonID",
-      footer: (props) => props.column.id,
-    },
-    {
-      header: "CaseClassStatus",
-      accessorFn: (row) => row.CaseClassStatus.toString(),
-      id: "CaseClassStatus",
       footer: (props) => props.column.id,
     },
   ])

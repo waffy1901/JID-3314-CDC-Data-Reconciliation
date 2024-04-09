@@ -98,7 +98,7 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
         # If a case ID is in the state DB but not the CDC DB, mark it as a missing case
         if state_case_id not in cdc_dict:
             results.append(CaseResult(
-                state_case_id, state_row['EventCode'], state_row['EventName'], state_row['MMWRYear'], state_row['MMWRWeek'], "CaseID not found in CDC dataset", "2"))
+                state_case_id, state_row['EventCode'], state_row['EventName'], state_row['MMWRYear'], state_row['MMWRWeek'], "CaseID not found in CDC dataset", "2", state_row["CaseClassStatus"]))
             
             # counting the missing case in totalMissingCDC for this eventCode
             stats[state_row['EventCode']]['totalMissingCDC'] += 1
@@ -130,7 +130,7 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
                 reason_string = f"Case differs on {wrong_attribute_string} between State and CDC datasets"
                 
                 results.append(CaseResult(state_case_id, state_row['EventCode'], state_row['EventName'], state_row[
-                                   'MMWRYear'], state_row['MMWRWeek'], reason_string, "3"))
+                                   'MMWRYear'], state_row['MMWRWeek'], reason_string, "3", state_row["CaseClassStatus"]))
                 # making sure to also count this discrepancy in the stats.csv file
                 stats[state_row['EventCode']]['totalWrongAttributes'] += 1
                 
@@ -142,7 +142,7 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
     for cdc_case_id in cdc_dict:
         cdc_row = cdc_dict[cdc_case_id]
         results.append(CaseResult(cdc_case_id, cdc_row['EventCode'], cdc_row['EventName'],
-                       cdc_row['MMWRYear'], cdc_row['MMWRWeek'], "CaseID not found in State dataset", "4"))
+                       cdc_row['MMWRYear'], cdc_row['MMWRWeek'], "CaseID not found in State dataset", "4", cdc_row["CaseClassStatus"]))
         
         # adding in missing from state count, total case count, and caseID to the stats dict
         # only counting cases that are not duplicates, otherwise counting as duplicate
