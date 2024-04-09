@@ -281,11 +281,11 @@ export default function Report({ reportID }) {
 
   const handleResultsDownload = (e) => {
     const csvData =
-      "CaseID,EventCode,EventName,MMWRYear,MMWRWeek,Reason,ReasonID\n" +
+      "CaseID,EventCode,EventName,CaseClassStatus,MMWRYear,MMWRWeek,Reason,ReasonID\n" +
       results
         .map(
           (result) =>
-            `${result.CaseID},${result.EventCode},"${result.EventName}",${result.MMWRYear},${result.MMWRWeek},${result.Reason},${result.ReasonID}`
+            `${result.CaseID},${result.EventCode},"${result.EventName}","${result.CaseClassStatus}",${result.MMWRYear},${result.MMWRWeek},"${result.Reason}",${result.ReasonID}`
         )
         .join("\n")
     const blob = new Blob([csvData], { type: "text/csv;charset=utf-8," })
