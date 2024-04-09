@@ -178,7 +178,9 @@ export default function Home() {
                 }`}
               >
                 <h2 className='text-xl font-semibold'>
-                  {summary.Name}
+                  <span className="text-wrap">
+                    {summary.Name}
+                  </span>
                   <span className="float-right -mx-1">
                   <Popover
                     content={
