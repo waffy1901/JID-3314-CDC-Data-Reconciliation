@@ -14,6 +14,7 @@ export default function CreateReport({ onDone }) {
     "EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus",
     "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"
   ]);
+  const [reportName, setReportName] = useState('')
 
   const currYear = 2023
   const yearList = Array.from({ length: 101}, (_, index) => currYear + index)
@@ -45,6 +46,10 @@ export default function CreateReport({ onDone }) {
     }
   }
 
+  const handleReportNameChange = (e) => {
+    setReportName(e.target.value)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -62,10 +67,10 @@ export default function CreateReport({ onDone }) {
       const formdata = new FormData()
       formdata.append("cdc_file", cdcFile)
       formdata.append("attributes", JSON.stringify(selectedAttributes));
-
       // Run the automatic report fetching
       try {
-        const response = await fetch(config.API_URL + `/automatic_report?year=${inputValue}&isCDCFilter=${isCDCFilter}`, {
+        const response = await fetch(config.API_URL + 
+          `/automatic_report?year=${inputValue}&isCDCFilter=${isCDCFilter}&reportName=${reportName}`, {
           method: "POST",
           body: formdata,
         })
@@ -102,7 +107,7 @@ export default function CreateReport({ onDone }) {
       formdata.append("cdc_file", cdcFile)
 
       try {
-        const response = await fetch(config.API_URL + `/manual_report?isCDCFilter=${isCDCFilter}`, {
+        const response = await fetch(config.API_URL + `/manual_report?isCDCFilter=${isCDCFilter}&reportName=${reportName}`, {
           method: "POST",
           body: formdata,
         })
@@ -167,7 +172,7 @@ export default function CreateReport({ onDone }) {
             </label>
             <hr></hr>
             <label htmlFor='cdc_file' className="font-bold ml-4">Upload CDC <span className="italic">.csv</span> File:</label>
-            <div className="ml-4">
+            <div className="-mt-4 ml-4">
               <input type='file' id='cdc_file' onChange={handleCDCFileChange}  />
             </div>
             <hr></hr>
@@ -175,7 +180,7 @@ export default function CreateReport({ onDone }) {
             <>
 
             <label className="font-bold ml-4">Specify Year to Query From: </label>
-            <select className="border border-black rounded-sm bg-gray-100 text-left  ml-4 w-[150px]"
+            <select className="-mt-4 border border-black rounded-sm bg-gray-100 text-left  ml-4 w-[150px]"
               value={inputValue}
               onChange={handleInputChange}
             >
@@ -251,10 +256,16 @@ export default function CreateReport({ onDone }) {
               />
               Compare Diseases Only From CDC Dataset
             </label>
-
-            {
-              // checking if the automatic report checkbox has been ticked, and disabling the state .csv file upload if it is
-            }
+            <hr></hr>
+            <label htmlFor='reportName' className="font-bold ml-4">Enter a name for the report (optional):</label>
+            <input
+              type='text'
+              id='reportName'
+              onChange={handleReportNameChange}
+              className='shadow appearance-none border rounded py-2 px-3 mx-3 -mt-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline'
+              placeholder='Enter the name'
+              value={reportName}
+            />
 
             <div className="items-center justify-center mx-auto">
               <Button

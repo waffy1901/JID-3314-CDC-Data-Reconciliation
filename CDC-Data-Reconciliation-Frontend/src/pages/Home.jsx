@@ -53,18 +53,17 @@ export default function Home() {
 
   const handleOptionClick = (option, id, name) => {
     setModifyingReportName(name)
+    setModifyingReportId(id)
     if (option === "Delete") {
       setDeleteModalOpen(true)
-      setModifyingReportId(id)
     } else if (option === "Rename") {
       setRenameModalOpen(true)
-      setModifyingReportId(id)
     }
   }
 
   const handleDeleteReport = async () => {
     try {
-      const response = await fetch(config.API_URL + "/reports/" + index, {method: "DELETE"})
+      const response = await fetch(config.API_URL + "/reports/" + modifyingReportId, {method: "DELETE"})
       if (response.ok) {
         if (modifyingReportId === currReport) {
           setCurrReport(null)
