@@ -39,14 +39,20 @@ app.dir = os.path.dirname(__file__)
 config_file_path = os.path.join(app.dir, "config.json")
 with open(config_file_path, "r") as f:
     app.config = json.load(f)
-    db_username = app.config["database_username"] if app.config["database_username"] else os.getenv('DB_USERNAME')
-    db_password = app.config["database_password"] if app.config["database_password"] else os.getenv('DB_PASSWORD')
+    db_username = app.config.get("database_username") or os.getenv('DB_USERNAME')
+    db_password = app.config.get("database_password") or os.getenv('DB_PASSWORD')
 
 # Connect to the SQL Server
-connection_string = 'DRIVER={' + app.config["driver"] + \
+connection_string_base = 'DRIVER={' + app.config["driver"] + \
     '}' + \
-    f';SERVER={app.config["server"]};DATABASE={app.config["database"]};UID={db_username};PWD={db_password};Trusted_Connection=yes;'
+    f';SERVER={app.config["server"]};DATABASE={app.config["database"]};'
 
+if db_username and db_password:
+    connection_string_auth = f'UID={db_username};PWD={db_password};'
+else:
+    connection_string_auth = 'Trusted_Connection=yes;'
+
+connection_string = connection_string_base + connection_string_auth
 app.conn = pyodbc.connect(connection_string)
 
 # SQLite reports and cases tables setup
