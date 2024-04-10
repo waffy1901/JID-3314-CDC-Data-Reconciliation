@@ -162,7 +162,7 @@ export default function Home() {
         </div>
       </Modal>
       <div className='flex flex-row items-center h-full w-full'>
-        <div className='min-w-[300px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 pb-8 overflow-auto'>
+        <div className='min-w-[300px] max-w-[300px] bg-slate-200 h-full flex flex-col items-center gap-4 p-1 pt-8 pb-8 overflow-auto'>
           <Button
             text='Create New Report'
             className='px-4 py-2 shadow-lg'
