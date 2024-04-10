@@ -58,9 +58,16 @@ def main():
         return
 
     # Connect to the SQL Server
-    connection_string = 'DRIVER={' + config["driver"] + \
+    connection_string_base = 'DRIVER={' + config["driver"] + \
         '}' + \
-        f';SERVER={config["server"]};DATABASE={config["database"]};UID={db_username};PWD={db_password}'
+        f';SERVER={config["server"]};DATABASE={config["database"]};'
+
+    if db_username and db_password:
+        connection_string_auth = f'UID={db_username};PWD={db_password};'
+    else:
+        connection_string_auth = 'Trusted_Connection=yes;'
+
+    connection_string = connection_string_base + connection_string_auth
     conn = pyodbc.connect(connection_string)
 
     # Get the state CSV
