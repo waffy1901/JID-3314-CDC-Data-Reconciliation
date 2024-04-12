@@ -15,8 +15,8 @@ configDir = os.path.dirname(__file__)
 config_file_path = os.path.join(configDir, "config.json")
 with open(config_file_path, "r") as f:
     config = json.load(f)
-    db_username = config["database_username"] if config["database_username"] else os.getenv('DB_USERNAME')
-    db_password = config["database_password"] if config["database_password"] else os.getenv('DB_PASSWORD')
+    db_username = config.get("database_username") or os.getenv('DB_USERNAME')
+    db_password = config.get("database_password") or os.getenv('DB_PASSWORD')
 
 def get_state_csv(year: int):
     query = None
@@ -58,9 +58,16 @@ def main():
         return
 
     # Connect to the SQL Server
-    connection_string = 'DRIVER={' + config["driver"] + \
+    connection_string_base = 'DRIVER={' + config["driver"] + \
         '}' + \
-        f';SERVER={config["server"]};DATABASE={config["database"]};UID={db_username};PWD={db_password}'
+        f';SERVER={config["server"]};DATABASE={config["database"]};'
+
+    if db_username and db_password:
+        connection_string_auth = f'UID={db_username};PWD={db_password};'
+    else:
+        connection_string_auth = 'Trusted_Connection=yes;'
+
+    connection_string = connection_string_base + connection_string_auth
     conn = pyodbc.connect(connection_string)
 
     # Get the state CSV
