@@ -110,6 +110,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalDuplicates.toString(),
       cell: (info) => (
         <span
+          onClick={() => handleStatClick(info.column, info.row.original)}
           className='text-blue-500 cursor-pointer underline'
         >
           {info.getValue()}
@@ -123,6 +124,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalMissingFromCDC.toString(),
       cell: (info) => (
         <span
+          onClick={() => handleStatClick(info.column, info.row.original)}
           className='text-blue-500 cursor-pointer underline'
         >
           {info.getValue()}
@@ -136,6 +138,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalMissingFromState.toString(),
       cell: (info) => (
         <span
+          onClick={() => handleStatClick(info.column, info.row.original)}
           className='text-blue-500 cursor-pointer underline'
         >
           {info.getValue()}
@@ -149,6 +152,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalWrongAttributes.toString(),
       cell: (info) => (
         <span
+          onClick={() => handleStatClick(info.column, info.row.original)}
           className='text-blue-500 cursor-pointer underline'
         >
           {info.getValue()}
@@ -539,7 +543,6 @@ export default function Report({ reportID }) {
                               {row.getVisibleCells().map((cell) => {
                                 return (
                                   <td
-                                    onClick={() => handleStatClick(cell.column, cell.row.original)}
                                     className='p-1'
                                     key={cell.id}
                                   >
