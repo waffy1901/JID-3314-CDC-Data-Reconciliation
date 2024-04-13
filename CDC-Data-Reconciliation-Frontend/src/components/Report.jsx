@@ -110,7 +110,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalDuplicates.toString(),
       cell: (info) => (
         <span
-          className='text-blue-500 cursor-pointer underline'
+          className='text-blue-500 cursor-pointer underline hover:text-blue-800'
         >
           {info.getValue()}
         </span>
@@ -123,7 +123,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalMissingFromCDC.toString(),
       cell: (info) => (
         <span
-          className='text-blue-500 cursor-pointer underline'
+          className='text-blue-500 cursor-pointer underline hover:text-blue-800'
         >
           {info.getValue()}
         </span>
@@ -136,7 +136,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalMissingFromState.toString(),
       cell: (info) => (
         <span
-          className='text-blue-500 cursor-pointer underline'
+          className='text-blue-500 cursor-pointer underline hover:text-blue-800'
         >
           {info.getValue()}
         </span>
@@ -149,7 +149,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalWrongAttributes.toString(),
       cell: (info) => (
         <span
-          className='text-blue-500 cursor-pointer underline'
+          className='text-blue-500 cursor-pointer underline hover:text-blue-800'
         >
           {info.getValue()}
         </span>
@@ -326,6 +326,7 @@ export default function Report({ reportID }) {
   }
 
   const handleStatClick = (col, row) => {
+
     // clear the filters of the report discrepancies table
     clearDiscFilters()
     // set the current disease for the header of the report discrepancies table
