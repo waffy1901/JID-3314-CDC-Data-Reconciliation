@@ -37,6 +37,7 @@ export default function Report({ reportID }) {
   const [statColumnFilters, setStatColumnFilters] = useState([])
   const [statGlobalFilter, setStatGlobalFilter] = useState("")
 
+  const [diseaseStatClicked, setDiseaseStatClicked] = useState(false)
   const [currentDisease, setCurrentDisease] = useState("")
   const [currentDiscType, setCurrentDiscType] = useState("")
 
@@ -171,17 +172,19 @@ export default function Report({ reportID }) {
       },
     },
     onColumnFiltersChange: (columnFilters) => {
-      if (currentDiscType != "" && currentDisease != "") {
-        setCurrentDiscType("")
+      if (diseaseStatClicked) {
+        setDiseaseStatClicked(false)
         setCurrentDisease("")
+        setCurrentDiscType("")
       }
 
       setDiscColumnFilters(columnFilters)
     },
     onGlobalFilterChange: (filter) => {
-      if (currentDiscType != "" && currentDisease != "") {
-        setCurrentDiscType("")
+      if (diseaseStatClicked) {
+        setDiseaseStatClicked(false)
         setCurrentDisease("")
+        setCurrentDiscType("")
       }
 
       setDiscGlobalFilter(filter)
@@ -324,10 +327,8 @@ export default function Report({ reportID }) {
 
   const handleStatClick = (col, row) => {
     // clear the filters of the report discrepancies table
-    discTable.setColumnFilters([])
-    discTable.setGlobalFilter("")
+    clearDiscFilters()
     // set the current disease for the header of the report discrepancies table
-    setCurrentDisease(row.EventName)
     let discrepancyType = ""
     switch (col.id) {
       case "TotalDuplicates":
@@ -395,11 +396,14 @@ export default function Report({ reportID }) {
         discrepancyType = ""
     }
     setCurrentDiscType(discrepancyType)
+    setCurrentDisease(row.EventName)
+    setDiseaseStatClicked(true)
   }
 
   const clearDiscFilters = () => {
     discTable.setColumnFilters([])
     discTable.setGlobalFilter("")
+    setDiseaseStatClicked(false)
     setCurrentDisease("")
     setCurrentDiscType("")
   }
@@ -647,7 +651,7 @@ export default function Report({ reportID }) {
                 <thead className='bg-[#d4e1ec]'>
                   <tr>
                     <th colSpan={8} className="text-2xl p-2">
-                      {currentDisease && currentDiscType ? `${currentDisease} ${currentDiscType}` : 'Report Discrepancies'}
+                      {diseaseStatClicked ? `${currentDisease} ${currentDiscType}` : 'Report Discrepancies'}
                     </th>
                   </tr>
                   {discTable.getHeaderGroups().map((headerGroup) => (
