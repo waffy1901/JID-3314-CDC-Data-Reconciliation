@@ -111,7 +111,7 @@ export default function Report({ reportID }) {
       cell: (info) => (
         <span
           onClick={() => handleStatClick(info.column, info.row.original)}
-          className='text-blue-500 cursor-pointer underline'
+          className='text-blue-500 cursor-pointer underline hover:text-purple-800'
         >
           {info.getValue()}
         </span>
@@ -125,7 +125,7 @@ export default function Report({ reportID }) {
       cell: (info) => (
         <span
           onClick={() => handleStatClick(info.column, info.row.original)}
-          className='text-blue-500 cursor-pointer underline'
+          className='text-blue-500 cursor-pointer underline hover:text-purple-800'
         >
           {info.getValue()}
         </span>
@@ -139,7 +139,7 @@ export default function Report({ reportID }) {
       cell: (info) => (
         <span
           onClick={() => handleStatClick(info.column, info.row.original)}
-          className='text-blue-500 cursor-pointer underline'
+          className='text-blue-500 cursor-pointer underline hover:text-purple-800'
         >
           {info.getValue()}
         </span>
@@ -153,7 +153,7 @@ export default function Report({ reportID }) {
       cell: (info) => (
         <span
           onClick={() => handleStatClick(info.column, info.row.original)}
-          className='text-blue-500 cursor-pointer underline'
+          className='text-blue-500 cursor-pointer underline hover:text-purple-800'
         >
           {info.getValue()}
         </span>
@@ -264,7 +264,7 @@ export default function Report({ reportID }) {
 
     if (reportID) {
       fetchReportStatistics()
-      fetchReport(reportID) 
+      fetchReport(reportID)
     }
   }, [reportID])
 
@@ -330,6 +330,7 @@ export default function Report({ reportID }) {
   }
 
   const handleStatClick = (col, row) => {
+
     // clear the filters of the report discrepancies table
     clearDiscFilters()
     // set the current disease for the header of the report discrepancies table
