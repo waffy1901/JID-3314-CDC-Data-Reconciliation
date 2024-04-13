@@ -110,7 +110,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalDuplicates.toString(),
       cell: (info) => (
         <span
-          className='text-blue-500 cursor-pointer underline hover:text-blue-800'
+          className='text-blue-500 cursor-pointer underline hover:text-purple-800'
         >
           {info.getValue()}
         </span>
@@ -123,7 +123,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalMissingFromCDC.toString(),
       cell: (info) => (
         <span
-          className='text-blue-500 cursor-pointer underline hover:text-blue-800'
+          className='text-blue-500 cursor-pointer underline hover:text-purple-800'
         >
           {info.getValue()}
         </span>
@@ -136,7 +136,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalMissingFromState.toString(),
       cell: (info) => (
         <span
-          className='text-blue-500 cursor-pointer underline hover:text-blue-800'
+          className='text-blue-500 cursor-pointer underline hover:text-purple-800'
         >
           {info.getValue()}
         </span>
@@ -149,7 +149,7 @@ export default function Report({ reportID }) {
       accessorFn: (row) => row.TotalWrongAttributes.toString(),
       cell: (info) => (
         <span
-          className='text-blue-500 cursor-pointer underline hover:text-blue-800'
+          className='text-blue-500 cursor-pointer underline hover:text-purple-800'
         >
           {info.getValue()}
         </span>
@@ -260,7 +260,7 @@ export default function Report({ reportID }) {
 
     if (reportID) {
       fetchReportStatistics()
-      fetchReport(reportID) 
+      fetchReport(reportID)
     }
   }, [reportID])
 
