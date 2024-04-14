@@ -57,10 +57,14 @@ export default function CreateReport({ onDone }) {
     if (isAutomatic) {
       if (cdcFile === null) {
         console.error("Files not uploaded!")
+        setShowError(true);
+        setErrorMessage("Files not uploaded")
         return
       }
       if (!inputValue) {
         console.error("Year not selected!")
+        setShowError(true);
+        setErrorMessage("Query year not selected")
         return
       }
       // Setting form data to year, cdcFile, and attributes
@@ -99,6 +103,15 @@ export default function CreateReport({ onDone }) {
     } else {
       if (stateFile === null || cdcFile === null) {
         console.error("Files not uploaded!")
+        var errors = [];
+        if (stateFile === null) {
+          errors.push("State file not uploaded");
+        }
+        if (cdcFile === null) {
+          errors.push("CDC file not uploaded");
+        }
+        var errorMessage = errors.join(" ") + ".";
+        setErrorMessage(errorMessage);
         return
       }
 
