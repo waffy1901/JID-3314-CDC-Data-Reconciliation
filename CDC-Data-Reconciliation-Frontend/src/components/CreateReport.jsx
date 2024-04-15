@@ -126,7 +126,7 @@ export default function CreateReport({ onDone }) {
         if (cdcFile === null) {
           errors.push("CDC file not uploaded");
         }
-        var errorMessage = errors.join(", ") + ".";
+        var errorMessage = errors.join(" and ") + ".";
         setShowError(true);
         setErrorMessage(errorMessage);
         return
