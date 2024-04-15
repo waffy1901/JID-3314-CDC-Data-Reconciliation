@@ -55,14 +55,34 @@ export default function CreateReport({ onDone }) {
 
     // Checking whether the checkbox for automatic upload is ticked or not
     if (isAutomatic) {
+      var fileFlag = false;
       if (cdcFile === null) {
         console.error("Files not uploaded!")
-        return
+        fileFlag = true;
       }
+      var queryFlag = false;
       if (!inputValue) {
         console.error("Year not selected!")
+        queryFlag = true;
+      }
+      var attributesFlag = false;
+      if (selectedAttributes.length === 0) {
+        console.error("No attributes selected!")
+        attributesFlag = true;
+      }
+
+      // Making the popup appear for the various errors that can occur, no files, no year to query, and/or no attributes selected.
+      if (fileFlag || queryFlag || attributesFlag) {
+        errors = []
+        if (fileFlag) errors.push("Files not uploaded");
+        if (queryFlag) errors.push("Year not selected");
+        if (attributesFlag) errors.push("No attributes selected");
+        var errorMessage = errors.join(" and ") + ".";
+        setShowError(true);
+        setErrorMessage(errorMessage);
         return
       }
+
       // Setting form data to year, cdcFile, and attributes
       const formdata = new FormData()
       formdata.append("cdc_file", cdcFile)
@@ -99,6 +119,16 @@ export default function CreateReport({ onDone }) {
     } else {
       if (stateFile === null || cdcFile === null) {
         console.error("Files not uploaded!")
+        var errors = [];
+        if (stateFile === null) {
+          errors.push("State file not uploaded");
+        }
+        if (cdcFile === null) {
+          errors.push("CDC file not uploaded");
+        }
+        var errorMessage = errors.join(" and ") + ".";
+        setShowError(true);
+        setErrorMessage(errorMessage);
         return
       }
 
