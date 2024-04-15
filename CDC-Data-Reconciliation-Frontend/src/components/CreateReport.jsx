@@ -66,7 +66,7 @@ export default function CreateReport({ onDone }) {
         queryFlag = true;
       }
       var attributesFlag = false;
-      if (!selectedAttributes) {
+      if (selectedAttributes.length === 0) {
         console.error("No attributes selected!")
         attributesFlag = true;
       }
@@ -126,7 +126,7 @@ export default function CreateReport({ onDone }) {
         if (cdcFile === null) {
           errors.push("CDC file not uploaded");
         }
-        var errorMessage = errors.join(" ") + ".";
+        var errorMessage = errors.join(", ") + ".";
         setShowError(true);
         setErrorMessage(errorMessage);
         return
