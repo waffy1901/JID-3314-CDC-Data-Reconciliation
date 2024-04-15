@@ -8,12 +8,12 @@ export default function CreateReport({ onDone }) {
   const [isAutomatic, setIsAutomatic] = useState(true)
   const [inputValue, setInputValue] = useState('')
   const [isCDCFilter, setIsCDCFilter] = useState(true)
-  const [showError, setShowError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [showError, setShowError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
   const [selectedAttributes, setSelectedAttributes] = useState([
     "EventCode", "EventName", "MMWRYear", "MMWRWeek", "CountyReporting", "CaseClassStatus",
     "Sex", "BirthDate", "Age", "AgeType", "Race", "Ethnicity"
-  ]);
+  ])
   const [reportName, setReportName] = useState('')
 
   const currYear = 2023
@@ -40,9 +40,9 @@ export default function CreateReport({ onDone }) {
 
   const handleAttributeChange = (attribute, checked) => {
     if (checked) {
-      setSelectedAttributes([...selectedAttributes, attribute]);
+      setSelectedAttributes([...selectedAttributes, attribute])
     } else {
-      setSelectedAttributes(selectedAttributes.filter(attr => attr !== attribute));
+      setSelectedAttributes(selectedAttributes.filter(attr => attr !== attribute))
     }
   }
 
@@ -50,43 +50,52 @@ export default function CreateReport({ onDone }) {
     setReportName(e.target.value)
   }
 
+  function formatErrorMessage(errors) {
+    if (errors.length === 2) {
+      return `${errors[0].charAt(0).toUpperCase() + errors[0].slice(1)} and ${errors[1]}.`
+    }
+    return errors.map((msg, index) => 
+      index === 0 ? msg.charAt(0).toUpperCase() + msg.slice(1) : msg
+    ).join(errors.length > 2 ? ", " : ", ").replace(/, (?=[^,]*$)/, ", and ") + "."
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
     // Checking whether the checkbox for automatic upload is ticked or not
     if (isAutomatic) {
-      var fileFlag = false;
+      var fileFlag = false
       if (cdcFile === null) {
-        console.error("Files not uploaded!")
-        fileFlag = true;
+        console.error("File not uploaded!")
+        fileFlag = true
       }
-      var queryFlag = false;
+      var queryFlag = false
       if (!inputValue) {
         console.error("Year not selected!")
-        queryFlag = true;
+        queryFlag = true
       }
-      var attributesFlag = false;
+      var attributesFlag = false
       if (selectedAttributes.length === 0) {
         console.error("No attributes selected!")
-        attributesFlag = true;
+        attributesFlag = true
       }
 
       // Making the popup appear for the various errors that can occur, no files, no year to query, and/or no attributes selected.
       if (fileFlag || queryFlag || attributesFlag) {
         errors = []
-        if (fileFlag) errors.push("Files not uploaded");
-        if (queryFlag) errors.push("Year not selected");
-        if (attributesFlag) errors.push("No attributes selected");
-        var errorMessage = errors.join(" and ") + ".";
-        setShowError(true);
-        setErrorMessage(errorMessage);
+        if (fileFlag) errors.push("File not uploaded")
+        if (queryFlag) errors.push("Year not selected")
+        if (attributesFlag) errors.push("No attributes selected")
+        var errorMessage = formatErrorMessage(errors)
+        setShowError(true)
+        setErrorMessage(errorMessage)
         return
       }
 
       // Setting form data to year, cdcFile, and attributes
       const formdata = new FormData()
       formdata.append("cdc_file", cdcFile)
-      formdata.append("attributes", JSON.stringify(selectedAttributes));
+      formdata.append("attributes", JSON.stringify(selectedAttributes))
       // Run the automatic report fetching
       try {
         const response = await fetch(config.API_URL + 
@@ -100,16 +109,16 @@ export default function CreateReport({ onDone }) {
           onDone()
         } else {
           console.error("Failed to fetch automatic report!")
-          setShowError(true);
-          const res = await response.json();
-          const errorMessage = res.detail;
-          setErrorMessage(errorMessage);
+          setShowError(true)
+          const res = await response.json()
+          const errorMessage = res.detail
+          setErrorMessage(errorMessage)
         }
       } catch (e) {
         console.error("Error fetching automatic report - " + e)
-        setShowError(true);
+        setShowError(true)
         if (typeof e.message === 'string') {
-          setErrorMessage(e.message);
+          setErrorMessage(e.message)
         } else {
           setErrorMessage("Internal Server Error")
         }
@@ -117,24 +126,28 @@ export default function CreateReport({ onDone }) {
 
       // ran if the automatic report checkbox is not ticked
     } else {
-      if (stateFile === null || cdcFile === null) {
-        console.error("Files not uploaded!")
-        var errors = [];
+      if (stateFile === null || cdcFile === null || selectedAttributes.length === 0) {
+        console.error("Files not uploaded and/or no attributes are selected!")
+        var errors = []
         if (stateFile === null) {
-          errors.push("State file not uploaded");
+          errors.push("State file not uploaded")
         }
         if (cdcFile === null) {
-          errors.push("CDC file not uploaded");
+          errors.push("CDC file not uploaded")
         }
-        var errorMessage = errors.join(" and ") + ".";
-        setShowError(true);
-        setErrorMessage(errorMessage);
+        if (selectedAttributes.length === 0) {
+          errors.push("No attributes selected")
+        }
+        var errorMessage = formatErrorMessage(errors)
+        setShowError(true)
+        setErrorMessage(errorMessage)
         return
       }
 
       const formdata = new FormData()
       formdata.append("state_file", stateFile)
       formdata.append("cdc_file", cdcFile)
+      formdata.append("attributes", JSON.stringify(selectedAttributes))
 
       try {
         const response = await fetch(config.API_URL + `/manual_report?isCDCFilter=${isCDCFilter}&reportName=${reportName}`, {
@@ -147,16 +160,16 @@ export default function CreateReport({ onDone }) {
           onDone()
         } else {
           console.error("Files failed to upload!")
-          setShowError(true);
-          const res = await response.json();
-          const errorMessage = res.detail;
-          setErrorMessage(errorMessage);
+          setShowError(true)
+          const res = await response.json()
+          const errorMessage = res.detail
+          setErrorMessage(errorMessage)
         }
       } catch (e) {
         console.error("Error Creating Report - " + e)
-        setShowError(true);
+        setShowError(true)
         if (typeof e.message === 'string') {
-          setErrorMessage(e.message);
+          setErrorMessage(e.message)
         } else {
           setErrorMessage("Internal Server Error")
         }
@@ -182,7 +195,7 @@ export default function CreateReport({ onDone }) {
         </Button>
       </div>
     </>
-  );
+  )
 
   return (
     <div className='flex flex-col items-center py-5'>
