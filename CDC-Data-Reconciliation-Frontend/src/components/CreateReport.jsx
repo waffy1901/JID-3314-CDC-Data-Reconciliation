@@ -259,7 +259,6 @@ export default function CreateReport({ onDone }) {
               </div>
             </div>
             
-
             </>
             )}
             {!isAutomatic && (

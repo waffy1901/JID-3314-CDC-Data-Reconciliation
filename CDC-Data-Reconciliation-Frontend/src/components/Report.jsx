@@ -366,7 +366,6 @@ export default function Report({ reportID }) {
           },
         ])
         break
-
       case "TotalWrongAttributes":
         discrepancyType = "Wrong Attributes"
         if (row.TotalWrongAttributes === 0) return

@@ -1,6 +1,22 @@
 # CDC Data Reconciliation Tool
 Our tool compares data between the CDC database and databases from the 50 U.S. state health departments. The data from the states is regarded as “the source of truth”. If any data in the CDC database errs from the state databases in any way, it will be regarded as a discrepancy that may be remedied. 
+
 # Release Notes
+## Version 1.0.0 
+### New Features
+- Filter discrepancies between state and CDC data by specific attributes
+- Reports can be renamed and deleted
+- More descriptive errors when a report cannot be generated
+- Error popup if required field(s) is empty
+- CaseClassStatus has been added to the results.csv file and discrepancy table
+- Detailed breakdown of mismatching attributes between the state and CDC data
+### Bug Fixes
+- The clear filters buttons on the statistics and discrepancies tables are no longer clamped up with the show/hide disease stats button
+- Discrepancy table resizes appropriately when the window is resized
+- The dynamic header on the discrepancy table properly updates anytime a clickable statistic is clicked
+### Known Issues
+- N/A
+
 ## Version 0.4.0 
 ### New Features
 - Static and dynamic table headers
@@ -14,6 +30,7 @@ Our tool compares data between the CDC database and databases from the 50 U.S. s
 - Timestamps on reports in the report history match one’s local timezone
 ### Known Issues
 - If you click on one stat in the disease statistics table, the report discrepancies table header will update dynamically as intended - if you go to directly click on another stat, it will change the table title back to report discrepancies
+
 ## Version 0.3.0 
 ### New Features
 - Download .csv report of disease-specific data from the statistics table
@@ -26,6 +43,7 @@ Our tool compares data between the CDC database and databases from the 50 U.S. s
 - Can now create a report even when the archive folder path is not set
 ### Known Issues
 - When both the discrepancy table and statistics table are open at the same time and you resize your window, the statistics table resizes appropriately but the discrepancy table does not resize appropriately
+
 ## Version 0.2.0 
 ### New Features
 - View report history with timestamps
@@ -37,6 +55,7 @@ Our tool compares data between the CDC database and databases from the 50 U.S. s
 ### Known Issues
 - The timestamp of a report in the report history may not exactly match one’s timezone
 - Reports differing in only the number of cases in the CDC.csv file does not produce the correct discrepancy list
+
 ## Version 0.1.0 
 ### New Features
 - Pull data automatically from state database

@@ -41,6 +41,5 @@ FROM Public_health_case with (nolock)
           LEFT OUTER JOIN Person_race with (nolock) ON Person.person_uid = Person_race.person_uid
       
 WHERE Public_health_case.record_status_cd!='LOG_DEL'
-
-
        AND Public_health_case.mmwr_year = ?
+	   

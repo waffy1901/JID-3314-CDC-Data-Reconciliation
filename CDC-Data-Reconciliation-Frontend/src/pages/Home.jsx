@@ -13,14 +13,14 @@ export default function Home() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [renameModalOpen, setRenameModalOpen] = useState(false)
   const [renameName, setRenameName] = useState('')
-  const [visibleReportsCount, setVisibleReportsCount] = useState(5);
+  const [visibleReportsCount, setVisibleReportsCount] = useState(5)
   const [modifyingReportId, setModifyingReportId] = useState(null)
   const [modifyingReportName, setModifyingReportName] = useState(null)
 
   const dotsOptions = [
     "Rename",
     "Delete",
-  ];
+  ]
 
   // Get the report summaries on page load
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function Home() {
     const newName = renameName
     // Clear entry field
     setRenameName('')
-    e.preventDefault();
+    e.preventDefault()
     const response = await fetch(config.API_URL + `/reports?report_id=${modifyingReportId}&new_name=${newName}`, {
       method: "POST"
     })
