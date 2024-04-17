@@ -118,88 +118,94 @@ async def manual_report(isCDCFilter: bool, reportName: str, state_file: UploadFi
     if not os.path.exists(os.path.join(app.dir, "temp")):
         os.makedirs(os.path.join(app.dir, "temp"))
 
-    id = str(uuid.uuid4())
-    os.makedirs(os.path.join(app.dir, folder_name, id), mode=0o777)
-    
-    # Fetching the archive_path for saving the Report
-    archive_path = await get_config_setting("archive_path")
-
-    cdc_content = await cdc_file.read()
-    cdc_save_to = os.path.join(app.dir, folder_name, id, "cdc.csv")
-    with open(cdc_save_to, "wb") as f:
-        f.write(cdc_content)
-
-    state_content = await state_file.read()
-    state_save_to = os.path.join(app.dir, folder_name, id, "state.csv")
-    with open(state_save_to, "wb") as f:
-        f.write(state_content)
-
-    res_file = os.path.join(app.dir, folder_name, id, "results.csv")
-    
-    # Creating argument list for running compare.py
-    subprocess_args = [sys.executable,
-                       os.path.join(app.dir, "compare.py"),
-                       '-c', cdc_save_to,
-                       '-s', state_save_to,
-                       '-o', res_file]
-    
-    if isCDCFilter:
-        subprocess_args.append('-f')
-    
-    attributes_list = json.loads(attributes)
-    subprocess_args.extend(['-a', *attributes_list])
-    
     try:
-        process = await asyncio.create_subprocess_exec(*subprocess_args,
-                                                        stderr=subprocess.PIPE)
-        _, stderr = await process.communicate()  # Wait for subprocess to finish and get stderr
-        if process.returncode != 0:  # Non-zero return code indicates an error
-            error_message = stderr.decode().strip()  # Decode error message from bytes to string
-            raise RuntimeError(f"Subprocess failed with error: {error_message}")
+        id = str(uuid.uuid4())
+        os.makedirs(os.path.join(app.dir, folder_name, id), mode=0o777)
+        
+        # Fetching the archive_path for saving the Report
+        archive_path = await get_config_setting("archive_path")
+
+        cdc_content = await cdc_file.read()
+        cdc_save_to = os.path.join(app.dir, folder_name, id, "cdc.csv")
+        with open(cdc_save_to, "wb") as f:
+            f.write(cdc_content)
+
+        state_content = await state_file.read()
+        state_save_to = os.path.join(app.dir, folder_name, id, "state.csv")
+        with open(state_save_to, "wb") as f:
+            f.write(state_content)
+
+        res_file = os.path.join(app.dir, folder_name, id, "results.csv")
+        
+        # Creating argument list for running compare.py
+        subprocess_args = [sys.executable,
+                        os.path.join(app.dir, "compare.py"),
+                        '-c', cdc_save_to,
+                        '-s', state_save_to,
+                        '-o', res_file]
+        
+        if isCDCFilter:
+            subprocess_args.append('-f')
+        
+        attributes_list = json.loads(attributes)
+        subprocess_args.extend(['-a', *attributes_list])
+        
+        try:
+            process = await asyncio.create_subprocess_exec(*subprocess_args,
+                                                            stderr=subprocess.PIPE)
+            _, stderr = await process.communicate()  # Wait for subprocess to finish and get stderr
+            if process.returncode != 0:  # Non-zero return code indicates an error
+                error_message = stderr.decode().strip()  # Decode error message from bytes to string
+                raise RuntimeError(f"Subprocess failed with error: {error_message}")
+        except Exception as e:
+            print(f"Error running comparison: {e}")
+            raise HTTPException(status_code=500, detail="Error running comparison")
+
+        res = []
+        with open(res_file, newline='') as csvfile:
+            # Create a CSV reader object
+            reader = csv.DictReader(csvfile)
+            # Loop through each row in the CSV file
+            for row in reader:
+                # Add the row as a dictionary to the list
+                res.append(tuple(row.values()))
+
+        numDiscrepancies = len(res)
+        reportId = insert_report(numDiscrepancies, reportName)
+
+        stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
+        stats_list = []
+
+        with open(stats_file, newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                tup = (reportId,) + tuple(row.values())
+                stats_list.append(tup)
+
+        if archive_path:
+            # Making a folder for the specific reportId
+            archive_save_to = os.path.join(archive_path, str(reportId))
+            os.makedirs(archive_save_to, exist_ok=True)
+
+            # writing the newly created results file to the archive folder too
+            shutil.copy2(res_file, archive_save_to)
+            shutil.copy2(stats_file, archive_save_to)
+
+        # Add reportId to each row
+        new_res = [(reportId,) + row for row in res]
+
+        insert_cases(new_res)
+        insert_statistics(stats_list)
+
+        # remove temp files / folder
+        shutil.rmtree(os.path.join(app.dir, folder_name, id))
+
+        return Response(status_code=200)
     except Exception as e:
-        print(f"Error running comparison: {e}")
-        raise HTTPException(status_code=500, detail="Error running comparison")
+        # remove temp files / folder
+        shutil.rmtree(os.path.join(app.dir, folder_name, id))
+        raise e
 
-    res = []
-    with open(res_file, newline='') as csvfile:
-        # Create a CSV reader object
-        reader = csv.DictReader(csvfile)
-        # Loop through each row in the CSV file
-        for row in reader:
-            # Add the row as a dictionary to the list
-            res.append(tuple(row.values()))
-
-    numDiscrepancies = len(res)
-    reportId = insert_report(numDiscrepancies, reportName)
-
-    stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
-    stats_list = []
-
-    with open(stats_file, newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            tup = (reportId,) + tuple(row.values())
-            stats_list.append(tup)
-
-    if archive_path:
-        # Making a folder for the specific reportId
-        archive_save_to = os.path.join(archive_path, str(reportId))
-        os.makedirs(archive_save_to, exist_ok=True)
-
-        # writing the newly created results file to the archive folder too
-        shutil.copy2(res_file, archive_save_to)
-        shutil.copy2(stats_file, archive_save_to)
-
-    # Add reportId to each row
-    new_res = [(reportId,) + row for row in res]
-
-    insert_cases(new_res)
-    insert_statistics(stats_list)
-
-    # remove temp files / folder
-    shutil.rmtree(os.path.join(app.dir, folder_name, id))
-
-    return Response(status_code=200)
 
 @app.post("/automatic_report")
 async def automatic_report(year: int, isCDCFilter: bool, reportName: str,
@@ -213,93 +219,98 @@ async def automatic_report(year: int, isCDCFilter: bool, reportName: str,
     folder_name = "temp"
     if not os.path.exists(os.path.join(app.dir, folder_name)):
         os.makedirs(os.path.join(app.dir, folder_name))
-
-    # Fetching the archive_path for saving the Report
-    archive_path = await get_config_setting("archive_path")
-    
-    id = str(uuid.uuid4())
-    os.makedirs(os.path.join(app.dir, folder_name, id), mode=0o777)
-
-    # Write queried state data to csv
-    state_save_to = os.path.join(app.dir, folder_name, id, "state.csv")
-    with open(state_save_to, "w", newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(column_names)
-        writer.writerows(state_content)
-
-    # Write user-uploaded CDC data to local csv
-    cdc_content = await cdc_file.read()
-    cdc_save_to = os.path.join(app.dir, folder_name, id, "cdc.csv")
-    with open(cdc_save_to, "wb") as f:
-        f.write(cdc_content)
-
-    # Do comparison
-    res_file = os.path.join(app.dir, folder_name, id, "results.csv")
-    # Creating argument list for running compare.py
-    subprocess_args = [sys.executable,
-                       os.path.join(app.dir, "compare.py"),
-                       '-c', cdc_save_to,
-                       '-s', state_save_to,
-                       '-o', res_file]
-    
-    if isCDCFilter:
-        subprocess_args.append('-f')
-    
-    attributes_list = json.loads(attributes)
-    subprocess_args.extend(['-a', *attributes_list])
-    
     try:
-        process = await asyncio.create_subprocess_exec(*subprocess_args,
-                                                        stderr=subprocess.PIPE)
-        _, stderr = await process.communicate()  # Wait for subprocess to finish and get stderr
-        if process.returncode != 0:  # Non-zero return code indicates an error
-            error_message = stderr.decode().strip()  # Decode error message from bytes to string
-            raise RuntimeError(f"Subprocess failed with error: {error_message}")
+        # Fetching the archive_path for saving the Report
+        archive_path = await get_config_setting("archive_path")
+        
+        id = str(uuid.uuid4())
+        os.makedirs(os.path.join(app.dir, folder_name, id), mode=0o777)
+
+        # Write queried state data to csv
+        state_save_to = os.path.join(app.dir, folder_name, id, "state.csv")
+        with open(state_save_to, "w", newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(column_names)
+            writer.writerows(state_content)
+
+        # Write user-uploaded CDC data to local csv
+        cdc_content = await cdc_file.read()
+        cdc_save_to = os.path.join(app.dir, folder_name, id, "cdc.csv")
+        with open(cdc_save_to, "wb") as f:
+            f.write(cdc_content)
+
+        # Do comparison
+        res_file = os.path.join(app.dir, folder_name, id, "results.csv")
+        # Creating argument list for running compare.py
+        subprocess_args = [sys.executable,
+                        os.path.join(app.dir, "compare.py"),
+                        '-c', cdc_save_to,
+                        '-s', state_save_to,
+                        '-o', res_file]
+        
+        if isCDCFilter:
+            subprocess_args.append('-f')
+        
+        attributes_list = json.loads(attributes)
+        subprocess_args.extend(['-a', *attributes_list])
+        
+        try:
+            process = await asyncio.create_subprocess_exec(*subprocess_args,
+                                                            stderr=subprocess.PIPE)
+            _, stderr = await process.communicate()  # Wait for subprocess to finish and get stderr
+            if process.returncode != 0:  # Non-zero return code indicates an error
+                error_message = stderr.decode().strip()  # Decode error message from bytes to string
+                raise RuntimeError(f"Subprocess failed with error: {error_message}")
+        except Exception as e:
+            print(f"Error running comparison: {e}")
+            raise HTTPException(status_code=500, detail="Error running comparison")
+        
+        # Add results to the response
+        res = []
+        with open(res_file, newline='') as csvfile:
+            # Create a CSV reader object
+            reader = csv.DictReader(csvfile)
+            # Loop through each row in the CSV file
+            for row in reader:
+                # Add the row as a dictionary to the list
+                res.append(tuple(row.values()))
+
+        numDiscrepancies = len(res)
+        reportId = insert_report(numDiscrepancies, reportName)
+
+        stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
+        stats_list = []
+
+        with open(stats_file, newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                tup = (reportId,) + tuple(row.values())
+                stats_list.append(tup)
+        
+        if archive_path:
+            # Making a folder for the specific reportId
+            archive_save_to = os.path.join(archive_path, str(reportId))
+            os.makedirs(archive_save_to, exist_ok=True)
+
+            # writing the newly created results file to the archive folder too
+            shutil.copy2(res_file, archive_save_to)
+            shutil.copy2(stats_file, archive_save_to)
+
+        # Add reportId to each row
+        new_res = [(reportId,) + row for row in res]
+
+        insert_cases(new_res)
+        insert_statistics(stats_list)
+        
+        # remove temp files / folder
+        shutil.rmtree(os.path.join(app.dir, folder_name, id))
+
+        return Response(status_code=200)
     except Exception as e:
-        print(f"Error running comparison: {e}")
-        raise HTTPException(status_code=500, detail="Error running comparison")
-    
-    # Add results to the response
-    res = []
-    with open(res_file, newline='') as csvfile:
-        # Create a CSV reader object
-        reader = csv.DictReader(csvfile)
-        # Loop through each row in the CSV file
-        for row in reader:
-            # Add the row as a dictionary to the list
-            res.append(tuple(row.values()))
+        # remove temp files / folder
+        shutil.rmtree(os.path.join(app.dir, folder_name, id))
+        raise e
 
-    numDiscrepancies = len(res)
-    reportId = insert_report(numDiscrepancies, reportName)
-
-    stats_file = os.path.join(app.dir, folder_name, id, "stats.csv")
-    stats_list = []
-
-    with open(stats_file, newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            tup = (reportId,) + tuple(row.values())
-            stats_list.append(tup)
-    
-    if archive_path:
-        # Making a folder for the specific reportId
-        archive_save_to = os.path.join(archive_path, str(reportId))
-        os.makedirs(archive_save_to, exist_ok=True)
-
-        # writing the newly created results file to the archive folder too
-        shutil.copy2(res_file, archive_save_to)
-        shutil.copy2(stats_file, archive_save_to)
-
-    # Add reportId to each row
-    new_res = [(reportId,) + row for row in res]
-
-    insert_cases(new_res)
-    insert_statistics(stats_list)
-    
-    # remove temp files / folder
-    shutil.rmtree(os.path.join(app.dir, folder_name, id))
-
-    return Response(status_code=200)
 
 @app.get("/reports")
 async def get_report_summaries():
