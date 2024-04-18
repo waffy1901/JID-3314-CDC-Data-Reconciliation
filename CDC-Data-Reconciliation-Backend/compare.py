@@ -14,7 +14,6 @@ class CaseResult:
         self.reasonID = reasonID
         self.caseClassStatus = caseClassStatus
 
-
 # dictionary holding all stats for this report
 stats = {}
 
@@ -134,7 +133,6 @@ def comp(state_dict, cdc_dict, compare_attributes=None):
                 # making sure to also count this discrepancy in the stats.csv file
                 stats[state_row['EventCode']]['totalWrongAttributes'] += 1
                 
-
             # Remove the case from the CDC dict so we can track what cases are missing from the state side
             del cdc_dict[state_case_id]
 

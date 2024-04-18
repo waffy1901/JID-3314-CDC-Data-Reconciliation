@@ -9,6 +9,8 @@ export default function DebouncedInput({ value: initialValue, onChange, debounce
   }, [initialValue])
 
   useEffect(() => {
+    if (value === initialValue) return
+
     const timeout = setTimeout(() => {
       onChange(value)
     }, debounce)
