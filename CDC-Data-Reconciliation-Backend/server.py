@@ -206,7 +206,6 @@ async def manual_report(isCDCFilter: bool, reportName: str, state_file: UploadFi
         shutil.rmtree(os.path.join(app.dir, folder_name, id))
         raise e
 
-
 @app.post("/automatic_report")
 async def automatic_report(year: int, isCDCFilter: bool, reportName: str,
                            cdc_file:  UploadFile = File(None), attributes: str = Form("[]")):
@@ -311,7 +310,6 @@ async def automatic_report(year: int, isCDCFilter: bool, reportName: str,
         shutil.rmtree(os.path.join(app.dir, folder_name, id))
         raise e
 
-
 @app.get("/reports")
 async def get_report_summaries():
     # Fetch all reports from the SQLite database, ordered by date and time (newest reports at the top)
@@ -325,7 +323,6 @@ async def get_report_summaries():
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return None
-
 
 @app.get("/reports/{report_id}")
 async def get_report_cases(report_id: int):
